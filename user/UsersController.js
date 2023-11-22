@@ -21,7 +21,7 @@ class UsersController {
         password: hashedPassword,
       });
 
-      response.status(201).json({ id: userID, email, username }).end();
+      response.status(201).json({ status: "User Created Successfully!", id: userID, email, username }).end();
     }
   }
 }

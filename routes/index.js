@@ -5,8 +5,8 @@ import UsersController from '../user/UsersController';
 const router = express.Router();
 
 router.post('/users', UsersController.postNew);
-// router.get('/connect', AuthController.getConnect);
-// router.get('/disconnect', AuthController.getDisconnect);
+// router.get('/sign_in', AuthController.getConnect);
+// router.get('/sign_out', AuthController.getDisconnect);
 // router.get('/users/me', AuthController.getMe);
 
 export default router;
