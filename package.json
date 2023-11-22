@@ -3,17 +3,25 @@
   "version": "1.0.0",
   "description": "A medical chat bot",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node index.js"
+    "dev": "node --exec babel-node --presets @babel/preset-env index.js",
+    "server": "nodemon --exec babel-node --presets @babel/preset-env ./server.js"
   },
   "author": "Team 113",
   "license": "ISC",
   "dependencies": {
     "colors": "^1.4.0",
     "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mongodb": "^6.3.0",
     "openai": "^4.19.1",
-    "readline-sync": "^1.4.10"
+    "readline-sync": "^1.4.10",
+    "sha1": "^1.1.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.3",
+    "@babel/node": "^7.22.19",
+    "@babel/preset-env": "^7.23.3"
   }
 }
