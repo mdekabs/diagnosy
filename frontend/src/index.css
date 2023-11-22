@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@200;400&family=Krub:wght@200&family=Lora&family=Montserrat:wght@400;500&family=Open+Sans&family=Roboto&family=Rubik:wght@300&display=swap");
+:root {
+  --primary_blue_color: #363eff;
+  --secondary-blue_color: #0c52cb;
+  --secondary_text_color: #757575;
+  --white_color: #ffffff;
+  --input_bg_color: #cccccc;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: "Open Sans", sans-serif;
+}
