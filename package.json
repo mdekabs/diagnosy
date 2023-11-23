@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node --exec babel-node --presets @babel/preset-env index.js",
+    "daisy": "node --require @babel/register index.js",
+    "dev": "node --require @babel/register index.js",
     "server": "nodemon --exec babel-node --presets @babel/preset-env ./server.js"
   },
   "author": "Team 113",
