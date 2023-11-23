@@ -1,13 +1,8 @@
 // import openai from "./config/openai.js"; /* import the api key from this file */
-import OpenAI from "openai";
+import openai from "./config/open_ai.js";
 import readlineSync from "readline-sync";
 import colors from "colors";
-import { config } from "dotenv";
 
-config();
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-// console.log(openai.chat.completions.create)
 
 async function main() {
   console.log(
