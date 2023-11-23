@@ -64,6 +64,7 @@ class AuthController {
     const token = request.headers["x-token"];
     const key = `auth_${token}`;
     const userID = await redisClient.get(key);
+    console.log(userID)
     if (!userID) {
       response.status(401).json({ error: "Unauthorized" }).end();
     } else {

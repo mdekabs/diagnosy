@@ -34,16 +34,19 @@ class RedisClient {
 
   async get(key) {
     console.log(await this.client.ping("Ready"));
-    console.log(await this.client.get("mike"));
-    return this.client.get(key);
+    const userID = await this.client.get(key);
+    this.client.disconnect();
+    return userID;
   }
 
   async set(key, value, duration) {
-    this.client.set(key, value, "EX", duration);
+    console.log(await this.client.ping("Ready"));
+    await this.client.set(key, value, "EX", duration);
   }
 
   async del(key) {
-    return this.client.del(key);
+    console.log(await this.client.ping("Ready"));
+    return await this.client.del(key);
   }
 }
 
