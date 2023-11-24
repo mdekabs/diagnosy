@@ -1,17 +1,24 @@
-.chat_with_us_header h1 {
-  font-weight: bolder;
-  font-size: 1.3rem;
-  margin: 1rem 0;
-}
 .chat_with_us_header {
+  position: relative;
+  /* position: fixed; */
   text-align: center;
-  /* display: flex; */
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  place-items: center;
 }
 .chat_with_us_header::after {
+  position: absolute;
   content: "";
   border-bottom: 1px solid #e3e3e3;
   display: block;
   width: 100%;
+  top: 4rem;
+}
+.chat_with_us_header h1 {
+  color: #667085;
+  font-weight: bolder;
+  font-size: 1.3rem;
+  margin: 1rem 0;
 }
 .chat_with_us_card {
   position: relative;
@@ -44,12 +51,19 @@
 }
 .start_chat_btn {
   background-color: var(--primary_blue_color);
-  box-shadow: 3px 3px 3px 3px #0c52cb;
+  /* box-shadow: 3px 3px 3px 3px #0c52cb; */
+  box-shadow: 1px 3px 1px 1px #0c52cb;
   color: #eee;
   border-radius: 25px;
   padding: 0.5rem;
   margin: 2rem 0 1rem 0;
   width: 100%;
+  transition: all 0.8s ease-in;
+}
+.start_chat_btn:hover {
+  background-color: var(--white_color);
+  color: var(--primary_blue_color);
+  font-weight: 700;
 }
 /* TextChat Styling */
 .blue_logo_div {
@@ -74,34 +88,38 @@
 }
 .messages {
   display: flex;
+  color: #667085;
   flex-direction: column;
   overflow-y: auto;
   margin-top: 1rem;
 }
-
-.message {
-  padding: 0.5rem;
-  border-radius: 10px;
-  background-color: #eee;
-  margin-left: 50%;
-}
-.user {
+.message.user .message_content {
   background-color: var(--primary_blue_color);
   color: #fff;
   width: 50%;
+  margin: 0.5rem 0 0.5rem 50%;
+  padding: 0.5rem;
+  border-radius: 10px;
 }
 
-.bot {
+.message.livechat .message_content {
   background-color: transparent;
   border: 1px solid #e3e3e3;
   color: #667085;
   text-align: left;
   width: 50%;
-  margin: 1rem 0;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  border-radius: 10px;
 }
 .message_input-container {
   display: flex;
   margin-top: 2rem;
+}
+.message.user .message_user_details {
+  margin-left: 50%;
+  text-align: right;
+  justify-content: flex-end;
 }
 .message_input-container input {
   background-color: transparent;
@@ -116,7 +134,7 @@
   outline: none;
 }
 .message_input-container input:hover {
-  transform: translateY(5px);
+  transform: translateY(-2px);
 }
 .message_input-container input::placeholder {
   padding-left: 0.5rem;
@@ -128,6 +146,12 @@
 }
 .message_input-container button:focus {
   outline: none;
+}
+.user_first_letter {
+  font-size: 0.7rem;
+  font-weight: bolder;
+  color: var(--primary_blue_color);
+  text-align: center;
 }
 /* CHAT SIDE BAR STYLINH */
 .chat_main_container {
@@ -179,6 +203,12 @@
     overflow: hidden;
     margin-top: 0.5rem;
     margin-left: 17rem;
+  }
+  .chat_with_us_header::after {
+    top: 3rem;
+  }
+  .chat_with_us_header {
+    display: block;
   }
   .chat_with_us_card {
     width: 25%;

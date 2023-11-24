@@ -46,10 +46,18 @@
   color: var(--white_color);
   border-radius: 25px;
   padding: 0.5rem 7rem;
-  box-shadow: 3px 3px 3px 3px #0c52cb;
+  /* box-shadow: 3px 3px 3px 3px #0c52cb; */
+  box-shadow: 1px 3px 1px 1px #0c52cb;
   margin: auto;
   max-width: 100%;
   text-align: center;
+  transition: all 0.8s ease-in;
+}
+.onboarding_btn:hover,
+.onboarding_btn2:hover {
+  background-color: var(--white_color);
+  color: var(--primary_blue_color);
+  font-weight: 700;
 }
 .onboarding_btn2 {
   padding: 0.5rem 6rem;
