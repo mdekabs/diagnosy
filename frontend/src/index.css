@@ -9,6 +9,7 @@
   --secondary_text_color: #757575;
   --white_color: #ffffff;
   --input_bg_color: #cccccc;
+  --chat_side_bar_bg_color: #d7d8ff;
 }
 
 *,
@@ -19,4 +20,15 @@
 }
 body {
   font-family: "Open Sans", sans-serif;
+}
+.burger {
+  display: block;
+}
+.burger span {
+  background-color: #333;
+}
+@media (min-width: 764px) {
+  .burger {
+    display: none;
+  }
 }

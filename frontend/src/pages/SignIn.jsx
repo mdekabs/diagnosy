@@ -44,7 +44,7 @@ const registrationSchema = Yup.object().shape({
 
 
     
-      <button className='sign_in_btn' type="submit">Continue</button>
+      <button className='sign_in_btn' type="submit"><Link to='/start_chat'>Continue</Link></button>
 
       <small className='block text-center mt-5' style={{color: "#757575"}}>Not registered yet? <Link style={{color: "#363eff", fontWeight: "bold"}} to='/signup'>Create an Account</Link></small>
     </form>
