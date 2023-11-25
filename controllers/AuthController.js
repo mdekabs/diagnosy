@@ -1,4 +1,3 @@
-import { atob } from "buffer";
 import { v4 as uuidv4 } from "uuid";
 import dbClient from "../storage/db";
 import redisClient from "../storage/redis";
@@ -15,8 +14,8 @@ class AuthController {
         try {
           const token = uuidv4();
           const key = `auth_${token}`;
-          const reply = await redisClient.set(key, user._id.toString(), 86400);
-          console.log(reply);
+          console.log(key)
+          await redisClient.set(key, user._id.toString(), 86400);
           response
             .status(200)
             .json({
@@ -79,8 +78,7 @@ class AuthController {
           })
           .end();
       } else {
-        const reply = await redisClient.del(key);
-        console.log(reply);
+        await redisClient.del(key);
         response.status(204).json().end();
       }
     }
@@ -89,8 +87,10 @@ class AuthController {
   static async getMe(request, response) {
     const token = request.headers["auth-token"];
     const key = `auth_${token}`;
+    console.log(key)
     try {
       const userID = await redisClient.get(key);
+      console.log(userID)
       if (!userID) {
         response
           .status(401)

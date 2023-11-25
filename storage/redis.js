@@ -51,7 +51,7 @@ class RedisClient {
 
   async del(key) {
     try {
-      return await this.client.del(key);
+      await this.client.del(key);
     } catch (error) {
       console.log(error);
     }
