@@ -9,6 +9,6 @@ router.post('/users', UsersController.postNew);
 router.get('/sign_in', AuthController.getConnect);
 router.get('/sign_out', AuthController.getDisconnect);
 router.get('/users/me', AuthController.getMe);
-router.get("/chats", ChatController.handleChat);
+router.get("/chat", ChatController.handleChat);
 
 export default router;
