@@ -12,6 +12,7 @@ class DBClient {
     const database = process.env.DB;
     this.isConnected = false;
     this.usersCollection = null;
+    this.chatCollection = null
     // this.client = new MongoClient(`mongodb://${host}:${port}/${database}`);
     const password = process.env.DB_PASSWORD;
     const uri = `mongodb+srv://MikeRock:${password}@cluster0.qyotcp1.mongodb.net/${database}?retryWrites=true&w=majority`;
@@ -28,6 +29,7 @@ class DBClient {
       .then(() => {
         this.isConnected = true;
         this.usersCollection = this.client.db().collection('users');
+        this.chatsCollection = this.client.db().collection('chats');
       })
       .catch((error) => {
         this.isConnected = false;
@@ -57,6 +59,11 @@ class DBClient {
   async fetchUserByID(userID) {
     const user = await this.usersCollection.findOne({ _id: new ObjectId(userID) });
     return user;
+  }
+
+  async createChat(chat) {
+    const response = await this.chatsCollection.insertOne(chat);
+    return response.insertedId.toString();
   }
 }
 
