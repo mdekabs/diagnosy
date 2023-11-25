@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A medical chat bot",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "daisy": "node --require @babel/register index.js",
