@@ -10,8 +10,7 @@ class RedisClient {
       console.log(error);
       this.alive = false;
     });
-    this.client.get = promisify(this.client.get).bind(this.client);
-    this.client.set = promisify(this.client.set).bind(this.client);
+
     this.client.once("ready", () => {
       this.alive = true;
       console.log("ready");
@@ -33,20 +32,29 @@ class RedisClient {
   }
 
   async get(key) {
-    console.log(await this.client.ping("Ready"));
-    const userID = await this.client.get(key);
-    this.client.disconnect();
-    return userID;
+    try {
+      this.client.set = await promisify(this.client.get).bind(this.client);
+      return this.client.get(key);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async set(key, value, duration) {
-    console.log(await this.client.ping("Ready"));
-    await this.client.set(key, value, "EX", duration);
+    try {
+      this.client.set = await promisify(this.client.set).bind(this.client);
+      this.client.set(key, value, "EX", duration);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async del(key) {
-    console.log(await this.client.ping("Ready"));
-    return await this.client.del(key);
+    try {
+      return await this.client.del(key);
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
 

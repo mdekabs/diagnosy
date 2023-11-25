@@ -8,6 +8,7 @@ class AuthController {
   static async getConnect(request, response) {
     const { email, password } = request.body;
     const user = await dbClient.fetchUserByEmail({ email });
+    console.log(user);
     if (user) {
       const hashedPassword = sha1(password);
       if (hashedPassword === user.password) {
@@ -63,24 +64,31 @@ class AuthController {
   static async getMe(request, response) {
     const token = request.headers["x-token"];
     const key = `auth_${token}`;
-    const userID = await redisClient.get(key);
-    console.log(userID)
-    if (!userID) {
-      response.status(401).json({ error: "Unauthorized" }).end();
-    } else {
-      const user = await dbClient.fetchUserByID(userID);
-
-      if (!user) {
+    try {
+      const userID = await redisClient.get(key);
+      if (!userID) {
         response.status(401).json({ error: "Unauthorized" }).end();
       } else {
-        response
-          .status(200)
-          .json({
-            id: user._id,
-            email: user.email,
-          })
-          .end();
+        const user = await dbClient.fetchUserByID(userID);
+
+        if (!user) {
+          response.status(401).json({ error: "Unauthorized" }).end();
+        } else {
+          response
+            .status(200)
+            .json({
+              status: "success",
+              data: {
+                id: user._id,
+                email: user.email,
+                username: user.username,
+              }
+            })
+            .end();
+        }
       }
+    } catch (error) {
+      console.log(error);
     }
   }
 }
