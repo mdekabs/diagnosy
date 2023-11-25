@@ -1,1 +1,1 @@
-# diagnosy
+This application allows patients to describe thier symptoms and receive preliminary medical advice from an AI-powered chatbot. it offers quick responses and help the user decide if they need to set in-person medical care.
