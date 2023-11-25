@@ -65,6 +65,19 @@ class DBClient {
     const response = await this.chatsCollection.insertOne(chat);
     return response.insertedId.toString();
   }
+	async saveChatHistory(userID, chatHistory) {
+		try {
+			await this.usersCollection.updateOne(
+				{ _id: new ObjectId(userID) },
+				{ $push: { chatHistory } }
+			);
+		}
+		catch (error) {
+			console.error("Error saving chat history:", error);
+			throw error;
+		}
+	}
+
 }
 
 const dbClient = new DBClient();
