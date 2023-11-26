@@ -16,7 +16,6 @@ class OpenaiService {
 
 
   async getChatbotCompletion(chatHistory) {
-    console.log(chatHistory);
     try {
       const completion = await this.openai.chat.completions.create({
         model: "gpt-3.5-turbo",

@@ -67,11 +67,12 @@ class DBClient {
     return chats;
   }
 
-	async saveChatHistory(userID, chatHistory) {
+	async updateChatHistory(chatID, updatedHistory) {
+    console.log(chatID)
 		try {
-			await this.usersCollection.updateOne(
-				{ _id: new ObjectId(userID) },
-				{ $push: { chatHistory } }
+			await this.chatsCollection.updateOne(
+				{ _id: chatID },
+				{ $set: { history: updatedHistory } }
 			);
 		}
 		catch (error) {
