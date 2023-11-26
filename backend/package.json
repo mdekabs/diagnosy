@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "daisy": "node --require @babel/register index.js",
     "dev": "node --require @babel/register index.js",
-    "server": "node --require @babel/register server.js"
+    "server": "node --require @babel/register server.js",
+    "dev-server": "nodemon --exec babel-node --presets @babel/preset-env server.js"
   },
   "author": "Team 113",
   "license": "ISC",
