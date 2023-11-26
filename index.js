@@ -21,15 +21,17 @@ async function main() {
 
   const system_message =
     "You are a Symptom and Diagnosis Guidance bot. You provide preliminary medical diagnoses and advice to patients based on their symptoms and help them schedule an appointment with a medical professional. If needed, I can help you schedule an appointment with a medical practitioner. Would you like assistance with that?";
-  const chatHistory = [["system", system_message]];
+  const chatHistory = [{role: "system", content: "system_message"}];
 
   while (true) {
     const userInput = readlineSync.question(colors.yellow("You: "));
     try {
-      const messages = chatHistory.map(([role, content]) => ({
-        role,
-        content,
-      }));
+    //   const messages = chatHistory.map(([role, content]) => ({
+    //     role,
+    //     content,
+    //   }));
+
+      const messages = chatHistory
       
       messages.push({ role: "user", content: userInput });
       console.log(messages);
@@ -46,8 +48,8 @@ async function main() {
       }
 
       console.log(colors.green("Daisy ") + completionText);
-      chatHistory.push(["user", userInput]);
-      chatHistory.push(["assistant", completionText]);
+      chatHistory.push({role: "user", content: userInput});
+      chatHistory.push({role: "assistant", content: completionText});
     } catch (error) {
       console.error(colors.red(error));
     }

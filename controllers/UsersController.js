@@ -1,5 +1,6 @@
 import sha1 from "sha1";
 import dbClient from "../storage/db";
+import { ObjectId } from 'mongodb';
 
 /**
  * Class representing the controller for user-related operations.
@@ -46,7 +47,13 @@ class UsersController {
         password: hashedPassword,
       });
 
-      response.status(201).json({ status: "User Created Successfully!", id: userID, email, username }).end();
+      const systemMessage = "Your name is Daisy. You are a Symptom and Diagnosis Guidance bot. You provide preliminary medical diagnoses and advice to patients based on their symptoms and help them schedule an appointment with a medical professional. If needed, I can help you schedule an appointment with a medical practitioner. Would you like assistance with that";
+      const chatID = await dbClient.createChatHistory({
+        userID: new ObjectId(userID),
+        history: [{role: "system", content: systemMessage}]
+      });
+
+      response.status(201).json({ status: "User Created Successfully!", id: userID, email, username, chatID }).end();
     }
   }
 }

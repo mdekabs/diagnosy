@@ -42,29 +42,30 @@ class ChatController {
 			  })
     }
 
-    const chatHistory = [];
-    let completionText;
-		if (!chatHistory[0] || chatHistory[0].role !== 'system') {
-      const systemMessage = "Your name is Daisy. You are a Symptom and Diagnosis Guidance bot. You provide preliminary medical diagnoses and advice to patients based on their symptoms and help them schedule an appointment with a medical professional. If needed, I can help you schedule an appointment with a medical practitioner. Would you like assistance with that";
-      chatHistory.unshift(["system", systemMessage]);
-    }
+    const chats = await dbClient.fetchUserChat(userID);
+    const chatHistory = chats.history;
+    console.log(chatHistory);
+  
+    // let completionText;
+		// // if (!chatHistory[0] || chatHistory[0].role !== 'system') {
+    // //   const systemMessage = "Your name is Daisy. You are a Symptom and Diagnosis Guidance bot. You provide preliminary medical diagnoses and advice to patients based on their symptoms and help them schedule an appointment with a medical professional. If needed, I can help you schedule an appointment with a medical practitioner. Would you like assistance with that";
+    // //   chatHistory.unshift({role: "system", content: systemMessage});
+    // // }
 
-    try {
-      const messages = chatHistory.map(([role, content]) => ({
-        role,
-        content
-      }));
-      messages.push({ role: "user", content: symptom });
-      completionText = await OpenaiService.getChatbotCompletion(messages);
-    } catch(error) {
-      console.log(error);
-    }
+    // try {
+    //   chatHistory.push({ role: "user", content: symptom });
+    //   completionText = await OpenaiService.getChatbotCompletion(chatHistory);
+    //   chatHistory.push({role: "assistant", content: completionText});
+
+    // } catch(error) {
+    //   console.log(error);
+    // }
 
     response.status(200).json({
       status: "success",
       message: "Response generated successfully!",
       data: {
-        advice: completionText
+        // advice: completionText
       }
     })
 	}
