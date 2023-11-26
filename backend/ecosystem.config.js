@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "Diagnosy API",
+      name: "Diagnosy",
       script: "npm run server",
       watch: true,
       env: {
