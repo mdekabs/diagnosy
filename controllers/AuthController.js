@@ -3,19 +3,31 @@ import dbClient from "../storage/db";
 import redisClient from "../storage/redis";
 import sha1 from "sha1";
 
+/**
+ * Class representing the authentication controller.
+ */
 class AuthController {
+  /**
+   * Authenticates a user and generates a token upon successful sign-in.
+   *
+   * @async
+   * @param {Object} request - The request object.
+   * @param {Object} response - The response object.
+   * @returns {Promise<void>}
+   */
   static async getConnect(request, response) {
     const { email, password } = request.body;
     const user = await dbClient.fetchUserByEmail({ email });
-    console.log(user);
+
     if (user) {
       const hashedPassword = sha1(password);
+
       if (hashedPassword === user.password) {
         try {
           const token = uuidv4();
           const key = `auth_${token}`;
-          console.log(key)
           await redisClient.set(key, user._id.toString(), 86400);
+
           response
             .status(200)
             .json({
@@ -53,10 +65,19 @@ class AuthController {
     }
   }
 
+  /**
+   * Logs out a user by deleting their authentication token.
+   *
+   * @async
+   * @param {Object} request - The request object.
+   * @param {Object} response - The response object.
+   * @returns {Promise<void>}
+   */
   static async getDisconnect(request, response) {
     const token = request.headers["auth-token"];
     const key = `auth_${token}`;
     const userID = await redisClient.get(key);
+
     if (!userID) {
       response
         .status(401)
@@ -68,6 +89,7 @@ class AuthController {
         .end();
     } else {
       const user = await dbClient.fetchUserByID(userID);
+
       if (!user) {
         response
           .status(404)
@@ -84,13 +106,21 @@ class AuthController {
     }
   }
 
+  /**
+   * Retrieves the information of the authenticated user.
+   *
+   * @async
+   * @param {Object} request - The request object.
+   * @param {Object} response - The response object.
+   * @returns {Promise<void>}
+   */
   static async getMe(request, response) {
     const token = request.headers["auth-token"];
     const key = `auth_${token}`;
-    console.log(key)
+
     try {
       const userID = await redisClient.get(key);
-      console.log(userID)
+
       if (!userID) {
         response
           .status(401)
@@ -102,6 +132,7 @@ class AuthController {
           .end();
       } else {
         const user = await dbClient.fetchUserByID(userID);
+
         if (!user) {
           response
             .status(404)
