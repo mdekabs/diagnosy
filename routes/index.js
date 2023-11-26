@@ -67,13 +67,10 @@ router.get('/users/me', AuthController.getMe);
  * @param {Object} response - The response object.
  * @returns {Promise<void>}
  */
-router.get("/chat", async (req, res) => {
-  const chatController = new ChatController();
-  await chatController.handleChat();
-});
+router.get("/chat", ChatController.createChat);
 
 router.get('/status', async(req, res) => {
-	res.status(200).json({"status": "Green"});
+	res.status(200).json({"status": "Green", "message": "Daisy says hi"});
 });
 
 export default router;

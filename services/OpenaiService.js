@@ -16,6 +16,7 @@ class OpenaiService {
 
 
   async getChatbotCompletion(messages) {
+    console.log("Reach here!")
     try {
       const completion = await this.openai.chat.completions.create({
         model: "gpt-3.5-turbo",
