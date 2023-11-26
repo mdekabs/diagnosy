@@ -78,8 +78,16 @@ For detailed information on each route, refer to the [api_documentation]section 
 - [OpenaiService](#) - Custom service for interacting with the OpenAI API.
 - [Sha1](https://www.npmjs.com/package/sha1) - Library for generating SHA-1 hash.
 
-## Contributor
+## Contributors
+Ekabua Mawoda
 
-Ekabua Mawoda-Backend Engineer @ www.mdstorms.cloud
-Michael Adebayo - Fullstack Engineer
+Title: Backend Engineer
+GitHub Profile: github.com/mdekabs
+LinkedIn Profile: linkedin/in/emawoda
+Portfolio: www.mdstorms.cloud
 
+Michael Adebayo
+
+Title: Fullstack Engineer
+GitHub Profile: michael-adebayo
+LinkedIn Profile: Michael Adebayo
