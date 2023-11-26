@@ -42,8 +42,8 @@ class RedisClient {
 
   async set(key, value, duration) {
     try {
-      this.client.set = await promisify(this.client.set).bind(this.client);
-      this.client.set(key, value, "EX", duration);
+      // this.client.set = await promisify(this.client.set).bind(this.client);
+      await this.client.set(key, value, "EX", duration);
     } catch (error) {
       console.log(error);
     }

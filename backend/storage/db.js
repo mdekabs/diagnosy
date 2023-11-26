@@ -1,5 +1,4 @@
 import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
-// import { MongoClient, ObjectId } from 'mongodb';
 import { config } from "dotenv";
 
 config();
@@ -7,12 +6,10 @@ config();
 
 class DBClient {
   constructor() {
-    // const host = process.env.DB_HOST ? process.env.DB_HOST : 'localhost';
-    // const port = process.env.DB_PORT ? process.env.DB_PORT : 27017;
     const database = process.env.DB;
     this.isConnected = false;
     this.usersCollection = null;
-    // this.client = new MongoClient(`mongodb://${host}:${port}/${database}`);
+    this.chatsCollection = null
     const password = process.env.DB_PASSWORD;
     const uri = `mongodb+srv://MikeRock:${password}@cluster0.qyotcp1.mongodb.net/${database}?retryWrites=true&w=majority`;
     this.client = new MongoClient(uri, {
@@ -28,6 +25,7 @@ class DBClient {
       .then(() => {
         this.isConnected = true;
         this.usersCollection = this.client.db().collection('users');
+        this.chatsCollection = this.client.db().collection('chats');
       })
       .catch((error) => {
         this.isConnected = false;
@@ -58,6 +56,31 @@ class DBClient {
     const user = await this.usersCollection.findOne({ _id: new ObjectId(userID) });
     return user;
   }
+
+  async createChatHistory(chat) {
+    const response = await this.chatsCollection.insertOne(chat);
+    return response.insertedId.toString();
+  }
+
+  async fetchUserChat(userID) {
+    const chats = await this.chatsCollection.findOne({ userID: new ObjectId(userID) });
+    return chats;
+  }
+
+	async updateChatHistory(chatID, updatedHistory) {
+    console.log(chatID)
+		try {
+			await this.chatsCollection.updateOne(
+				{ _id: chatID },
+				{ $set: { history: updatedHistory } }
+			);
+		}
+		catch (error) {
+			console.error("Error saving chat history:", error);
+			throw error;
+		}
+	}
+
 }
 
 const dbClient = new DBClient();

@@ -32,7 +32,7 @@ class ChatController {
 					return;
 				}
 
-				console.log(colors.gree("Daisy ") + completionText);
+				console.log(colors.green("Daisy ") + completionText);
 				this.chatHistory.push(["user", userInput]);
 				this.chatHistory.push(["assistant", completionText]);
 			}
