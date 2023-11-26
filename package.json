@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "daisy": "node --require @babel/register index.js",
     "dev": "node --require @babel/register index.js",
-    "server": "nodemon --exec babel-node --require @babel/register --presets @babel/preset-env server.js"
+    "server": "nodemon --exec babel-node --presets @babel/preset-env server.js"
   },
   "author": "Team 113",
   "license": "ISC",
@@ -23,10 +23,9 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.18.0",
-    "@babel/node": "^10.2.3",
-    "@babel/preset-env": "^7.18.0",
-    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.16.4",
+    "@babel/core": "^7.23.3",
+    "@babel/node": "^7.22.19",
+    "@babel/preset-env": "^7.23.3",
     "nodemon": "^3.0.1"
   }
 }
