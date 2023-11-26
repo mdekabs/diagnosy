@@ -28,17 +28,6 @@ class OpenaiService {
       throw error;
     }
   }
-
-  async saveChatHistory(chatHistory) {
-    try {
-      await dbClient.connect();
-      const collection = dbClient.db().collection("chatHistory");
-      await collection.insertOne({ chatHistory });
-      console.log("chat history saved to DB");
-    } catch (error) {
-      console.error("Error saving chat history");
-    }
-  }
 }
 
 export default new OpenaiService();
