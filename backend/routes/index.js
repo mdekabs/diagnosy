@@ -31,7 +31,7 @@ router.post('/users', UsersController.postNew);
  * @param {Object} response - The response object.
  * @returns {void}
  */
-router.get('/sign_in', AuthController.getConnect);
+router.post('/sign_in', AuthController.getConnect);
 
 /**
  * Route for user sign-out.
@@ -67,9 +67,12 @@ router.get('/users/me', AuthController.getMe);
  * @param {Object} response - The response object.
  * @returns {Promise<void>}
  */
-router.get("/chat", async (req, res) => {
-  const chatController = new ChatController();
-  await chatController.handleChat();
+router.post("/chats", ChatController.createChat);
+
+router.get("/chats", ChatController.getChatHistory);
+
+router.get('/status', async(req, res) => {
+	res.status(200).json({"status": "Green", "message": "Daisy says hi"});
 });
 
 export default router;

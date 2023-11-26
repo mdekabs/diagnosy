@@ -15,28 +15,17 @@ class OpenaiService {
   }
 
 
-  async getChatbotCompletion(messages) {
+  async getChatbotCompletion(chatHistory) {
     try {
       const completion = await this.openai.chat.completions.create({
         model: "gpt-3.5-turbo",
-        messages: messages,
+        messages: chatHistory,
       });
 
       return completion.choices[0].message.content;
     } catch (error) {
       console.error("Error interacting with OpenAI");
       throw error;
-    }
-  }
-
-  async saveChatHistory(chatHistory) {
-    try {
-      await dbClient.connect();
-      const collection = dbClient.db().collection("chatHistory");
-      await collection.insertOne({ chatHistory });
-      console.log("chat history saved to DB");
-    } catch (error) {
-      console.error("Error saving chat history");
     }
   }
 }
