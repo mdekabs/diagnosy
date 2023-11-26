@@ -60,16 +60,61 @@ class ChatController {
       })
     }
 
-    console.log(await dbClient.fetchUserChat(userID));
-
     response.status(200).json({
       status: "success",
       message: "Response generated successfully!",
       data: {
         advice: completionText
       }
-    })
+    });
 	}
+  
+  static async getChatHistory(request, response) {
+    const token = request.headers['auth-token'];
+    
+    if (!token) {
+			response.status(401).json({
+				status: "error",
+				message: "Unauthorized! auth-token required",
+				data: null,
+			  })
+		}
+
+    const key = `auth_${token}`;
+		const userID = await redisClient.get(key);
+    if (!userID) {
+      response.status(401).json({
+				status: "error",
+				message: "Unauthorized! invalid token",
+				data: null,
+			  })
+    }
+    const user = await dbClient.fetchUserByID(userID)
+		if (!user) {
+			response.status(404).json({
+				status: "error",
+				message: "User not found",
+				data: null,
+			  });
+		}
+
+    try {
+      const chats = await dbClient.fetchUserChat(userID);
+      response.status(200).json({
+        status: "success",
+        message: "Chat history retrieved successfully!",
+        data: { chats }
+      })
+    } catch(error) {
+      console.log(error);
+      response.status(504).json({
+        status: "error",
+        message: error.message,
+        data: null,
+      })
+    }
+
+  }
 }
 
 export default ChatController;
