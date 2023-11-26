@@ -16,18 +16,18 @@ class OpenaiService {
 
 
   async getChatbotCompletion(messages) {
-    console.log("Reach here!")
-    try {
-      const completion = await this.openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: messages,
-      });
+    console.log(messages);
+    // try {
+    //   const completion = await this.openai.chat.completions.create({
+    //     model: "gpt-3.5-turbo",
+    //     messages: messages,
+    //   });
 
-      return completion.choices[0].message.content;
-    } catch (error) {
-      console.error("Error interacting with OpenAI");
-      throw error;
-    }
+    //   return completion.choices[0].message.content;
+    // } catch (error) {
+    //   console.error("Error interacting with OpenAI");
+    //   throw error;
+    // }
   }
 
   async saveChatHistory(chatHistory) {

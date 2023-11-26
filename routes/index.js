@@ -67,7 +67,7 @@ router.get('/users/me', AuthController.getMe);
  * @param {Object} response - The response object.
  * @returns {Promise<void>}
  */
-router.get("/chat", ChatController.createChat);
+router.get("/chats", ChatController.createChat);
 
 router.get('/status', async(req, res) => {
 	res.status(200).json({"status": "Green", "message": "Daisy says hi"});
