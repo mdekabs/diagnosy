@@ -1,16 +1,44 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import './Chat.css'
 import blue_logo from '../../assets/blue_logo_vector.png'
 import input_arrow from '../../assets/input_arrow.png'
 import ChatSideBar from '../../components/ChatSideBar';
 import { BsList } from "react-icons/bs";
 import MobileSideBar from '../../components/MobileSideBar';
+// import axios from 'axios';
 
 
 const TextChart = () => {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
-  const [openBurger, setOpenBurger] =useState(false)
+  const [openBurger, setOpenBurger] = useState(false)
+  // const [role, setRole] = useState('')
+  
+//   const token = localStorage.getItem("authToken")
+//   console.log(token)
+//   const handleGetChat = async () => {
+//   try {
+//     let url = 'https://diagnosy-api.mikerock.tech/chats';
+//     let response = await axios.get(url, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'auth-token': token
+//       },
+//     });
+//     setRole(response.data.data.chats.history.role)
+//     setMessages(response.data.data.chats.history.content)
+
+//     console.log(response.data.data.chats.history.content)
+//     console.log(response.data.data.chats.history.role)
+//   } catch (error) {
+//     console.log(error)
+//   }
+// };
+
+// useEffect(()=>{
+//   handleGetChat()
+// }, [])
+
 
   const handleUserInputChange = (event) => {
     setUserInput(event.target.value);
@@ -51,7 +79,7 @@ const TextChart = () => {
   const getAvatarFromName = (name) => {
   return name.charAt(0).toUpperCase(); 
 };
-console.log(messages.sender)
+// console.log(messages.sender)
   return (
     <React.Fragment>
       <section className='flex'>
@@ -85,7 +113,10 @@ console.log(messages.sender)
               <div className='bot_avatar_div'>
                 <img src={blue_logo} alt="med chart logo" />
               </div>
+              <div className="flex">
               <small className='text-xs mr-1' style={{ color: "#667085" }}>Livechat</small><span className='text-xs' style={{ color: "#667085" }}>02:30PM</span>
+              <div className='text-sm'>"welcome to Diagnosy! My name is Daisy. How are you feeling today?"</div>
+              </div>
             </div>
                       {messages.map((message, index) => (
                     <>
@@ -113,7 +144,8 @@ console.log(messages.sender)
                   </>
                 ))}
                 </div>
-
+              
+              <div className="message_input-bg">
               <div className="message_input-container">
                 <input
                   type="text"
@@ -122,9 +154,12 @@ console.log(messages.sender)
                   placeholder="Type your symptoms"
                 />
                 <button onClick={handleSendMessage}>
+                {/* <button onClick={handlePostSymptoms}> */}
                   <img src={input_arrow} alt="" />
                 </button>
               </div>
+              </div>
+
             </div>
 
           </article>

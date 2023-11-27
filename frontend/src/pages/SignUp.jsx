@@ -3,40 +3,63 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Link } from 'react-router-dom';
 import './Form.css'
+import axios from "axios"
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const SignUp = () => {
+ 
+
+   const handleUserReg = async (values) => {
+    try{
+      let url = 'https://diagnosy-api.mikerock.tech/users'
+      let response = await axios.post(url, values, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+          },
+      })
+      toast.success('Sign Up successful', { autoClose: 2000 });
+      
+      formik.resetForm();
+      console.log(response.data)
+    }catch(error){
+      console.log(error)
+    }
+  } 
 const registrationSchema = Yup.object().shape({
-  name: Yup.string().required('Please enter your Name'),
+  username: Yup.string().required('Please enter your Name'),
   email: Yup.string().email('Please enter a valid email address').required('Please enter your Email address'),
   password: Yup.string().min(8, 'Password must be at least 8 characters long').required('Please enter a Password'),
-  confirmPassword: Yup.string().oneOf([Yup.ref('password'), null], 'Passwords must match').required('Please Confirm your Password'),
+  // confirmPassword: Yup.string().oneOf([Yup.ref('password'), null], 'Passwords must match').required('Please Confirm your Password'),
 });
  const formik = useFormik({
     initialValues: {
-      name: '',
+      username: '',
       email: '',
       password: '',
-      confirmPassword: '',
+      // confirmPassword: '',
     },
     validationSchema: registrationSchema,
     onSubmit: (values) => {
-      console.log('Submitting form data:', values);
+    handleUserReg(values)
+    console.log(values)
     },
   });
     return(
   <React.Fragment>
     <form onSubmit={formik.handleSubmit} className='sign_up_form'>
-         
          <header className='sign_up_form_header'>
                 <h1>Sign Up! 👋</h1>
+                <ToastContainer/>
                 <p className='text-sm mt-5'>Sign up for free and start using our app today</p>
         </header>
     
     <div className="form-group">
       <label htmlFor="name">Name</label>
-      <input type="text" id="name" name="name" value={formik.values.name} onChange={formik.handleChange} placeholder='Your Name' />
-      {formik.errors.name && <div style={{color: "red"}}>{formik.errors.name}</div>}
+      <input type="text" id="username" name="username" value={formik.values.username} onChange={formik.handleChange} placeholder='Your Name' />
+      {formik.errors.username && <div style={{color: "red"}}>{formik.errors.username}</div>}
     </div>
 
     <div className="form-group">
@@ -51,11 +74,11 @@ const registrationSchema = Yup.object().shape({
       {formik.errors.password && <div style={{color: "red"}}>{formik.errors.password}</div>}
     </div>
 
-        <div className="form-group">
+        {/* <div className="form-group">
       <label htmlFor="confirmPassword">Confirm Password</label>
       <input type="password" id="confirmPassword" name="confirmPassword" value={formik.values.confirmPassword} onChange={formik.handleChange} />
       {formik.errors.confirmPassword && <div style={{color: "red"}}>{formik.errors.confirmPassword}</div>}
-        </div>
+        </div> */}
 
 
      <div className="flex items-center mb-5">

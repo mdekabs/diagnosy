@@ -22,6 +22,8 @@ const MobileSideBar = () => {
         <img src={emergency_icon} alt="" />
         <button>Emergency Chat</button>
     </div>
+
+    <button className='sign_out_btn'>Sign Out</button>
         </aside>
   )
 }
