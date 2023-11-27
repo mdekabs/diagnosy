@@ -16,7 +16,7 @@ class RedisClient {
      * @type {Object}
      */
     this.client = createClient();
-
+    this.client.connect();
     /**
      * Indicates the connection status to the Redis server.
      *
@@ -37,21 +37,6 @@ class RedisClient {
      */
     this.client.once("ready", () => {
       this.alive = true;
-      console.log("ready");
-    });
-  }
-
-  /**
-   * Initializes the Redis client.
-   *
-   * @returns {Promise<void>} - A Promise that resolves when the initialization is complete.
-   */
-  async init() {
-    this.client = await createClient()
-      .on("error", (err) => console.log("Redis Client Error", err))
-      .connect();
-
-    this.client.on("ready", () => {
       console.log("ready");
     });
   }
@@ -117,3 +102,4 @@ class RedisClient {
 const redisClient = new RedisClient();
 
 export default redisClient;
+  
