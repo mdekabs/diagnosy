@@ -27,7 +27,7 @@ class AuthController {
           const token = uuidv4();
           const key = `auth_${token}`;
 
-          // Use await to ensure the asynchronous operation completes before proceeding
+          
           await redisClient.set(key, user._id.toString(), 86400);
 
           response
@@ -59,7 +59,7 @@ class AuthController {
           .end();
       }
     } catch (error) {
-      // Handle errors gracefully and log them
+      
       console.error(error);
       response
         .status(500)
