@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./Chat.css";
 import blue_logo from "../../assets/blue_logo_vector.png";
 import input_arrow from "../../assets/input_arrow.png";
@@ -11,33 +11,106 @@ const TextChart = () => {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState("");
   const [openBurger, setOpenBurger] = useState(false);
-  // const [role, setRole] = useState('')
+  // const [historyRes, setHistoryRes] = useState('')
 
-  //   const token = localStorage.getItem("authToken")
-  //   console.log(token)
-  //   const handleGetChat = async () => {
-  //   try {
-  //     let url = 'https://diagnosy-api.mikerock.tech/chats';
-  //     let response = await axios.get(url, {
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         'auth-token': token
-  //       },
-  //     });
-  //     setRole(response.data.data.chats.history.role)
-  //     setMessages(response.data.data.chats.history.content)
+  
+//   const handleSendMessage = async () => {
+//   if (userInput === "") {
+//     return;
+//   }
 
-  //     console.log(response.data.data.chats.history.content)
-  //     console.log(response.data.data.chats.history.role)
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // };
+//   try {
+//     const token = localStorage.getItem("authToken");
+//     let url = 'https://diagnosy-api.mikerock.tech/chats';
 
-  // useEffect(()=>{
-  //   handleGetChat()
-  // }, [])
+//     // GETTING ADVICE
+//     const getAdvice = await axios.get(url, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'auth-token': token,
+//       },
+//     });
 
+//     // POSTING SYMPTOMS
+//     const postSymptoms = await axios.post(url, { body: { symptom: userInput } }, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'auth-token': token,
+//       },
+//     });
+
+//     console.log(postSymptoms.data);
+//     console.log(getAdvice.data);
+
+//     setHistoryRes(getAdvice.data.data.chats.history);
+
+//     const rolesFromResponse = historyRes.map(history => history);
+//     console.log(rolesFromResponse);
+
+//     const userRole = rolesFromResponse[1];
+//     console.log(userRole);
+
+//     const newUserMessage = {
+//       sender: 'User',
+//       message: userInput,
+//       timestamp: getCurrentTime(),
+//     };
+
+//     console.log(userInput);
+//     setUserInput('');
+//     setMessages([...messages, newUserMessage]);
+
+//     setTimeout(() => {
+
+//       const assistantRole = rolesFromResponse[2];
+//       console.log(assistantRole);
+
+//       const newBotMessage = {
+//         sender: 'Livechat',
+//         message: assistantRole.content,
+//         timestamp: getCurrentTime(),
+//       };
+
+//       setMessages((prevMessages) => [...prevMessages, newBotMessage]);
+
+//     }, 1000);
+
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
+const handleSendMessage = async () => {
+  if(userInput === ""){
+    return
+  }
+  try {
+    const newUserMessage = {
+      sender: 'User',
+      message: userInput,
+      timestamp: getCurrentTime(),
+    };
+// console.log(userInput)
+    setUserInput('');
+    setMessages([...messages, newUserMessage]);
+
+    setTimeout(() => {
+
+       const newBotMessage = {
+        sender: 'Livechat',
+        message: ' welcome to Diagnosy! My name is Daisy. How are you feeling today?',
+        timestamp: getCurrentTime(),
+      };
+
+      setMessages((prevMessages) => [...prevMessages, newBotMessage]);
+  
+
+    }, 1000);
+
+  } catch (error) {
+    console.log(error);
+  }
+};
   const handleUserInputChange = (event) => {
     setUserInput(event.target.value);
   };
@@ -50,34 +123,10 @@ const TextChart = () => {
     return `${hours}:${minutes} ${am_pm}`;
   };
 
-  const handleSendMessage = () => {
-    if (!userInput.trim()) {
-      return;
-    }
-
-    const newUserMessage = {
-      sender: "User",
-      message: userInput,
-      timestamp: getCurrentTime(),
-    };
-
-    setUserInput("");
-    setMessages([...messages, newUserMessage]);
-
-    setTimeout(() => {
-      const newBotMessage = {
-        sender: "Livechat",
-        message: "Hello there! How can I help you today?",
-        timestamp: getCurrentTime(),
-      };
-
-      setMessages((prevMessages) => [...prevMessages, newBotMessage]);
-    }, 1000);
-  };
   const getAvatarFromName = (name) => {
     return name.charAt(0).toUpperCase();
   };
-  // console.log(messages.sender)
+  
   return (
     <React.Fragment>
       <section className="flex">
@@ -124,10 +173,10 @@ const TextChart = () => {
                     <span className="text-xs" style={{ color: "#667085" }}>
                       02:30PM
                     </span>
-                    <div className="text-sm">
+                    {/* <div className="text-sm">
                       "welcome to Diagnosy! My name is Daisy. How are you
                       feeling today?"
-                    </div>
+                    </div> */}
                   </div>
                 </div>
                 {messages.map((message, index) => (
@@ -178,7 +227,6 @@ const TextChart = () => {
                     placeholder="Type your symptoms"
                   />
                   <button onClick={handleSendMessage}>
-                    {/* <button onClick={handlePostSymptoms}> */}
                     <img src={input_arrow} alt="" />
                   </button>
                 </div>
@@ -192,3 +240,10 @@ const TextChart = () => {
 };
 
 export default TextChart;
+
+
+
+
+
+
+ 
