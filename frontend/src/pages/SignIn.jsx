@@ -12,7 +12,6 @@ import 'react-toastify/dist/ReactToastify.css';
 const SignIn = () => {
   const navigate = useNavigate()
 
-   const[succesSMessage, setSuccesSMessage] = useState('')
    const [errorMessage, setErrorMessage] = useState('')
 
  const handleSignIn = async (values) => {
@@ -26,10 +25,10 @@ const SignIn = () => {
     });
 
     const authToken = response.data.data.token;
-    console.log(authToken)
+    
 
     if (response.status === 200 || response.status === 201) {
-      setSuccesSMessage("Sign In successful");
+    
       setErrorMessage('');
       formik.resetForm();
 
@@ -40,13 +39,11 @@ const SignIn = () => {
         navigate('/start_chat');
       }, 4000);
     } else {
-      setSuccesSMessage('');
       setErrorMessage("Sign In failed");
     }
 
   } catch (error) {
     console.log(error.response ? error.response.status : 'Network error');
-    setSuccesSMessage('');
     setErrorMessage("Sign In failed");
   }
 };
@@ -92,7 +89,7 @@ const registrationSchema = Yup.object().shape({
 
 
     
-      <button className='sign_in_btn' type="submit"></button>
+      <button className='sign_in_btn' type="submit">Continue</button>
 
       <small className='block text-center mt-5' style={{color: "#757575"}}>Not registered yet? <Link style={{color: "#363eff", fontWeight: "bold"}} to='/signup'>Create an Account</Link></small>
     </form>

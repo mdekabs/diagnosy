@@ -5,38 +5,99 @@ import input_arrow from "../../assets/input_arrow.png";
 import ChatSideBar from "../../components/ChatSideBar";
 import { BsList } from "react-icons/bs";
 import MobileSideBar from "../../components/MobileSideBar";
-// import axios from 'axios';
+import axios from 'axios';
 
 const TextChart = () => {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState("");
   const [openBurger, setOpenBurger] = useState(false);
-  // const [role, setRole] = useState('')
+  const [historyRes, setHistoryRes] = useState('')
 
-  //   const token = localStorage.getItem("authToken")
-  //   console.log(token)
-  //   const handleGetChat = async () => {
-  //   try {
-  //     let url = 'https://diagnosy-api.mikerock.tech/chats';
-  //     let response = await axios.get(url, {
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         'auth-token': token
-  //       },
-  //     });
-  //     setRole(response.data.data.chats.history.role)
-  //     setMessages(response.data.data.chats.history.content)
+  
+  const handleGetDiagnosis = async () => {
+    
+    // console.log(token)
+    
+    const token = localStorage.getItem("authToken")
+    try {
+      let url = 'https://diagnosy-api.mikerock.tech/chats';
+      
 
-  //     console.log(response.data.data.chats.history.content)
-  //     console.log(response.data.data.chats.history.role)
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // };
+       // GETTING ADVICE
+      const getAdvice = await axios.get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'auth-token': token,
+        },
+      });
 
-  // useEffect(()=>{
-  //   handleGetChat()
-  // }, [])
+      // POSTING SYMPTOMS
+      const postSymptoms = await axios.post(url,
+      {body: {
+        symptom: userInput,
+      }},
+       {
+        headers: {
+          'Content-Type': 'application/json',
+          'auth-token': token,
+        },
+      });
+
+     
+      console.log(postSymptoms.data);
+      console.log(getAdvice.data);
+
+      setHistoryRes(getAdvice.data.data.chats.history);
+    } catch (error) {
+      console.error('Error:', error.message);
+    }
+  };
+
+  useEffect(()=>{
+    handleGetDiagnosis()
+  })
+
+const handleSendMessage = async () => {
+  console.log(userInput)
+  if(userInput === ""){
+    return
+  }
+  try {
+    const rolesFromResponse = historyRes.map(history => history);
+    console.log(rolesFromResponse);
+
+    const userRole = rolesFromResponse[1];
+      console.log(userRole);
+
+    const newUserMessage = {
+      sender: 'User',
+      message: userInput,
+      timestamp: getCurrentTime(),
+    };
+console.log(userInput)
+    setUserInput('');
+    setMessages([...messages, newUserMessage]);
+
+    setTimeout(() => {
+      
+      const assistantRole = rolesFromResponse[2];
+      console.log(assistantRole);
+
+       const newBotMessage = {
+        sender: 'Livechat',
+        message: assistantRole.content,
+        timestamp: getCurrentTime(),
+      };
+
+      setMessages((prevMessages) => [...prevMessages, newBotMessage]);
+  
+
+    }, 1000);
+
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   const handleUserInputChange = (event) => {
     setUserInput(event.target.value);
@@ -50,34 +111,10 @@ const TextChart = () => {
     return `${hours}:${minutes} ${am_pm}`;
   };
 
-  const handleSendMessage = () => {
-    if (!userInput.trim()) {
-      return;
-    }
-
-    const newUserMessage = {
-      sender: "User",
-      message: userInput,
-      timestamp: getCurrentTime(),
-    };
-
-    setUserInput("");
-    setMessages([...messages, newUserMessage]);
-
-    setTimeout(() => {
-      const newBotMessage = {
-        sender: "Livechat",
-        message: "Hello there! How can I help you today?",
-        timestamp: getCurrentTime(),
-      };
-
-      setMessages((prevMessages) => [...prevMessages, newBotMessage]);
-    }, 1000);
-  };
   const getAvatarFromName = (name) => {
     return name.charAt(0).toUpperCase();
   };
-  // console.log(messages.sender)
+  
   return (
     <React.Fragment>
       <section className="flex">
@@ -178,7 +215,6 @@ const TextChart = () => {
                     placeholder="Type your symptoms"
                   />
                   <button onClick={handleSendMessage}>
-                    {/* <button onClick={handlePostSymptoms}> */}
                     <img src={input_arrow} alt="" />
                   </button>
                 </div>
