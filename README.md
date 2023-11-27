@@ -79,15 +79,22 @@ For detailed information on each route, refer to the [api_documentation]section 
 - [Sha1](https://www.npmjs.com/package/sha1) - Library for generating SHA-1 hash.
 
 ## Contributors
-Ekabua Mawoda
-
-Title: Backend Engineer
-GitHub Profile: github.com/mdekabs
-LinkedIn Profile: linkedin/in/emawoda
-Portfolio: www.mdstorms.cloud
-
-Michael Adebayo
+**Michael Adebayo**
 
 Title: Fullstack Engineer
-GitHub Profile: michael-adebayo
-LinkedIn Profile: Michael Adebayo
+
+[GitHub Profile](https://github.com/MikeRock51)
+
+[LinkedIn Profile](https://www.linkedin.com/in/michael-adebayo-637507251/)
+
+[Portfolio](https://mikerock.tech)
+
+**Ekabua Mawoda**
+
+Title: Backend Engineer
+
+[GitHub Profile](github.com/mdekabs)
+
+[LinkedIn Profile](linkedin/in/emawoda)
+
+[Portfolio](www.mdstorms.cloud)
