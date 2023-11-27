@@ -7,7 +7,7 @@ const ChatWithUs = () => {
   return (
     <React.Fragment>
         <header className='chat_with_us_header'>
-        <h1> Chat with Us</h1>
+        <h1> Chat with Daisy</h1>
         </header>
     
         <div className='chat_with_us_card'>
