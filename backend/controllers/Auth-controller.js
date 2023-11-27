@@ -13,21 +13,19 @@ class AuthController {
    * @async
    * @param {Object} request - The request object.
    * @param {Object} response - The response object.
-   * @returns {Promise<void>} - A Promise that resolves when the operation is complete.
+   * @returns {Promise<void>}
    */
   static async getConnect(request, response) {
-    try {
-      const { email, password } = request.body;
-      const user = await dbClient.fetchUserByEmail({ email });
+    const { email, password } = request.body;
+    const user = await dbClient.fetchUserByEmail({ email });
 
-      if (user) {
-        const hashedPassword = sha1(password);
+    if (user) {
+      const hashedPassword = sha1(password);
 
-        if (hashedPassword === user.password) {
+      if (hashedPassword === user.password) {
+        try {
           const token = uuidv4();
           const key = `auth_${token}`;
-
-          
           await redisClient.set(key, user._id.toString(), 86400);
 
           response
@@ -38,14 +36,11 @@ class AuthController {
               data: { token },
             })
             .end();
-        } else {
+        } catch (error) {
+          console.error(error);
           response
-            .status(401)
-            .json({
-              status: "error",
-              message: "Incorrect password",
-              data: null,
-            })
+            .status(504)
+            .json({ status: "error", message: error.message, data: null })
             .end();
         }
       } else {
@@ -53,17 +48,19 @@ class AuthController {
           .status(401)
           .json({
             status: "error",
-            message: "User does not exist",
+            message: "Incorrect password",
             data: null,
           })
           .end();
       }
-    } catch (error) {
-      
-      console.error(error);
+    } else {
       response
-        .status(500)
-        .json({ status: "error", message: "Internal Server Error", data: null })
+        .status(401)
+        .json({
+          status: "error",
+          message: "User does not exist",
+          data: null,
+        })
         .end();
     }
   }
@@ -74,7 +71,7 @@ class AuthController {
    * @async
    * @param {Object} request - The request object.
    * @param {Object} response - The response object.
-   * @returns {Promise<void>} - A Promise that resolves when the operation is complete.
+   * @returns {Promise<void>}
    */
   static async getDisconnect(request, response) {
     const token = request.headers["auth-token"];
@@ -115,7 +112,7 @@ class AuthController {
    * @async
    * @param {Object} request - The request object.
    * @param {Object} response - The response object.
-   * @returns {Promise<void>} - A Promise that resolves when the operation is complete.
+   * @returns {Promise<void>}
    */
   static async getMe(request, response) {
     const token = request.headers["auth-token"];
