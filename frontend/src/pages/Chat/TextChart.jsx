@@ -1,91 +1,104 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./Chat.css";
 import blue_logo from "../../assets/blue_logo_vector.png";
 import input_arrow from "../../assets/input_arrow.png";
 import ChatSideBar from "../../components/ChatSideBar";
 import { BsList } from "react-icons/bs";
 import MobileSideBar from "../../components/MobileSideBar";
-import axios from 'axios';
+// import axios from 'axios';
 
 const TextChart = () => {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState("");
   const [openBurger, setOpenBurger] = useState(false);
-  const [historyRes, setHistoryRes] = useState('')
+  // const [historyRes, setHistoryRes] = useState('')
 
   
-  const handleGetDiagnosis = async () => {
-    
-    // console.log(token)
-    
-    const token = localStorage.getItem("authToken")
-    try {
-      let url = 'https://diagnosy-api.mikerock.tech/chats';
-      
+//   const handleSendMessage = async () => {
+//   if (userInput === "") {
+//     return;
+//   }
 
-       // GETTING ADVICE
-      const getAdvice = await axios.get(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          'auth-token': token,
-        },
-      });
+//   try {
+//     const token = localStorage.getItem("authToken");
+//     let url = 'https://diagnosy-api.mikerock.tech/chats';
 
-      // POSTING SYMPTOMS
-      const postSymptoms = await axios.post(url,
-      {body: {
-        symptom: userInput,
-      }},
-       {
-        headers: {
-          'Content-Type': 'application/json',
-          'auth-token': token,
-        },
-      });
+//     // GETTING ADVICE
+//     const getAdvice = await axios.get(url, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'auth-token': token,
+//       },
+//     });
 
-     
-      console.log(postSymptoms.data);
-      console.log(getAdvice.data);
+//     // POSTING SYMPTOMS
+//     const postSymptoms = await axios.post(url, { body: { symptom: userInput } }, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'auth-token': token,
+//       },
+//     });
 
-      setHistoryRes(getAdvice.data.data.chats.history);
-    } catch (error) {
-      console.error('Error:', error.message);
-    }
-  };
+//     console.log(postSymptoms.data);
+//     console.log(getAdvice.data);
 
-  useEffect(()=>{
-    handleGetDiagnosis()
-  })
+//     setHistoryRes(getAdvice.data.data.chats.history);
+
+//     const rolesFromResponse = historyRes.map(history => history);
+//     console.log(rolesFromResponse);
+
+//     const userRole = rolesFromResponse[1];
+//     console.log(userRole);
+
+//     const newUserMessage = {
+//       sender: 'User',
+//       message: userInput,
+//       timestamp: getCurrentTime(),
+//     };
+
+//     console.log(userInput);
+//     setUserInput('');
+//     setMessages([...messages, newUserMessage]);
+
+//     setTimeout(() => {
+
+//       const assistantRole = rolesFromResponse[2];
+//       console.log(assistantRole);
+
+//       const newBotMessage = {
+//         sender: 'Livechat',
+//         message: assistantRole.content,
+//         timestamp: getCurrentTime(),
+//       };
+
+//       setMessages((prevMessages) => [...prevMessages, newBotMessage]);
+
+//     }, 1000);
+
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 
 const handleSendMessage = async () => {
-  console.log(userInput)
   if(userInput === ""){
     return
   }
   try {
-    const rolesFromResponse = historyRes.map(history => history);
-    console.log(rolesFromResponse);
-
-    const userRole = rolesFromResponse[1];
-      console.log(userRole);
-
     const newUserMessage = {
       sender: 'User',
       message: userInput,
       timestamp: getCurrentTime(),
     };
-console.log(userInput)
+// console.log(userInput)
     setUserInput('');
     setMessages([...messages, newUserMessage]);
 
     setTimeout(() => {
-      
-      const assistantRole = rolesFromResponse[2];
-      console.log(assistantRole);
 
        const newBotMessage = {
         sender: 'Livechat',
-        message: assistantRole.content,
+        message: ' welcome to Diagnosy! My name is Daisy. How are you feeling today?',
         timestamp: getCurrentTime(),
       };
 
@@ -98,7 +111,6 @@ console.log(userInput)
     console.log(error);
   }
 };
-
   const handleUserInputChange = (event) => {
     setUserInput(event.target.value);
   };
@@ -161,10 +173,10 @@ console.log(userInput)
                     <span className="text-xs" style={{ color: "#667085" }}>
                       02:30PM
                     </span>
-                    <div className="text-sm">
+                    {/* <div className="text-sm">
                       "welcome to Diagnosy! My name is Daisy. How are you
                       feeling today?"
-                    </div>
+                    </div> */}
                   </div>
                 </div>
                 {messages.map((message, index) => (
@@ -228,3 +240,10 @@ console.log(userInput)
 };
 
 export default TextChart;
+
+
+
+
+
+
+ 

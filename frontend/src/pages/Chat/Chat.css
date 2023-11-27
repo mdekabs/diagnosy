@@ -117,13 +117,14 @@
     left: 0; 
 } */
 .message_input-container {
-  position: fixed;
+  /* position: fixed; */
   display: flex;
   align-items: center;
   padding: 0 1rem;
-  left: 0;
+  /* left: 0; */
   width: 100%;
-  margin: 20rem auto 0 auto;
+  margin: 5rem auto;
+  /* margin: 20rem auto 0 auto; */
 }
 .message.user .message_user_details {
   margin-left: 50%;
@@ -238,13 +239,14 @@
     left: 0;
   } */
   .message_input-container {
-    position: fixed;
+    /* position: fixed; */
     display: flex;
     align-items: center;
-    z-index: 2;
-    left: 35%;
+    /* z-index: 2; */
+    /* left: 35%; */
+    /* left: 0; */
     width: 50%;
-    margin: 20rem auto 0 auto;
+    /* margin: 20rem auto 0 auto; */
   }
   .sign_out_btn {
     margin: 18rem auto 0;
