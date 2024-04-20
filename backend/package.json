@@ -19,6 +19,7 @@
     "express": "^4.18.2",
     "mongodb": "^6.3.0",
     "openai": "^4.20.0",
+    "python-shell": "^5.0.0",
     "readline-sync": "^1.4.10",
     "redis": "^4.6.11",
     "sha1": "^1.1.1",
