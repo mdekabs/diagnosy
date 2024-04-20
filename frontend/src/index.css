@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@200;400&family=Krub:wght@200&family=Lora&family=Montserrat:wght@400;500&family=Open+Sans&family=Roboto&family=Rubik:wght@300&display=swap");
+:root {
+  --primary_blue_color: #363eff;
+  --secondary-blue_color: #0c52cb;
+  --secondary_text_color: #757575;
+  --white_color: #ffffff;
+  --input_bg_color: #cccccc;
+  --chat_side_bar_bg_color: #d7d8ff;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: "Open Sans", sans-serif;
+}
+.burger {
+  display: block;
+  position: fixed;
+  font-size: 1.5rem;
+  cursor: pointer;
+  right: 5rem;
+}
+.mobile_chat_sidebar_container {
+  display: block;
+  transform: translateX(0);
+  background-color: var(--chat_side_bar_bg_color);
+  width: 70%;
+  padding: 1rem;
+  height: 100dvh;
+  position: fixed;
+  z-index: 1;
+  transition: all 0.8s ease-in;
+}
+@media (min-width: 764px) {
+  .burger {
+    display: none;
+  }
+  .mobile_chat_sidebar_container {
+    transform: translateX(-120);
+    /* display: none; */
+  }
+}

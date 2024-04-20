@@ -1,0 +1,70 @@
+.sign_up_form,
+.sign_in_form {
+  background-color: var(--white_color);
+  margin: 2rem auto;
+  width: 80%;
+}
+.form-group {
+  margin: 1rem 0;
+}
+.sign_up_form_header h1,
+.sign_in_form_header h1 {
+  font-weight: bolder;
+  font-size: 1.4rem;
+}
+.sign_up_form_header p {
+  color: var(--secondary_text_color);
+}
+.sign_up_form .form-group label,
+.sign_in_form .form-group label {
+  display: block;
+  color: #000000;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+.sign_up_form .form-group input,
+.sign_in_form .form-group input {
+  background-color: var(--input_bg_color);
+  border-radius: 8px;
+  width: 100%;
+  padding: 0.5rem;
+}
+.sign_up_form .form-group input:focus,
+.sign_in_form .form-group input:focus {
+  outline: none;
+}
+.forms_btn,
+.sign_in_btn {
+  display: block;
+  background-color: var(--primary_blue_color);
+  color: var(--white_color);
+  border-radius: 25px;
+  padding: 0.5rem 7rem;
+  /* box-shadow: 3px 3px 3px 3px #0c52cb; */
+  box-shadow: 1px 3px 1px 1px #0c52cb;
+  margin: auto;
+  max-width: 100%;
+  text-align: center;
+  transition: all 0.8s ease-in;
+}
+.forms_btn:hover,
+.sign_in_btn:hover {
+  background-color: var(--white_color);
+  color: var(--primary_blue_color);
+  font-weight: 700;
+}
+.sign_in_btn {
+  margin-top: 12rem;
+}
+@media (min-width: 764px) {
+  .sign_up_form,
+  .sign_in_form {
+    margin: 2rem auto;
+    max-width: 30%;
+  }
+  .sign_up_form_header,
+  .sign_in_form_header {
+    text-align: center;
+  }
+}
