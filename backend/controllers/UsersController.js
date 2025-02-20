@@ -1,6 +1,24 @@
 import sha1 from "sha1";
 import dbClient from "../storage/db";
-import { ObjectId } from 'mongodb';
+import { ObjectId } from "mongodb";
+
+// Constants for error messages
+const ERRORS = {
+  MISSING_EMAIL: "Missing email",
+  MISSING_USERNAME: "Missing username",
+  MISSING_PASSWORD: "Missing password",
+  USER_EXISTS: "User already exists",
+  SERVER_ERROR: "Internal Server Error",
+};
+
+// System message for new users
+const SYSTEM_MESSAGE = {
+  role: "system",
+  content:
+    "Your name is Daisy. You are a Symptom and Diagnosis Guidance bot. " +
+    "You provide preliminary medical diagnoses and advice based on symptoms " +
+    "and help schedule medical appointments. Would you like assistance with that?",
+};
 
 /**
  * Class representing the controller for user-related operations.
@@ -16,44 +34,46 @@ class UsersController {
    * @returns {Promise<void>}
    */
   static async postNew(request, response) {
-    /**
-     * Destructuring user data from the request body.
-     * @type {Object}
-     */
-    const { email, password, username } = request.body;
+    try {
+      // Destructure user data from request body
+      const { email, password, username } = request.body;
 
-    if (!email) {
-      response.status(400).json({ error: "Missing email" }).end();
-    } else if (!username) {
-      response.status(400).json({ error: "Missing username" }).end();
-    } else if (!password) {
-      response.status(400).json({ error: "Missing password" }).end();
-    } else if ((await dbClient.fetchUserByEmail({ email })) !== null) {
-      response.status(400).json({ error: "User already exists" }).end();
-    } else {
-      /**
-       * Hashed password using the sha1 algorithm.
-       * @type {string}
-       */
+      if (!email) return response.status(400).json({ error: ERRORS.MISSING_EMAIL });
+      if (!username) return response.status(400).json({ error: ERRORS.MISSING_USERNAME });
+      if (!password) return response.status(400).json({ error: ERRORS.MISSING_PASSWORD });
+
+      // Check if user already exists
+      const existingUser = await dbClient.fetchUserByEmail({ email });
+      if (existingUser) {
+        return response.status(400).json({ error: ERRORS.USER_EXISTS });
+      }
+
+      // Hash the password
       const hashedPassword = sha1(password);
 
-      /**
-       * The unique identifier for the newly created user.
-       * @type {string}
-       */
+      // Create a new user in the database
       const userID = await dbClient.createUser({
         email,
         username,
         password: hashedPassword,
       });
 
-      const systemMessage = "Your name is Daisy. You are a Symptom and Diagnosis Guidance bot. You provide preliminary medical diagnoses and advice to patients based on their symptoms and help them schedule an appointment with a medical professional. If needed, I can help you schedule an appointment with a medical practitioner. Would you like assistance with that";
+      // Create chat history for the new user
       const chatID = await dbClient.createChatHistory({
         userID: new ObjectId(userID),
-        history: [{role: "system", content: systemMessage}]
+        history: [SYSTEM_MESSAGE],
       });
 
-      response.status(201).json({ status: "User Created Successfully!", id: userID, email, username, chatID }).end();
+      return response.status(201).json({
+        status: "User Created Successfully!",
+        id: userID,
+        email,
+        username,
+        chatID,
+      });
+    } catch (error) {
+      console.error("postNew: Error creating user:", error);
+      return response.status(500).json({ status: "error", message: ERRORS.SERVER_ERROR });
     }
   }
 }
