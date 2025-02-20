@@ -1,4 +1,4 @@
-import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import { config } from "dotenv";
 
 /**
@@ -16,11 +16,11 @@ class DBClient {
    */
   constructor() {
     /**
-     * Retrieves the database name from the environment variables.
+     * Retrieves the database URI from the environment variables.
      *
      * @type {string}
      */
-    const database = process.env.DB;
+    const dbUri = process.env.DB; // e.g., mongodb://127.0.0.1:27017/diagnosy
 
     /**
      * Indicates the connection status to the database.
@@ -44,29 +44,9 @@ class DBClient {
     this.chatsCollection = null;
 
     /**
-     * Retrieves the database password from the environment variables.
-     *
-     * @type {string}
+     * Creates a new instance of the MongoClient.
      */
-    const password = process.env.DB_PASSWORD;
-
-    /**
-     * Constructs the MongoDB connection URI.
-     *
-     * @type {string}
-     */
-    const uri = `mongodb+srv://MikeRock:${password}@cluster0.qyotcp1.mongodb.net/${database}?retryWrites=true&w=majority`;
-
-    /**
-     * Creates a new instance of the MongoClient with specified options.
-     */
-    this.client = new MongoClient(uri, {
-      serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-      },
-    });
+    this.client = new MongoClient(dbUri);
 
     /**
      * Establishes a connection to the MongoDB database.
@@ -77,10 +57,11 @@ class DBClient {
         this.isConnected = true;
         this.usersCollection = this.client.db().collection('users');
         this.chatsCollection = this.client.db().collection('chats');
+        console.log("Successfully connected to the database."); // Log connection message
       })
       .catch((error) => {
         this.isConnected = false;
-        console.log(error);
+        console.error("Error connecting to the database:", error);
       });
   }
 
@@ -166,10 +147,9 @@ class DBClient {
    * @returns {Promise<void>} - A Promise that resolves when the operation is complete.
    */
   async updateChatHistory(chatID, updatedHistory) {
-    console.log(chatID);
     try {
       await this.chatsCollection.updateOne(
-        { _id: chatID },
+        { _id: new ObjectId(chatID) },
         { $set: { history: updatedHistory } }
       );
     } catch (error) {
