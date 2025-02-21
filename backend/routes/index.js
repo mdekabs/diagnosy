@@ -2,105 +2,33 @@ import express from 'express';
 import UsersController from '../controllers/UsersController';
 import AuthController from '../controllers/AuthController';
 import ChatController from "../controllers/ChatController";
+import Pagination from '../middleware/_pagination';
 
-/**
- * Express router for handling user-related and authentication routes.
- *
- * @type {express.Router}
- */
 const router = express.Router();
 
-/**
- * Route for creating a new user.
- *
- * @name POST /users
- * @function
- * @memberof module:Routes
- * @inner
- * @param {Object} request - The request object.
- * @param {Object} response - The response object.
- * @returns {void}
- */
-router.post('/users', UsersController.postNew);
+// Route Paths
+const ROUTES = {
+  USERS: '/users',
+  SIGN_IN: '/sign_in',
+  SIGN_OUT: '/sign_out',
+  ME: '/users/me',
+  CHATS: '/chats',
+  STATUS: '/status',
+};
 
-/**
- * Route for user sign-in.
- *
- * @name POST /sign_in
- * @function
- * @memberof module:Routes
- * @inner
- * @param {Object} request - The request object.
- * @param {Object} response - The response object.
- * @returns {void}
- */
-router.post('/sign_in', AuthController.getConnect);
+// User Routes
+router.post(ROUTES.USERS, UsersController.postNew);
+router.post(ROUTES.SIGN_IN, AuthController.getConnect);
+router.get(ROUTES.SIGN_OUT, AuthController.getDisconnect);
+router.get(ROUTES.ME, AuthController.getMe);
 
-/**
- * Route for user sign-out.
- *
- * @name GET /sign_out
- * @function
- * @memberof module:Routes
- * @inner
- * @param {Object} request - The request object.
- * @param {Object} response - The response object.
- * @returns {void}
- */
-router.get('/sign_out', AuthController.getDisconnect);
+// Chat Routes
+router.post(ROUTES.CHATS, ChatController.createChat);
+router.get(ROUTES.CHATS, Pagination, ChatController.getChatHistory);
 
-/**
- * Route for retrieving information about the authenticated user.
- *
- * @name GET /users/me
- * @function
- * @memberof module:Routes
- * @inner
- * @param {Object} request - The request object.
- * @param {Object} response - The response object.
- * @returns {void}
- */
-router.get('/users/me', AuthController.getMe);
-
-/**
- * Route for initiating a chat interaction.
- *
- * @name POST /chats
- * @function
- * @memberof module:Routes
- * @inner
- * @param {Object} request - The request object.
- * @param {Object} response - The response object.
- * @returns {Promise<void>}
- */
-router.post("/chats", ChatController.createChat);
-
-/**
- * Route for retrieving chat history.
- *
- * @name GET /chats
- * @function
- * @memberof module:Routes
- * @inner
- * @param {Object} request - The request object.
- * @param {Object} response - The response object.
- * @returns {Promise<void>}
- */
-router.get("/chats", ChatController.getChatHistory);
-
-/**
- * Route for checking the status.
- *
- * @name GET /status
- * @function
- * @memberof module:Routes
- * @inner
- * @param {Object} request - The request object.
- * @param {Object} response - The response object.
- * @returns {void}
- */
-router.get('/status', async (req, res) => {
-  res.status(200).json({"status": "Green", "message": "Daisy says hi"});
+// Status Route
+router.get(ROUTES.STATUS, async (req, res) => {
+  res.status(200).json({ status: "Green", message: "Daisy says hi" });
 });
 
 export default router;
