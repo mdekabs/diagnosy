@@ -12,30 +12,20 @@ const ERR_TOKEN_NOT_FOUND = "Token not found.";
 const ERR_INVALID_TOKEN = "Invalid token. Please log in again to get a new token.";
 const ERR_FORBIDDEN_ACTION = "You are not allowed to perform this task.";
 
-/**
- * Checks if a token is blacklisted in Redis.
- * @param {string} token - The JWT token to check
- * @returns {Promise<boolean>} True if token is blacklisted, false otherwise
- */
+// Checks if a token is blacklisted in Redis
+// Returns true if token is blacklisted, false otherwise
 export const isTokenBlacklisted = async (token) => {
   const blacklisted = await redisClient.get(`blacklist:${token}`);
   return blacklisted === "true";
 };
 
-/**
- * Adds a token to the Redis blacklist with an expiration time.
- * @param {string} token - The JWT token to blacklist
- * @param {number} [expiration=3600] - Expiration time in seconds (default: 1 hour)
- * @returns {Promise<void>}
- */
+// Adds a token to the Redis blacklist with an expiration time
 export const updateBlacklist = async (token, expiration = 3600) => {
   await redisClient.set(`blacklist:${token}`, "true", "EX", expiration);
   logger.info(`Token blacklisted for ${expiration}s`);
 };
 
-/**
- * Middleware to verify JWT authentication for protected routes.
- */
+// Middleware to verify JWT authentication for protected routes
 export const authenticationVerifier = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]; // Bearer <token>
   logger.info(`Auth header for ${req.method} ${req.originalUrl}: ${token ? "Present" : "Missing"}`);
@@ -79,9 +69,7 @@ export const authenticationVerifier = async (req, res, next) => {
   }
 };
 
-/**
- * Optional authentication middleware that allows unauthenticated access.
- */
+// Optional authentication middleware that allows unauthenticated access
 export const optionalVerifier = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
   logger.info(`Optional auth header for ${req.method} ${req.originalUrl}: ${token ? "Present" : "Missing"}`);
@@ -119,9 +107,7 @@ export const optionalVerifier = async (req, res, next) => {
   }
 };
 
-/**
- * Creates a permission verification middleware with custom conditions.
- */
+// Creates a permission verification middleware with custom conditions
 export const permissionVerifier = (...conditions) => {
   return (req, res, next) => {
     authenticationVerifier(req, res, () => {

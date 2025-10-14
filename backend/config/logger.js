@@ -13,12 +13,8 @@ if (!fs.existsSync(LOG_DIR)) {
 const LOG_LEVEL = 'info';
 const customTimestamp = format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss A' });
 
-/**
- * Custom log format that filters sensitive data and pretty-prints metadata.
- * Masks authorization headers and structures log output.
- * @param {Object} info - Winston log info object containing level, message, timestamp, and meta
- * @returns {string} Formatted log string
- */
+// Custom log format that filters sensitive data and pretty-prints metadata
+// Masks authorization headers and structures log output
 const prettyPrintFormat = format.printf(({ level, message, timestamp, meta }) => {
   // const statusCode = meta?.res?.statusCode; // Commented out but preserved
   if (meta?.req?.headers?.authorization) delete meta.req.headers.authorization;
@@ -26,11 +22,8 @@ const prettyPrintFormat = format.printf(({ level, message, timestamp, meta }) =>
   return `${timestamp} ${level.toUpperCase()}: ${message} ${metaString}`;
 });
 
-/**
- * Winston logger instance for application logging.
- * Configures daily rotating log files for different levels and exceptions.
- * @type {Object}
- */
+// Winston logger instance for application logging
+// Configures daily rotating log files for different levels and exceptions
 export const logger = createLogger({
   level: LOG_LEVEL,
   format: format.combine(customTimestamp, prettyPrintFormat),
@@ -74,19 +67,14 @@ if (process.env.NODE_ENV !== 'production') {
   }));
 }
 
-/**
- * Global handler for unhandled promise rejections.
- * Logs the rejection reason using the configured logger.
- */
+// Global handler for unhandled promise rejections
+// Logs the rejection reason using the configured logger
 process.on('unhandledRejection', (reason) => {
   logger.error(`Unhandled Rejection: ${reason}`);
 });
 
-/**
- * Express middleware for request/response logging.
- * Integrates with Winston logger and includes metadata.
- * @type {Function}
- */
+// Express middleware for request/response logging
+// Integrates with Winston logger and includes metadata
 export const appLogger = expressWinston.logger({
   winstonInstance: logger,
   meta: true,
@@ -95,9 +83,6 @@ export const appLogger = expressWinston.logger({
   colorize: false,
 });
 
-/**
- * Express middleware for error logging.
- * Logs errors using the configured Winston logger instance.
- * @type {Function}
- */
+// Express middleware for error logging
+// Logs errors using the configured Winston logger instance
 export const errorLogger = expressWinston.errorLogger({ winstonInstance: logger });

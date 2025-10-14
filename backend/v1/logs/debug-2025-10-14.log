@@ -1,0 +1,154 @@
+2025-10-14 04:00:17 AM INFO: MongoDB connected 
+2025-10-14 04:00:17 AM INFO: Redis connected 
+2025-10-14 04:00:17 AM INFO: Server is running on port 3000 
+2025-10-14 04:00:43 AM INFO: Auth header for POST /api/chat: Present 
+2025-10-14 04:00:43 AM INFO: Decoded token: {"id":"68ed1c84fb78deb21be548da","isAdmin":false,"iat":1760375428,"exp":1760461828} 
+2025-10-14 04:00:43 AM INFO: Authenticated userID: 68ed1c84fb78deb21be548da 
+2025-10-14 04:00:46 AM INFO: POST /api/chat 200 2681ms 
+{
+  "req": {
+    "url": "/api/chat",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "6d1169d1-9978-496e-934b-dcf07cb51947",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "85"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 2681
+}
+2025-10-14 04:01:40 AM INFO: Auth header for GET /api/chat/history: Present 
+2025-10-14 04:01:40 AM INFO: Decoded token: {"id":"68ed1c84fb78deb21be548da","isAdmin":false,"iat":1760375428,"exp":1760461828} 
+2025-10-14 04:01:40 AM INFO: Authenticated userID: 68ed1c84fb78deb21be548da 
+2025-10-14 04:01:40 AM INFO: Cached response for key: /api/chat/history 
+2025-10-14 04:01:40 AM INFO: GET /api/chat/history 200 55ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "2a188cc7-cd42-4145-a630-67e0d10dcf6e",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "85"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 55
+}
+2025-10-14 04:02:51 AM WARN: GET /api/chat/guest 404 6ms 
+{
+  "req": {
+    "url": "/api/chat/guest",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "2e1fa74b-66ee-4032-a1a2-aeeed048a917",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "85"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/guest",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 404
+  },
+  "responseTime": 6
+}
+2025-10-14 04:02:58 AM INFO: Optional auth header for POST /api/chat/guest: Present 
+2025-10-14 04:02:58 AM ERROR: Optional auth failed: User token used for guest route 
+2025-10-14 04:02:58 AM WARN: POST /api/chat/guest 401 17ms 
+{
+  "req": {
+    "url": "/api/chat/guest",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "23bd8bfe-d8ab-4da2-9393-6796ee0b2976",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "85"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/guest",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 401
+  },
+  "responseTime": 17
+}
+2025-10-14 04:07:01 AM INFO: MongoDB connected 
+2025-10-14 04:07:01 AM INFO: Redis connected 
+2025-10-14 04:07:01 AM INFO: Server is running on port 3000 
+2025-10-14 04:10:58 AM INFO: MongoDB connected 
+2025-10-14 04:10:58 AM INFO: Redis connected 
+2025-10-14 04:10:58 AM INFO: Server is running on port 3000 
+2025-10-14 04:15:01 AM INFO: MongoDB connected 
+2025-10-14 04:15:01 AM INFO: Redis connected 
+2025-10-14 04:15:01 AM INFO: Server is running on port 3000 
+2025-10-14 04:16:53 AM INFO: MongoDB connected 
+2025-10-14 04:16:54 AM INFO: Redis connected 
+2025-10-14 04:16:54 AM INFO: Server is running on port 3000 
+2025-10-14 04:25:06 AM INFO: MongoDB connected 
+2025-10-14 04:25:06 AM INFO: Redis connected 
+2025-10-14 04:25:06 AM INFO: Server is running on port 3000 
+2025-10-14 04:26:35 AM INFO: Auth header for POST /api/chat: Present 
+2025-10-14 04:26:35 AM INFO: Decoded token: {"id":"68ed1c84fb78deb21be548da","isAdmin":false,"iat":1760375428,"exp":1760461828} 
+2025-10-14 04:26:35 AM INFO: Authenticated userID: 68ed1c84fb78deb21be548da 
+2025-10-14 04:26:38 AM INFO: GeminiService: Response generated successfully. 
+2025-10-14 04:26:38 AM INFO: POST /api/chat 200 3453ms 
+{
+  "req": {
+    "url": "/api/chat",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "8b345f60-d1f2-4e0f-a794-253640f53e60",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "62"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 3453
+}
+2025-10-14 04:43:17 AM INFO: MongoDB connected 
+2025-10-14 04:43:17 AM INFO: Redis connected 
+2025-10-14 04:43:17 AM INFO: Server is running on port 3000 

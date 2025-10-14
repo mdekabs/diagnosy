@@ -1,22 +1,328 @@
 import { AuthController } from "../controllers/authentication.js";
 import { authenticationVerifier } from "../middleware/tokenization.js";
 
+// Defines authentication routes for the Express router
 export default function authRoutes(router) {
-  // Generate guest ID and token
+  /**
+   * @swagger
+   * /auth/guest:
+   *   post:
+   *     summary: Generate a guest ID and token
+   *     description: Creates a guest ID and JWT token for unauthenticated users to use guest routes (e.g., POST /chat/guest).
+   *     tags: [Authentication]
+   *     responses:
+   *       200:
+   *         description: Guest ID and token generated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: success
+   *                 message:
+   *                   type: string
+   *                   example: Guest ID and token generated successfully
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     guestId:
+   *                       type: string
+   *                       example: uuid-abc123
+   *                     token:
+   *                       type: string
+   *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: error
+   *                 message:
+   *                   type: string
+   *                   example: Failed to generate guest ID
+   */
   router.post("/auth/guest", AuthController.generateGuestId);
 
-  // Register a new user (optionally with guestId for history merging)
+  /**
+   * @swagger
+   * /auth/register:
+   *   post:
+   *     summary: Register a new user
+   *     description: Registers a new user with username, email, and password. Optionally merges guest chat history if guestId is provided.
+   *     tags: [Authentication]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - username
+   *               - email
+   *               - password
+   *             properties:
+   *               username:
+   *                 type: string
+   *                 example: user1
+   *               email:
+   *                 type: string
+   *                 example: user@example.com
+   *               password:
+   *                 type: string
+   *                 example: password123
+   *               guestId:
+   *                 type: string
+   *                 example: uuid-abc123
+   *                 nullable: true
+   *     responses:
+   *       200:
+   *         description: Registration successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: success
+   *                 message:
+   *                   type: string
+   *                   example: Registration successful
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     userId:
+   *                       type: string
+   *                       example: 12345
+   *                     token:
+   *                       type: string
+   *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   *       400:
+   *         description: Invalid input (e.g., missing username, email, or password)
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: error
+   *                 message:
+   *                   type: string
+   *                   example: Username is required
+   */
   router.post("/auth/register", AuthController.register);
 
-  // Login a user (optionally with guestId for history merging)
+  /**
+   * @swagger
+   * /auth/login:
+   *   post:
+   *     summary: Login a user
+   *     description: Authenticates a user with username and password. Optionally merges guest chat history if guestId is provided.
+   *     tags: [Authentication]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - username
+   *               - password
+   *             properties:
+   *               username:
+   *                 type: string
+   *                 example: user1
+   *               password:
+   *                 type: string
+   *                 example: password123
+   *               guestId:
+   *                 type: string
+   *                 example: uuid-abc123
+   *                 nullable: true
+   *     responses:
+   *       200:
+   *         description: Login successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: success
+   *                 message:
+   *                   type: string
+   *                   example: Login successful
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     userId:
+   *                       type: string
+   *                       example: 12345
+   *                     token:
+   *                       type: string
+   *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   *       401:
+   *         description: Invalid credentials
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: error
+   *                 message:
+   *                   type: string
+   *                   example: Invalid username or password
+   */
   router.post("/auth/login", AuthController.login);
 
-  // Logout a user (requires authentication)
+  /**
+   * @swagger
+   * /auth/logout:
+   *   post:
+   *     summary: Logout a user
+   *     description: Logs out a user by blacklisting the provided JWT token. Requires authentication.
+   *     tags: [Authentication]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Logout successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: success
+   *                 message:
+   *                   type: string
+   *                   example: Logout successful
+   *       401:
+   *         description: Unauthorized (invalid or missing token)
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: error
+   *                 message:
+   *                   type: string
+   *                   example: You are not authenticated. Please log in to get a new token.
+   */
   router.post("/auth/logout", authenticationVerifier, AuthController.logout);
 
-  // Initiate password reset
+  /**
+   * @swagger
+   * /auth/forgot-password:
+   *   post:
+   *     summary: Initiate password reset
+   *     description: Sends a password reset email to the provided email address.
+   *     tags: [Authentication]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - email
+   *             properties:
+   *               email:
+   *                 type: string
+   *                 example: user@example.com
+   *     responses:
+   *       200:
+   *         description: Password reset email sent
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: success
+   *                 message:
+   *                   type: string
+   *                   example: Password reset email sent.
+   *       400:
+   *         description: Invalid email
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: error
+   *                 message:
+   *                   type: string
+   *                   example: Email is required
+   */
   router.post("/auth/forgot-password", AuthController.forgotPassword);
 
-  // Reset password with token
+  /**
+   * @swagger
+   * /auth/reset-password:
+   *   post:
+   *     summary: Reset password with token
+   *     description: Resets the user password using a valid reset token.
+   *     tags: [Authentication]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - token
+   *               - newPassword
+   *             properties:
+   *               token:
+   *                 type: string
+   *                 example: reset-token-123
+   *               newPassword:
+   *                 type: string
+   *                 example: newpassword123
+   *     responses:
+   *       200:
+   *         description: Password reset successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: success
+   *                 message:
+   *                   type: string
+   *                   example: Password reset successful.
+   *       400:
+   *         description: Invalid token or password
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: error
+   *                 message:
+   *                   type: string
+   *                   example: Invalid or expired reset token
+   */
   router.post("/auth/reset-password", AuthController.resetPassword);
 }
