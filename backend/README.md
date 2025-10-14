@@ -1,83 +1,63 @@
+# Diagnosy
 
-# Diagnosy Service
+Diagnosy is a Node.js-based API that provides health-related chat functionality for authenticated and guest users. Users can submit health symptoms to receive advice powered by a Gemini service, with chat history stored in MongoDB for authenticated users and Redis for guests. The API supports user authentication, registration, password reset, and guest access, with JWT-based authentication, Redis caching, and asynchronous email processing via queues.
 
-Diagnosy is a service that provides symptom and diagnosis guidance, user management, and chat functionality for medical inquiries.
+## Features
+- **Authentication**:
+  - Register and log in users with JWT tokens.
+  - Guest access with temporary IDs and tokens.
+  - Password reset via email with queue-based processing.
+  - Token blacklisting for logout.
+- **Chat Functionality**:
+  - Create health-related chat sessions for authenticated or guest users.
+  - Retrieve chat history for authenticated users.
+- **Caching**: Redis-based caching for improved performance.
+- **Logging**: Winston-based logging with daily rotation and sensitive data filtering.
+- **Email Processing**: Asynchronous email sending via Bull queues.
+- **API Documentation**: Swagger UI for endpoint exploration.
+- **Testing**: Unit tests for controllers using Mocha, Chai, and Sinon.
 
-## Table of Contents
+## Tech Stack
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: MongoDB (user data, chat history), Redis (guest chats, caching, token blacklisting)
+- **Authentication**: JSON Web Tokens (JWT)
+- **Queue**: Bull for email processing
+- **Logging**: Winston with daily rotation
+- **API Docs**: Swagger (OpenAPI 3.0)
+- **Testing**: Mocha, Chai, Sinon
+- **Dependencies**: Mongoose, Redis, Bull, Express-validator, Swagger-jsdoc, Swagger-ui-express
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [Routes](#routes)
-- [Dependencies](#dependencies)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Installation
 
-1. **Clone the Repository:**
+1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/mdekabs/diagnosy.git
-   ```
+   git clone <repository-url>
+   cd diagnosy/backend
 
-2. **Navigate to the Project Directory:**
-   ```bash
-   cd diagnosy
-   ```
+   npm Installation
+## Set up .env
+    use the sampel .env.example files
 
-3. **Install Dependencies:**
-   ```bash
-   npm install or npm i
-   ```
+## start mongodb and redis on your server
 
-4. **Configure Environment Variables:**
-   - Create a `.env` file in the project root.
-   - Add necessary environment variables (DB, DB_PASSWORD, API_KEY).
+## start the email worker
+    npm start worker
 
-5. **Start the Server:**
-   ```bash
-   npm run server
-   ```
+## start server
+    npm start
 
-## Usage
+## API Usage
+    The API is accessible at http://localhost:3000/api. 
+    Explore endpoints via Swagger UI at http://localhost:3000/api-docs
 
-To use Diagnosy, follow the installation steps and start the server. The service exposes various routes for user management, authentication, and chat interactions.
 
-## Routes
 
-- **Create a New User:**
-  ```
-  POST /users
-  ```
-  
-- **User Sign-In:**
-  ```
-  GET /sign_in
-  ```
 
-- **User Sign-Out:**
-  ```
-  GET /sign_out
-  ```
 
-- **Retrieve Authenticated User Information:**
-  ```
-  GET /users/me
-  ```
 
-- **Initiate a Chat Interaction:**
-  ```
-  GET /chat
-  ```
-
-For detailed information on each route, refer to the [api_documentation]section in the code repository.
-
-## Dependencies
-
-- [Express](https://expressjs.com/) - Web application framework for Node.js.
-- [Readline-sync](https://www.npmjs.com/package/readline-sync) - Synchronous Readline for interactively running JavaScript.
-- [OpenaiService](#) - Custom service for interacting with the OpenAI API.
-- [Sha1](https://www.npmjs.com/package/sha1) - Library for generating SHA-1 hash.
-
+## Project Structure
 ## Contributors
 **Michael Adebayo**
 

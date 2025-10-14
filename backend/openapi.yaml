@@ -1,0 +1,543 @@
+openapi: 3.0.0
+info:
+  title: Diagnosy API
+  version: 1.0.0
+  description: A health chat API for authenticated and guest users to submit
+    health symptoms and receive advice, with JWT authentication, Redis caching,
+    and Bull queue-based email processing.
+servers:
+  - url: http://localhost:3000
+paths:
+  /chat:
+    post:
+      summary: Create a chat for an authenticated user
+      description: Creates a new chat session for an authenticated user based on the
+        provided symptom. Requires a valid user JWT token.
+      tags:
+        - Chat
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - symptom
+              properties:
+                symptom:
+                  type: string
+                  example: I have a sore throat.
+      responses:
+        "200":
+          description: Chat response generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Response generated successfully!
+                  data:
+                    type: object
+                    properties:
+                      advice:
+                        type: string
+                        example: A sore throat could be due to a viral infection or allergies. Please
+                          consult a healthcare professional.
+                      disclaimer:
+                        type: string
+                        example: "Please note: This advice is not a substitute for professional medical
+                          care"
+        "400":
+          description: Invalid input (e.g., missing or non-health-related symptom)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Symptom is required
+        "401":
+          description: Unauthorized (invalid or missing token)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: You are not authenticated. Please log in to get a new token.
+  /chat/guest:
+    post:
+      summary: Create a chat for a guest user
+      description: Creates a new chat session for a guest user based on the provided
+        symptom. Optionally accepts a guest JWT token for history tracking.
+      tags:
+        - Chat
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - symptom
+              properties:
+                symptom:
+                  type: string
+                  example: I have a headache and fever.
+      responses:
+        "200":
+          description: Chat response generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Response generated successfully!
+                  data:
+                    type: object
+                    properties:
+                      advice:
+                        type: string
+                        example: Your symptoms could indicate a viral infection or dehydration. Please
+                          consult a healthcare professional.
+                      disclaimer:
+                        type: string
+                        example: "Please note: This advice is not a substitute for professional medical
+                          care"
+        "400":
+          description: Invalid input (e.g., missing or non-health-related symptom)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Symptom is required
+        "401":
+          description: Unauthorized (invalid or expired guest token, if provided)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Invalid or expired guest token.
+  /chat/history:
+    get:
+      summary: Get chat history for an authenticated user
+      description: Retrieves the chat history for an authenticated user. Requires a
+        valid user JWT token.
+      tags:
+        - Chat
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Chat history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Chat history retrieved successfully!
+                  data:
+                    type: object
+                    properties:
+                      chats:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                            example: chat-id-123
+                          userID:
+                            type: string
+                            example: 12345
+                          history:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                role:
+                                  type: string
+                                  example: user
+                                content:
+                                  type: string
+                                  example: I have a sore throat.
+                                timestamp:
+                                  type: string
+                                  format: date-time
+                                  example: 2025-10-14T04:15:00Z
+                          createdAt:
+                            type: string
+                            format: date-time
+                            example: 2025-10-14T04:15:00Z
+                          updatedAt:
+                            type: string
+                            format: date-time
+                            example: 2025-10-14T04:15:01Z
+        "401":
+          description: Unauthorized (invalid or missing token)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: You are not authenticated. Please log in to get a new token.
+        "404":
+          description: Chat history not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Chat history not found
+  /auth/guest:
+    post:
+      summary: Generate a guest ID and token
+      description: Creates a guest ID and JWT token for unauthenticated users to use
+        guest routes (e.g., POST /chat/guest).
+      tags:
+        - Authentication
+      responses:
+        "200":
+          description: Guest ID and token generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Guest ID and token generated successfully
+                  data:
+                    type: object
+                    properties:
+                      guestId:
+                        type: string
+                        example: uuid-abc123
+                      token:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Failed to generate guest ID
+  /auth/register:
+    post:
+      summary: Register a new user
+      description: Registers a new user with username, email, and password. Optionally
+        merges guest chat history if guestId is provided.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+              properties:
+                username:
+                  type: string
+                  example: user1
+                email:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+                  example: password123
+                guestId:
+                  type: string
+                  example: uuid-abc123
+                  nullable: true
+      responses:
+        "200":
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Registration successful
+                  data:
+                    type: object
+                    properties:
+                      userId:
+                        type: string
+                        example: 12345
+                      token:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        "400":
+          description: Invalid input (e.g., missing username, email, or password)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Username is required
+  /auth/login:
+    post:
+      summary: Login a user
+      description: Authenticates a user with username and password. Optionally merges
+        guest chat history if guestId is provided.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: user1
+                password:
+                  type: string
+                  example: password123
+                guestId:
+                  type: string
+                  example: uuid-abc123
+                  nullable: true
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Login successful
+                  data:
+                    type: object
+                    properties:
+                      userId:
+                        type: string
+                        example: 12345
+                      token:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Invalid username or password
+  /auth/logout:
+    post:
+      summary: Logout a user
+      description: Logs out a user by blacklisting the provided JWT token. Requires
+        authentication.
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Logout successful
+        "401":
+          description: Unauthorized (invalid or missing token)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: You are not authenticated. Please log in to get a new token.
+  /auth/forgot-password:
+    post:
+      summary: Initiate password reset
+      description: Sends a password reset email to the provided email address.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+      responses:
+        "200":
+          description: Password reset email sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Password reset email sent.
+        "400":
+          description: Invalid email
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Email is required
+  /auth/reset-password:
+    post:
+      summary: Reset password with token
+      description: Resets the user password using a valid reset token.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - newPassword
+              properties:
+                token:
+                  type: string
+                  example: reset-token-123
+                newPassword:
+                  type: string
+                  example: newpassword123
+      responses:
+        "200":
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Password reset successful.
+        "400":
+          description: Invalid token or password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Invalid or expired reset token
+components: {}
+tags: []

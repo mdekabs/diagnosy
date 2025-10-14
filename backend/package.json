@@ -27,8 +27,11 @@
     "nodemon": "^3.1.10",
     "openai": "^6.3.0",
     "redis": "^5.8.3",
+    "swagger-jsdoc": "^6.2.8",
     "uuid": "^13.0.0",
     "winston": "^3.18.3",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "yaml": "^2.8.1",
+    "yamljs": "^0.3.0"
   }
 }

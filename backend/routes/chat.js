@@ -47,7 +47,7 @@ export default function chatRoutes(router) {
    *                       example: A sore throat could be due to a viral infection or allergies. Please consult a healthcare professional.
    *                     disclaimer:
    *                       type: string
-   *                       example: Please note: This advice is not a substitute for professional medical care
+   *                       example: "Please note: This advice is not a substitute for professional medical care"
    *       400:
    *         description: Invalid input (e.g., missing or non-health-related symptom)
    *         content:
@@ -120,7 +120,7 @@ export default function chatRoutes(router) {
    *                       example: Your symptoms could indicate a viral infection or dehydration. Please consult a healthcare professional.
    *                     disclaimer:
    *                       type: string
-   *                       example: Please note: This advice is not a substitute for professional medical care
+   *                       example: "Please note: This advice is not a substitute for professional medical care"
    *       400:
    *         description: Invalid input (e.g., missing or non-health-related symptom)
    *         content:
