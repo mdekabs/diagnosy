@@ -4,10 +4,10 @@ import { connectDB, disconnectDB } from "./config/mongod_database.js";
 import { connectRedis, disconnectRedis } from "./config/redis.js";
 import { logger } from "./config/logger.js";
 import gracefulShutdown from "express-graceful-shutdown";
-//import { setupSwaggerDocs } from "./config/_swagger.js";
+import { setupSwaggerDocs } from "./config/swagger.js";
 
 // Setup Swagger documentation
-//setupSwaggerDocs(app);
+setupSwaggerDocs(app);
 
 
 const PORT = process.env.PORT || 3000;
