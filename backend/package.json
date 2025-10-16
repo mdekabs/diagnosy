@@ -7,7 +7,7 @@
   "scripts": {
     "test": "cross-env NODE_ENV=test mocha test/**/*.test.js --exit",
     "start": "cross-env NODE_ENV=development nodemon server.js",
-    "worker": "cross-env NODE_ENV=development nodemon ./script/_email_worker.js"
+    "worker": "cross-env NODE_ENV=development nodemon ./script/email_worker.js"
   },
   "author": "",
   "license": "ISC",

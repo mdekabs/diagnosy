@@ -1,6 +1,6 @@
 import { ChatController } from "../controllers/chat.js";
 import { authenticationVerifier, optionalVerifier } from "../middleware/tokenization.js";
-import { cacheMiddleware } from "../middleware/caching.js";
+import { cacheMiddleware, clearCache } from "../middleware/caching.js";
 
 // Defines chat routes for the Express router
 export default function chatRoutes(router) {
@@ -75,7 +75,7 @@ export default function chatRoutes(router) {
    *                   type: string
    *                   example: You are not authenticated. Please log in to get a new token.
    */
-  router.post("/chat", authenticationVerifier, cacheMiddleware, ChatController.createChat);
+  router.post("/chat", authenticationVerifier, clearCache, ChatController.createChat);
 
   /**
    * @swagger
@@ -148,7 +148,7 @@ export default function chatRoutes(router) {
    *                   type: string
    *                   example: Invalid or expired guest token.
    */
-  router.post("/chat/guest", optionalVerifier, cacheMiddleware, ChatController.createGuestChat);
+  router.post("/chat/guest", optionalVerifier, clearCache, ChatController.createGuestChat);
 
   /**
    * @swagger
