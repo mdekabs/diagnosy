@@ -279,122 +279,6 @@ paths:
                   message:
                     type: string
                     example: Failed to generate guest ID
-    get:
-      summary: Retrieve guest ID
-      description: Returns the guest ID associated with a valid guest JWT token if it
-        exists in Redis. Requires the guest token from POST /auth/guest.
-      tags:
-        - Authentication
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: Guest ID retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    example: success
-                  message:
-                    type: string
-                    example: Guest ID retrieved successfully
-                  data:
-                    type: object
-                    properties:
-                      guestId:
-                        type: string
-                        example: uuid-abc123
-        "401":
-          description: Unauthorized (missing or invalid guest token)
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    example: error
-                  message:
-                    type: string
-                    example: Invalid or missing guest token
-        "404":
-          description: Guest ID not found in Redis
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    example: error
-                  message:
-                    type: string
-                    example: Guest ID not found
-  /auth/me:
-    get:
-      summary: Retrieve current user details
-      description: Returns the current user's details (userId, username, email) from
-        MongoDB. Requires a valid user JWT token from POST /auth/login or POST
-        /auth/register.
-      tags:
-        - Authentication
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: User details retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    example: success
-                  message:
-                    type: string
-                    example: User details retrieved successfully
-                  data:
-                    type: object
-                    properties:
-                      userId:
-                        type: string
-                        example: 12345
-                      username:
-                        type: string
-                        example: user1
-                      email:
-                        type: string
-                        example: user@example.com
-        "401":
-          description: Unauthorized (missing or invalid user token)
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    example: error
-                  message:
-                    type: string
-                    example: Invalid or missing user token
-        "404":
-          description: User not found in MongoDB
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    example: error
-                  message:
-                    type: string
-                    example: User not found
   /auth/register:
     post:
       summary: Register a new user
@@ -462,19 +346,6 @@ paths:
                   message:
                     type: string
                     example: Username is required
-        "409":
-          description: Email already in use
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    example: error
-                  message:
-                    type: string
-                    example: Email is already in use
   /auth/login:
     post:
       summary: Login a user
@@ -538,19 +409,6 @@ paths:
                   message:
                     type: string
                     example: Invalid username or password
-        "403":
-          description: Account locked
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    example: error
-                  message:
-                    type: string
-                    example: Account locked. Try again after 12:00:00 AM
   /auth/logout:
     post:
       summary: Logout a user
@@ -619,8 +477,8 @@ paths:
                   message:
                     type: string
                     example: Password reset email sent.
-        "404":
-          description: User not found
+        "400":
+          description: Invalid email
           content:
             application/json:
               schema:
@@ -631,7 +489,7 @@ paths:
                     example: error
                   message:
                     type: string
-                    example: User not found
+                    example: Email is required
   /auth/reset-password:
     post:
       summary: Reset password with token

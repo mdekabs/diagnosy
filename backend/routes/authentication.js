@@ -1,5 +1,5 @@
-import { AuthController } from "../controllers/authentication.js";
-import { authenticationVerifier } from "../middleware/tokenization.js";
+import { AuthController } from '../controllers/authentication.js';
+import { authenticationVerifier } from '../middleware/tokenization.js';
 
 // Defines authentication routes for the Express router
 export default function authRoutes(router) {
@@ -47,14 +47,78 @@ export default function authRoutes(router) {
    *                   type: string
    *                   example: Failed to generate guest ID
    */
-  router.post("/auth/guest", AuthController.generateGuestId);
+  router.post('/auth/guest', AuthController.generateGuestId);
+
+  /**
+   * @swagger
+   * /auth/me:
+   *   get:
+   *     summary: Retrieve current user details
+   *     description: Returns the current user's details (userId, username, email) from MongoDB. Requires a valid user JWT token from POST /auth/login or POST /auth/register.
+   *     tags: [Authentication]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: User details retrieved successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: success
+   *                 message:
+   *                   type: string
+   *                   example: User details retrieved successfully
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     userId:
+   *                       type: string
+   *                       example: 12345
+   *                     username:
+   *                       type: string
+   *                       example: user1
+   *                     email:
+   *                       type: string
+   *                       example: user@example.com
+   *       401:
+   *         description: Unauthorized (missing or invalid user token)
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: error
+   *                 message:
+   *                   type: string
+   *                   example: Invalid or missing user token
+   *       404:
+   *         description: User not found in MongoDB
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: error
+   *                 message:
+   *                   type: string
+   *                   example: User not found
+   */
+  router.get('/auth/me', authenticationVerifier, AuthController.getMe);
 
   /**
    * @swagger
    * /auth/register:
    *   post:
    *     summary: Register a new user
-   *     description: Registers a new user with username, email, and password. Optionally merges guest chat history if guestId is provided.
+   *     description: Registers a new user with username, email, and password.
    *     tags: [Authentication]
    *     requestBody:
    *       required: true
@@ -76,10 +140,6 @@ export default function authRoutes(router) {
    *               password:
    *                 type: string
    *                 example: password123
-   *               guestId:
-   *                 type: string
-   *                 example: uuid-abc123
-   *                 nullable: true
    *     responses:
    *       200:
    *         description: Registration successful
@@ -116,15 +176,28 @@ export default function authRoutes(router) {
    *                 message:
    *                   type: string
    *                   example: Username is required
+   *       409:
+   *         description: Email already in use
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: error
+   *                 message:
+   *                   type: string
+   *                   example: Email is already in use
    */
-  router.post("/auth/register", AuthController.register);
+  router.post('/auth/register', AuthController.register);
 
   /**
    * @swagger
    * /auth/login:
    *   post:
    *     summary: Login a user
-   *     description: Authenticates a user with username and password. Optionally merges guest chat history if guestId is provided.
+   *     description: Authenticates a user with username and password.
    *     tags: [Authentication]
    *     requestBody:
    *       required: true
@@ -142,10 +215,6 @@ export default function authRoutes(router) {
    *               password:
    *                 type: string
    *                 example: password123
-   *               guestId:
-   *                 type: string
-   *                 example: uuid-abc123
-   *                 nullable: true
    *     responses:
    *       200:
    *         description: Login successful
@@ -182,8 +251,21 @@ export default function authRoutes(router) {
    *                 message:
    *                   type: string
    *                   example: Invalid username or password
+   *       403:
+   *         description: Account locked
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 type:
+   *                   type: string
+   *                   example: error
+   *                 message:
+   *                   type: string
+   *                   example: Account locked. Try again after 12:00:00 AM
    */
-  router.post("/auth/login", AuthController.login);
+  router.post('/auth/login', AuthController.login);
 
   /**
    * @swagger
@@ -222,7 +304,7 @@ export default function authRoutes(router) {
    *                   type: string
    *                   example: You are not authenticated. Please log in to get a new token.
    */
-  router.post("/auth/logout", authenticationVerifier, AuthController.logout);
+  router.post('/auth/logout', authenticationVerifier, AuthController.logout);
 
   /**
    * @swagger
@@ -257,8 +339,8 @@ export default function authRoutes(router) {
    *                 message:
    *                   type: string
    *                   example: Password reset email sent.
-   *       400:
-   *         description: Invalid email
+   *       404:
+   *         description: User not found
    *         content:
    *           application/json:
    *             schema:
@@ -269,9 +351,9 @@ export default function authRoutes(router) {
    *                   example: error
    *                 message:
    *                   type: string
-   *                   example: Email is required
+   *                   example: User not found
    */
-  router.post("/auth/forgot-password", AuthController.forgotPassword);
+  router.post('/auth/forgot-password', AuthController.forgotPassword);
 
   /**
    * @swagger
@@ -324,5 +406,5 @@ export default function authRoutes(router) {
    *                   type: string
    *                   example: Invalid or expired reset token
    */
-  router.post("/auth/reset-password", AuthController.resetPassword);
+  router.post('/auth/reset-password', AuthController.resetPassword);
 }

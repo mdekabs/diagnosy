@@ -2,6 +2,7 @@ import { Chat } from "../models/chat.js";
 import { GeminiService } from "./gemini.js";
 import redisClient from "../config/redis.js";
 import mongoose from "mongoose";
+
 const STATUS_SUCCESS = "success";
 const STATUS_ERROR = "error";
 
@@ -9,196 +10,164 @@ const MSG_NO_SYMPTOM = "Symptom is required";
 const MSG_CHAT_HISTORY_NOT_FOUND = "Chat history not found";
 const MSG_RESPONSE_SUCCESS = "Response generated successfully!";
 const MSG_CHAT_HISTORY_RETRIEVED = "Chat history retrieved successfully!";
-const MSG_GUEST_HISTORY_MERGED = "Guest chat history merged successfully";
 
 const DISCLAIMER_MESSAGE = "Please note: This advice is not a substitute for professional medical care.";
-
-const healthKeywords = [
-  "pain", "ache", "fever", "cough", "sore", "throat", "headache", "stomach",
-  "nausea", "fatigue", "symptom", "ill", "sick", "infection", "injury",
-  "disease", "condition", "allergy", "rash", "swelling", "dizzy", "breath",
-  "heart", "blood", "pressure", "diabetes", "cancer", "virus", "bacteria"
-];
-
-const isHealthRelated = (query) => {
-  const queryLower = query.toLowerCase();
-  const isRelated = healthKeywords.some(keyword => queryLower.includes(keyword));
-  if (!isRelated) {
-    const suggestedKeywords = healthKeywords.slice(0, 5).join(", ");
-    return {
-      isValid: false,
-      message: `Query must be health-related. Please include terms like ${suggestedKeywords} to describe your symptoms.`
-    };
-  }
-  return { isValid: true };
-};
+const REFUSAL_MESSAGE = "I can only assist with health-related questions. Please ask about symptoms or medical conditions.";
 
 export class ChatService {
-  static async createChat(userID, symptom) {
-    if (!symptom) {
-      const errMsg = "createChat: Symptom not provided.";
-      console.error(errMsg);
-      throw new Error(MSG_NO_SYMPTOM);
-    }
+    // New static method to dynamically classify the query using Gemini
+    static async classifyQuery(query) {
+        // A simple, constrained prompt to force a binary (YES/NO) classification
+        const classificationPrompt = `Is the following user query strictly about a medical symptom, health condition, or seeking medical advice? Respond with ONLY the single word 'YES' or 'NO'. Query: "${query}"`;
+        
+        const classificationMessages = [{ role: "user", content: classificationPrompt }];
+        
+        let classificationResult;
+        try {
+            classificationResult = await GeminiService.generateResponse(classificationMessages);
+        } catch (error) {
+            console.error("classifyQuery: Error calling Gemini for classification:", error);
+            return false; // Default to false on API error
+        }
 
-    const healthCheck = isHealthRelated(symptom);
-    if (!healthCheck.isValid) {
-      const errMsg = `createChat: ${healthCheck.message}`;
-      console.error(errMsg);
-      throw new Error(healthCheck.message);
-    }
+        // Clean up the response to ensure it's a reliable 'YES' or 'NO' check
+        const isHealth = classificationResult.trim().toUpperCase() === 'YES';
+        
+        return isHealth;
+    }
 
-    let chats = await Chat.findOne({ userID: new mongoose.Types.ObjectId(userID) }).lean();
-    if (!chats) {
-      chats = await Chat.create({ userID: new mongoose.Types.ObjectId(userID), history: [] });
-      console.info(`createChat: Created new chat record for userID ${userID}.`);
-    }
+    static async createChat(userID, symptom) {
+        if (!symptom) {
+            const errMsg = "createChat: Symptom not provided.";
+            console.error(errMsg);
+            throw new Error(MSG_NO_SYMPTOM);
+        }
 
-    const chatHistory = JSON.parse(JSON.stringify(chats.history));
+        // **DYNAMIC HEALTH CHECK**
+        const isHealthRelated = await ChatService.classifyQuery(symptom);
 
-    let completionText;
-    try {
-      chatHistory.push({ role: "user", content: symptom });
-      console.info("createChat: User symptom appended to chat history.");
+        if (!isHealthRelated) {
+            console.info(`createChat: Query classified as non-health-related for userID ${userID}.`);
+            throw new Error(REFUSAL_MESSAGE);
+        }
+        // **END DYNAMIC HEALTH CHECK**
 
-      const messages = [
-        {
-          role: "system",
-          content: "You are a medical assistant specializing in health-related queries. Only respond to questions about medical symptoms, conditions, or health advice. Politely decline non-health-related queries with: 'I can only assist with health-related questions. Please ask about symptoms or medical conditions.' Always include a disclaimer that your advice is not a substitute for professional medical care"
-        },
-        ...chatHistory,
-      ];
+        let chats = await Chat.findOne({ userID: new mongoose.Types.ObjectId(userID) }).lean();
+        if (!chats) {
+            chats = await Chat.create({ userID: new mongoose.Types.ObjectId(userID), history: [] });
+            console.info(`createChat: Created new chat record for userID ${userID}.`);
+        }
 
-      completionText = await GeminiService.generateResponse(messages);
-      console.info("createChat: Response generated by Gemini:", completionText);
+        const chatHistory = JSON.parse(JSON.stringify(chats.history));
 
-      chatHistory.push({ role: "assistant", content: completionText });
+        let completionText;
+        try {
+            chatHistory.push({ role: "user", content: symptom });
+            console.info("createChat: User symptom appended to chat history.");
 
-      await Chat.updateOne(
-        { _id: chats._id },
-        { $set: { history: chatHistory } }
-      );
-      console.info("createChat: Chat history updated in the database.");
-    } catch (innerError) {
-      console.error("createChat: Error during Gemini call or database update:", innerError);
-      throw new Error(innerError.message);
-    }
+            const messages = [
+                {
+                    role: "system",
+                    content: "You are a medical assistant specializing in health-related queries. Only respond to questions about medical symptoms, conditions, or health advice. Politely decline non-health-related queries with: 'I can only assist with health-related questions. Please ask about symptoms or medical conditions.' Always include a disclaimer that your advice is not a substitute for professional medical care"
+                },
+                ...chatHistory,
+            ];
 
-    return {
-      status: STATUS_SUCCESS,
-      message: MSG_RESPONSE_SUCCESS,
-      data: {
-        advice: completionText,
-        disclaimer: DISCLAIMER_MESSAGE,
-      },
-    };
-  }
+            completionText = await GeminiService.generateResponse(messages);
+            console.info("createChat: Response generated by Gemini:", completionText);
 
-  static async createGuestChat(guestId, symptom) {
-    if (!symptom) {
-      const errMsg = "createGuestChat: Symptom not provided.";
-      console.error(errMsg);
-      throw new Error(MSG_NO_SYMPTOM);
-    }
+            chatHistory.push({ role: "assistant", content: completionText });
 
-    const healthCheck = isHealthRelated(symptom);
-    if (!healthCheck.isValid) {
-      const errMsg = `createGuestChat: ${healthCheck.message}`;
-      console.error(errMsg);
-      throw new Error(healthCheck.message);
-    }
+            await Chat.updateOne(
+                { _id: chats._id },
+                { $set: { history: chatHistory } }
+            );
+            console.info("createChat: Chat history updated in the database.");
+        } catch (innerError) {
+            console.error("createChat: Error during Gemini call or database update:", innerError);
+            throw new Error(innerError.message);
+        }
 
-    let chatHistory = [];
-    try {
-      const cachedHistory = await redisClient.get(`guest_chat:${guestId}`);
-      if (cachedHistory) {
-        chatHistory = JSON.parse(cachedHistory);
-        console.info(`createGuestChat: Retrieved guest chat history for guestId ${guestId}.`);
-      }
+        return {
+            status: STATUS_SUCCESS,
+            message: MSG_RESPONSE_SUCCESS,
+            data: {
+                advice: completionText,
+                disclaimer: DISCLAIMER_MESSAGE,
+            },
+        };
+    }
 
-      chatHistory.push({ role: "user", content: symptom });
-      console.info("createGuestChat: Guest symptom appended to chat history.");
+    static async createGuestChat(guestId, symptom) {
+        if (!symptom) {
+            const errMsg = "createGuestChat: Symptom not provided.";
+            console.error(errMsg);
+            throw new Error(MSG_NO_SYMPTOM);
+        }
 
-      const messages = [
-        {
-          role: "system",
-          content: "You are a medical assistant specializing in health-related queries. Only respond to questions about medical symptoms, conditions, or health advice. Politely decline non-health-related queries with: 'I can only assist with health-related questions. Please ask about symptoms or medical conditions.' Always include a disclaimer that your advice is not a substitute for professional medical care"
-        },
-        ...chatHistory,
-      ];
+        // **DYNAMIC HEALTH CHECK**
+        const isHealthRelated = await ChatService.classifyQuery(symptom);
 
-      const completionText = await GeminiService.generateResponse(messages);
-      console.info("createGuestChat: Response generated by Gemini:", completionText);
+        if (!isHealthRelated) {
+            console.info(`createGuestChat: Query classified as non-health-related for guestId ${guestId}.`);
+            throw new Error(REFUSAL_MESSAGE);
+        }
+        // **END DYNAMIC HEALTH CHECK**
 
-      chatHistory.push({ role: "assistant", content: completionText });
+        let chatHistory = [];
+        try {
+            const cachedHistory = await redisClient.get(`guest_chat:${guestId}`);
+            if (cachedHistory) {
+                chatHistory = JSON.parse(cachedHistory);
+                console.info(`createGuestChat: Retrieved guest chat history for guestId ${guestId}.`);
+            }
 
-      await redisClient.set(`guest_chat:${guestId}`, JSON.stringify(chatHistory), "EX", 3600);
-      console.info(`createGuestChat: Guest chat history stored in Redis for guestId ${guestId}.`);
-      
-      return {
-        status: STATUS_SUCCESS,
-        message: MSG_RESPONSE_SUCCESS,
-        data: {
-          advice: completionText,
-          disclaimer: DISCLAIMER_MESSAGE,
-        },
-      };
-    } catch (innerError) {
-      console.error("createGuestChat: Error during Gemini call or Redis update:", innerError);
-      throw new Error(innerError.message);
-    }
-  }
+            chatHistory.push({ role: "user", content: symptom });
+            console.info("createGuestChat: Guest symptom appended to chat history.");
 
-  static async getChatHistory(userID) {
-    const chats = await Chat.findOne({ userID: new mongoose.Types.ObjectId(userID) }).lean();
-    if (!chats) {
-      const errMsg = `getChatHistory: Chat history not found for userID ${userID}.`;
-      console.error(errMsg);
-      throw new Error(MSG_CHAT_HISTORY_NOT_FOUND);
-    }
+            const messages = [
+                {
+                    role: "system",
+                    content: "You are a medical assistant specializing in health-related queries. Only respond to questions about medical symptoms, conditions, or health advice. Politely decline non-health-related queries with: 'I can only assist with health-related questions. Please ask about symptoms or medical conditions.' Always include a disclaimer that your advice is not a substitute for professional medical care"
+                },
+                ...chatHistory,
+            ];
 
-    console.info(`getChatHistory: Chat history retrieved for userID ${userID}.`);
-    return {
-      status: STATUS_SUCCESS,
-      message: MSG_CHAT_HISTORY_RETRIEVED,
-      data: { chats },
-    };
-  }
+            const completionText = await GeminiService.generateResponse(messages);
+            console.info("createGuestChat: Response generated by Gemini:", completionText);
 
-  static async mergeGuestHistory(userID, guestId) {
-    const guestChatHistory = await redisClient.get(`guest_chat:${guestId}`);
-    if (!guestChatHistory) {
-      console.info(`mergeGuestHistory: No guest chat history found for guestId ${guestId}.`);
-      return { status: STATUS_SUCCESS, message: "No guest chat history to merge" };
-    }
+            chatHistory.push({ role: "assistant", content: completionText });
 
-    let userChats = await Chat.findOne({ userID: new mongoose.Types.ObjectId(userID) }).lean();
-    if (!userChats) {
-      userChats = await Chat.create({ userID: new mongoose.Types.ObjectId(userID), history: [] });
-      console.info(`mergeGuestHistory: Created new chat record for userID ${userID}.`);
-    }
+            await redisClient.set(`guest_chat:${guestId}`, JSON.stringify(chatHistory), "EX", 3600);
+            console.info(`createGuestChat: Guest chat history stored in Redis for guestId ${guestId}.`);
+            
+            return {
+                status: STATUS_SUCCESS,
+                message: MSG_RESPONSE_SUCCESS,
+                data: {
+                    advice: completionText,
+                    disclaimer: DISCLAIMER_MESSAGE,
+                },
+            };
+        } catch (innerError) {
+            console.error("createGuestChat: Error during Gemini call or Redis update:", innerError);
+            throw new Error(innerError.message);
+        }
+    }
 
-    const parsedGuestHistory = JSON.parse(guestChatHistory);
-    const mergedHistory = [
-      ...JSON.parse(JSON.stringify(userChats.history)),
-      ...parsedGuestHistory,
-    ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    static async getChatHistory(userID) {
+        const chats = await Chat.findOne({ userID: new mongoose.Types.ObjectId(userID) }).lean();
+        if (!chats) {
+            const errMsg = `getChatHistory: Chat history not found for userID ${userID}.`;
+            console.error(errMsg);
+            throw new Error(MSG_CHAT_HISTORY_NOT_FOUND);
+        }
 
-    try {
-      await Chat.updateOne(
-        { _id: userChats._id },
-        { $set: { history: mergedHistory } }
-      );
-      await redisClient.del(`guest_chat:${guestId}`);
-      console.info(`mergeGuestHistory: Guest chat history merged for userID ${userID}, guestId ${guestId}.`);
-    } catch (innerError) {
-      console.error("mergeGuestHistory: Error during database update:", innerError);
-      throw new Error(innerError.message);
-    }
-
-    return {
-      status: STATUS_SUCCESS,
-      message: MSG_GUEST_HISTORY_MERGED,
-    };
-  }
+        console.info(`getChatHistory: Chat history retrieved for userID ${userID}.`);
+        return {
+            status: STATUS_SUCCESS,
+            message: MSG_CHAT_HISTORY_RETRIEVED,
+            data: { chats },
+        };
+    }
 }

@@ -1,29 +1,28 @@
-import User from "../models/user.js";
-import jwt from "jsonwebtoken";
-import crypto from "crypto";
-import uuid from "../utils/uuid.js";
-import { emailQueue } from "../jobs/queues/email_queue.js";
-import { generatePasswordResetEmail } from "../utils/index.js";
-import { updateBlacklist } from "../middleware/index.js";
-import redisClient from "../config/redis.js";
-import { ChatService } from "./chat.js";
-import { logger } from "../config/logger.js";
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import uuid from '../utils/uuid.js';
+import { emailQueue } from '../jobs/queues/email_queue.js';
+import { generatePasswordResetEmail } from '../utils/index.js';
+import { updateBlacklist } from '../middleware/index.js';
+import redisClient from '../config/redis.js';
+import User from '../models/user.js';
+import { logger } from '../config/logger.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRATION = "1d";
+const JWT_EXPIRATION = '1d';
 const PASSWORD_RESET_EXPIRATION = 3600000;
 const TOKEN_BYTES = 32;
-const GUEST_TOKEN_EXPIRATION = "1h";
+const GUEST_TOKEN_EXPIRATION = '1h';
 
 export class AuthService {
-  static async createUser({ username, email, password, guestId }) {
+  static async createUser({ username, email, password }) {
     if (!username || !email || !password) {
-      throw new Error("Username, email, and password are required.");
+      throw new Error('Username, email, and password are required.');
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      throw new Error("Email is already in use.");
+      throw new Error('Email is already in use.');
     }
 
     const newUser = new User({ username, email, password });
@@ -32,28 +31,18 @@ export class AuthService {
       expiresIn: JWT_EXPIRATION,
     });
 
-    if (guestId) {
-      try {
-        await ChatService.mergeGuestHistory(user._id.toString(), guestId);
-        logger.info(`createUser: Merged guest history for guestId ${guestId} to userID ${user._id}`);
-      } catch (err) {
-        logger.error(`createUser: Failed to merge guest history for guestId ${guestId}: ${err.message}`);
-        // Continue with user creation even if merging fails
-      }
-    }
-
     logger.info(`User registered: ${user._id}`);
     return { userId: user._id.toString(), token: accessToken };
   }
 
-  static async loginUser({ username, password, guestId }) {
+  static async loginUser({ username, password }) {
     if (!username || !password) {
-      throw new Error("Username and password are required.");
+      throw new Error('Username and password are required.');
     }
 
     const user = await User.findOne({ username });
     if (!user) {
-      throw new Error("Invalid username or password.");
+      throw new Error('Invalid username or password.');
     }
 
     if (!user.canLogin()) {
@@ -63,7 +52,7 @@ export class AuthService {
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
       await user.incrementLoginAttempts();
-      throw new Error("Incorrect password.");
+      throw new Error('Incorrect password.');
     }
 
     await user.resetLoginAttempts();
@@ -71,23 +60,13 @@ export class AuthService {
       expiresIn: JWT_EXPIRATION,
     });
 
-    if (guestId) {
-      try {
-        await ChatService.mergeGuestHistory(user._id.toString(), guestId);
-        logger.info(`loginUser: Merged guest history for guestId ${guestId} to userID ${user._id}`);
-      } catch (err) {
-        logger.error(`loginUser: Failed to merge guest history for guestId ${guestId}: ${err.message}`);
-        // Continue with login even if merging fails
-      }
-    }
-
     logger.info(`User logged in: ${user._id}`);
     return { userId: user._id.toString(), token: accessToken };
   }
 
   static async logoutUser(token) {
     if (!token) {
-      throw new Error("Token is required.");
+      throw new Error('Token is required.');
     }
     try {
       await updateBlacklist(token);
@@ -101,15 +80,15 @@ export class AuthService {
   static async forgotPassword(email) {
     const user = await User.findOne({ email });
     if (!user) {
-      throw new Error("User not found.");
+      throw new Error('User not found.');
     }
 
-    const resetToken = crypto.randomBytes(TOKEN_BYTES).toString("hex");
+    const resetToken = crypto.randomBytes(TOKEN_BYTES).toString('hex');
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + PASSWORD_RESET_EXPIRATION;
     await user.save();
 
-    await emailQueue.add("sendEmail", generatePasswordResetEmail(user.email, resetToken));
+    await emailQueue.add('sendEmail', generatePasswordResetEmail(user.email, resetToken));
     logger.info(`Password reset initiated for user: ${user._id}`);
   }
 
@@ -119,7 +98,7 @@ export class AuthService {
       resetPasswordExpires: { $gt: Date.now() },
     });
     if (!user) {
-      throw new Error("Invalid or expired token.");
+      throw new Error('Invalid or expired token.');
     }
 
     user.password = newPassword;
@@ -135,12 +114,59 @@ export class AuthService {
       const token = jwt.sign({ guestId, isGuest: true }, JWT_SECRET, {
         expiresIn: GUEST_TOKEN_EXPIRATION,
       });
-      await redisClient.set(`guest_${guestId}`, token, "EX", 3600);
+      await redisClient.set(`guest_${guestId}`, token, 'EX', 3600);
       logger.info(`Generated guest ID: ${guestId}`);
       return { guestId, token };
     } catch (err) {
       logger.error(`Failed to generate guest ID: ${err.message}`);
       throw new Error(`Failed to generate guest ID: ${err.message}`);
+    }
+  }
+
+  static async getGuestId(guestId) {
+    try {
+      if (!guestId) {
+        throw new Error('Invalid or missing guest token');
+      }
+      const token = await redisClient.get(`guest_${guestId}`);
+      if (!token) {
+        throw new Error('Guest ID not found');
+      }
+      const chatData = await redisClient.get(`guest_chat:${guestId}`);
+      logger.info(`Retrieved guestId: ${guestId}${chatData ? ' with chat history' : ''}`);
+      return {
+        status: 'success',
+        message: 'Guest ID retrieved successfully',
+        data: { guestId },
+      };
+    } catch (err) {
+      logger.error(`getGuestId: ${err.message}`);
+      throw err;
+    }
+  }
+
+  static async getMe(userId) {
+    try {
+      if (!userId) {
+        throw new Error('Invalid or missing user token');
+      }
+      const user = await User.findById(userId).select('username email');
+      if (!user) {
+        throw new Error('User not found');
+      }
+      logger.info(`Retrieved user details for userId: ${userId}`);
+      return {
+        status: 'success',
+        message: 'User details retrieved successfully',
+        data: {
+          userId: user._id.toString(),
+          username: user.username,
+          email: user.email,
+        },
+      };
+    } catch (err) {
+      logger.error(`getMe: ${err.message}`);
+      throw err;
     }
   }
 }

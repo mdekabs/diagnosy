@@ -152,3 +152,445 @@
 2025-10-14 04:43:17 AM INFO: MongoDB connected 
 2025-10-14 04:43:17 AM INFO: Redis connected 
 2025-10-14 04:43:17 AM INFO: Server is running on port 3000 
+2025-10-14 13:21:36 PM INFO: MongoDB connected 
+2025-10-14 13:21:36 PM INFO: Redis connected 
+2025-10-14 13:21:36 PM INFO: Server is running on port 3000 
+2025-10-14 13:21:58 PM INFO: GET /api-docs 301 23ms 
+{
+  "req": {
+    "url": "/api-docs",
+    "headers": {
+      "host": "localhost:3000",
+      "connection": "keep-alive",
+      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"Windows\"",
+      "upgrade-insecure-requests": "1",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+      "sec-gpc": "1",
+      "accept-language": "en-GB,en;q=0.8",
+      "sec-fetch-site": "none",
+      "sec-fetch-mode": "navigate",
+      "sec-fetch-user": "?1",
+      "sec-fetch-dest": "document",
+      "accept-encoding": "gzip, deflate, br, zstd"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api-docs",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 301
+  },
+  "responseTime": 23
+}
+2025-10-14 13:21:58 PM INFO: GET /api-docs/ 200 22ms 
+{
+  "req": {
+    "url": "/api-docs/",
+    "headers": {
+      "host": "localhost:3000",
+      "connection": "keep-alive",
+      "upgrade-insecure-requests": "1",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+      "sec-gpc": "1",
+      "accept-language": "en-GB,en;q=0.8",
+      "sec-fetch-site": "none",
+      "sec-fetch-mode": "navigate",
+      "sec-fetch-user": "?1",
+      "sec-fetch-dest": "document",
+      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"Windows\"",
+      "accept-encoding": "gzip, deflate, br, zstd"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api-docs/",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 22
+}
+2025-10-14 13:21:58 PM INFO: GET /api-docs/swagger-ui.css 200 19ms 
+{
+  "req": {
+    "url": "/api-docs/swagger-ui.css",
+    "headers": {
+      "host": "localhost:3000",
+      "connection": "keep-alive",
+      "sec-ch-ua-platform": "\"Windows\"",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+      "sec-ch-ua-mobile": "?0",
+      "accept": "text/css,*/*;q=0.1",
+      "sec-gpc": "1",
+      "accept-language": "en-GB,en;q=0.8",
+      "sec-fetch-site": "same-origin",
+      "sec-fetch-mode": "no-cors",
+      "sec-fetch-dest": "style",
+      "referer": "http://localhost:3000/api-docs/",
+      "accept-encoding": "gzip, deflate, br, zstd"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api-docs/swagger-ui.css",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 19
+}
+2025-10-14 13:21:58 PM INFO: GET /api-docs/swagger-ui-init.js 200 1ms 
+{
+  "req": {
+    "url": "/api-docs/swagger-ui-init.js",
+    "headers": {
+      "host": "localhost:3000",
+      "connection": "keep-alive",
+      "sec-ch-ua-platform": "\"Windows\"",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+      "sec-ch-ua-mobile": "?0",
+      "accept": "*/*",
+      "sec-gpc": "1",
+      "accept-language": "en-GB,en;q=0.8",
+      "sec-fetch-site": "same-origin",
+      "sec-fetch-mode": "no-cors",
+      "sec-fetch-dest": "script",
+      "referer": "http://localhost:3000/api-docs/",
+      "accept-encoding": "gzip, deflate, br, zstd"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api-docs/swagger-ui-init.js",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 1
+}
+2025-10-14 13:21:58 PM INFO: GET /api-docs/swagger-ui-standalone-preset.js 200 28ms 
+{
+  "req": {
+    "url": "/api-docs/swagger-ui-standalone-preset.js",
+    "headers": {
+      "host": "localhost:3000",
+      "connection": "keep-alive",
+      "sec-ch-ua-platform": "\"Windows\"",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+      "sec-ch-ua-mobile": "?0",
+      "accept": "*/*",
+      "sec-gpc": "1",
+      "accept-language": "en-GB,en;q=0.8",
+      "sec-fetch-site": "same-origin",
+      "sec-fetch-mode": "no-cors",
+      "sec-fetch-dest": "script",
+      "referer": "http://localhost:3000/api-docs/",
+      "accept-encoding": "gzip, deflate, br, zstd"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api-docs/swagger-ui-standalone-preset.js",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 28
+}
+2025-10-14 13:21:58 PM INFO: GET /api-docs/swagger-ui-bundle.js 200 65ms 
+{
+  "req": {
+    "url": "/api-docs/swagger-ui-bundle.js",
+    "headers": {
+      "host": "localhost:3000",
+      "connection": "keep-alive",
+      "sec-ch-ua-platform": "\"Windows\"",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+      "sec-ch-ua-mobile": "?0",
+      "accept": "*/*",
+      "sec-gpc": "1",
+      "accept-language": "en-GB,en;q=0.8",
+      "sec-fetch-site": "same-origin",
+      "sec-fetch-mode": "no-cors",
+      "sec-fetch-dest": "script",
+      "referer": "http://localhost:3000/api-docs/",
+      "accept-encoding": "gzip, deflate, br, zstd"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api-docs/swagger-ui-bundle.js",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 65
+}
+2025-10-14 13:25:06 PM INFO: Auth header for POST /api/chat: Present 
+2025-10-14 13:25:06 PM INFO: Decoded token: {"id":"68ed1c84fb78deb21be548da","isAdmin":false,"iat":1760375428,"exp":1760461828} 
+2025-10-14 13:25:06 PM INFO: Authenticated userID: 68ed1c84fb78deb21be548da 
+2025-10-14 13:25:08 PM INFO: GeminiService: Response generated successfully. 
+2025-10-14 13:25:09 PM INFO: POST /api/chat 200 2832ms 
+{
+  "req": {
+    "url": "/api/chat",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "dab2baa2-576f-47eb-ab11-8eb6c210552e",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "52"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 2832
+}
+2025-10-14 13:26:11 PM INFO: Optional auth header for POST /api/chat/guest: Present 
+2025-10-14 13:26:11 PM ERROR: Optional auth failed: User token used for guest route 
+2025-10-14 13:26:11 PM WARN: POST /api/chat/guest 401 16ms 
+{
+  "req": {
+    "url": "/api/chat/guest",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "a0f3c60b-7b00-426c-9385-6c28f80a2226",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "53"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/guest",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 401
+  },
+  "responseTime": 16
+}
+2025-10-14 13:26:45 PM INFO: Generated guest ID: 0649aa38-1851-4d72-930b-f9e609ea713b 
+2025-10-14 13:26:45 PM INFO: POST /api/auth/guest 200 20ms 
+{
+  "req": {
+    "url": "/api/auth/guest",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "57bb21bd-0ab6-4b83-a071-af35c765e6c9",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "53"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/auth/guest",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 20
+}
+2025-10-14 13:27:55 PM INFO: Generated guest ID: 4709b823-408d-47b6-8fd0-e9aecc16bcfa 
+2025-10-14 13:27:55 PM INFO: POST /api/auth/guest 200 11ms 
+{
+  "req": {
+    "url": "/api/auth/guest",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "a96d4276-d7ee-4c69-91d9-0b06bc0fe06e",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "53"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/auth/guest",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 11
+}
+2025-10-14 13:28:09 PM INFO: Optional auth header for POST /api/chat/guest: Missing 
+2025-10-14 13:28:12 PM INFO: GeminiService: Response generated successfully. 
+2025-10-14 13:28:12 PM INFO: POST /api/chat/guest 200 2995ms 
+{
+  "req": {
+    "url": "/api/chat/guest",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "2f6d16d7-2f86-419d-9fee-da64a7172bb3",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "53"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/guest",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 2995
+}
+2025-10-14 13:28:53 PM INFO: Optional auth header for POST /api/chat/guest: Missing 
+2025-10-14 13:28:53 PM WARN: POST /api/chat/guest 400 14ms 
+{
+  "req": {
+    "url": "/api/chat/guest",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "fe850aa9-e35f-40da-815a-764567b085e7",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "42"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/guest",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 400
+  },
+  "responseTime": 14
+}
+2025-10-14 13:30:36 PM INFO: Optional auth header for POST /api/chat/guest: Missing 
+2025-10-14 13:30:40 PM INFO: GeminiService: Response generated successfully. 
+2025-10-14 13:30:40 PM INFO: POST /api/chat/guest 200 4286ms 
+{
+  "req": {
+    "url": "/api/chat/guest",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "ad3aae2b-f8c1-4514-8288-f043e49d3d56",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "67"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/guest",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 4286
+}
+2025-10-14 13:31:40 PM INFO: Optional auth header for POST /api/chat/guest: Missing 
+2025-10-14 13:31:45 PM INFO: GeminiService: Response generated successfully. 
+2025-10-14 13:31:45 PM INFO: POST /api/chat/guest 200 5369ms 
+{
+  "req": {
+    "url": "/api/chat/guest",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "b1b7e953-10cd-446d-a115-7611b95be02c",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "65"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/guest",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 5369
+}
+2025-10-14 13:32:01 PM WARN: GET /api/chat/guest 404 4ms 
+{
+  "req": {
+    "url": "/api/chat/guest",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "12c9426d-7efe-494d-9453-a6fa3c9a5aca",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "65"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/guest",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 404
+  },
+  "responseTime": 4
+}
+2025-10-14 13:33:19 PM INFO: Optional auth header for POST /api/chat/guest: Missing 
+2025-10-14 13:33:21 PM INFO: GeminiService: Response generated successfully. 
+2025-10-14 13:33:21 PM INFO: POST /api/chat/guest 200 2453ms 
+{
+  "req": {
+    "url": "/api/chat/guest",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "3ad27701-02b1-4457-85e1-11738d44b6d0",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "65"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/guest",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 2453
+}
