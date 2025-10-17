@@ -1,52 +1,57 @@
-import jwt from "jsonwebtoken";
-import redisClient from "../config/redis.js";
-import { responseHandler } from "../utils/index.js";
-import HttpStatus from "http-status-codes";
-import { logger } from "../config/logger.js";
+import jwt from 'jsonwebtoken';
+import redisClient from '../config/redis.js';
+import { responseHandler } from '../utils/index.js';
+import HttpStatus from 'http-status-codes';
+import { logger } from '../config/logger.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // Error message constants
-const ERR_AUTH_HEADER_MISSING = "You are not authenticated. Please log in to get a new token.";
-const ERR_TOKEN_NOT_FOUND = "Token not found.";
-const ERR_INVALID_TOKEN = "Invalid token. Please log in again to get a new token.";
-const ERR_FORBIDDEN_ACTION = "You are not allowed to perform this task.";
+const ERR_AUTH_HEADER_MISSING = 'You are not authenticated. Please log in to get a new token.';
+const ERR_INVALID_TOKEN = 'Invalid token. Please log in again to get a new token.';
+const ERR_INVALID_GUEST_ID = 'Invalid or expired guest ID.';
+const ERR_FORBIDDEN_ACTION = 'You are not allowed to perform this task.';
 
 // Checks if a token is blacklisted in Redis
-// Returns true if token is blacklisted, false otherwise
 export const isTokenBlacklisted = async (token) => {
   const blacklisted = await redisClient.get(`blacklist:${token}`);
-  return blacklisted === "true";
+  return blacklisted === 'true';
 };
 
 // Adds a token to the Redis blacklist with an expiration time
 export const updateBlacklist = async (token, expiration = 3600) => {
-  await redisClient.set(`blacklist:${token}`, "true", "EX", expiration);
+  await redisClient.set(`blacklist:${token}`, 'true', 'EX', expiration);
   logger.info(`Token blacklisted for ${expiration}s`);
 };
 
 // Middleware to verify JWT authentication for protected routes
 export const authenticationVerifier = async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1]; // Bearer <token>
-  logger.info(`Auth header for ${req.method} ${req.originalUrl}: ${token ? "Present" : "Missing"}`);
-  if (!token) {
-    logger.error(`Authentication failed: No token provided`);
-    return responseHandler(res, HttpStatus.UNAUTHORIZED, "error", ERR_AUTH_HEADER_MISSING);
+  const authHeader = req.headers.authorization;
+  logger.info(`Auth header for ${req.method} ${req.originalUrl}: ${authHeader ? 'Present' : 'Masked'}`);
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    logger.error(`Authentication failed: Invalid or missing Authorization header`);
+    return responseHandler(res, HttpStatus.UNAUTHORIZED, 'error', ERR_AUTH_HEADER_MISSING);
   }
 
+  const token = authHeader.replace('Bearer ', '');
   try {
     if (!redisClient.isOpen) {
-      throw new Error("Redis client is not initialized.");
+      throw new Error('Redis client is not initialized.');
     }
 
     const blacklisted = await isTokenBlacklisted(token);
     if (blacklisted) {
       logger.error(`Authentication failed: Token is blacklisted`);
-      return responseHandler(res, HttpStatus.UNAUTHORIZED, "error", ERR_INVALID_TOKEN);
+      return responseHandler(res, HttpStatus.UNAUTHORIZED, 'error', ERR_INVALID_TOKEN);
     }
 
     let user;
     try {
+      if (!jwt) {
+        logger.error('jsonwebtoken module is not defined');
+        throw new Error('Internal server error: JWT module unavailable');
+      }
       user = jwt.verify(token, JWT_SECRET);
       logger.info(`Decoded token: ${JSON.stringify(user)}`);
     } catch (jwtError) {
@@ -54,75 +59,70 @@ export const authenticationVerifier = async (req, res, next) => {
       throw new Error(`Invalid token: ${jwtError.message}`);
     }
 
-    if (user.isGuest) {
-      logger.error(`Authentication failed: Guest token used for protected route`);
-      return responseHandler(res, HttpStatus.UNAUTHORIZED, "error", "Guest tokens are not allowed for this route.");
+    if (!user.id) {
+      logger.error('Authentication failed: user.id not found in token payload');
+      return responseHandler(res, HttpStatus.UNAUTHORIZED, 'error', 'Invalid token: Missing user ID');
     }
 
     req.user = user;
-    req.userID = user.id; // Set req.userID for ChatController
-    logger.info(`Authenticated userID: ${req.userID}`);
+    req.userID = user.id;
+    logger.info(`Authenticated userID: ${req.userID} for ${req.method} ${req.originalUrl}`);
     next();
   } catch (err) {
     logger.error(`Authentication failed for ${req.method} ${req.originalUrl}: ${err.message}`);
-    return responseHandler(res, HttpStatus.UNAUTHORIZED, "error", ERR_INVALID_TOKEN);
+    return responseHandler(res, HttpStatus.UNAUTHORIZED, 'error', ERR_INVALID_TOKEN);
   }
 };
 
-// Optional authentication middleware that allows unauthenticated access
+// Optional authentication middleware for guest routes
 export const optionalVerifier = async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  logger.info(`Optional auth header for ${req.method} ${req.originalUrl}: ${token ? "Present" : "Missing"}`);
-  if (!token) {
+  const authHeader = req.headers.authorization;
+  logger.info(`Optional auth header for ${req.method} ${req.originalUrl}: ${authHeader ? 'Present' : 'Missing'}`);
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     req.guestId = null;
+    logger.info(`No guest ID provided, proceeding as unauthenticated for ${req.method} ${req.originalUrl}`);
     return next();
   }
 
+  const guestId = authHeader.replace('Bearer ', '');
   try {
-    const blacklisted = await isTokenBlacklisted(token);
-    if (blacklisted) {
-      logger.error(`Optional auth failed: Token is blacklisted`);
-      return responseHandler(res, HttpStatus.UNAUTHORIZED, "error", ERR_INVALID_TOKEN);
+    if (!redisClient.isOpen) {
+      throw new Error('Redis client is not initialized.');
     }
 
-    const user = jwt.verify(token, JWT_SECRET);
-    if (!user.isGuest) {
-      logger.error(`Optional auth failed: User token used for guest route`);
-      return responseHandler(res, HttpStatus.UNAUTHORIZED, "error", "User tokens are not allowed for guest routes.");
+    const status = await redisClient.get(`guest_${guestId}`);
+    if (!status) {
+      logger.error(`Optional auth failed: Invalid or expired guest ID: ${guestId}`);
+      return responseHandler(res, HttpStatus.UNAUTHORIZED, 'error', ERR_INVALID_GUEST_ID);
     }
 
-    const storedToken = await redisClient.get(`guest_${user.guestId}`);
-    if (!storedToken) {
-      logger.error(`Optional auth failed: Invalid or expired guest token`);
-      return responseHandler(res, HttpStatus.UNAUTHORIZED, "error", "Invalid or expired guest token.");
-    }
-
-    req.guestId = user.guestId;
-    logger.info(`Authenticated guestId: ${req.guestId}`);
+    req.guestId = guestId;
+    logger.info(`Authenticated guestId: ${req.guestId} for ${req.method} ${req.originalUrl}`);
     next();
   } catch (err) {
     logger.error(`Optional auth failed for ${req.method} ${req.originalUrl}: ${err.message}`);
     req.guestId = null;
-    next();
+    return responseHandler(res, HttpStatus.UNAUTHORIZED, 'error', ERR_INVALID_GUEST_ID);
   }
 };
 
-// Creates a permission verification middleware with custom conditions
+// Permission verification middleware
 export const permissionVerifier = (...conditions) => {
   return (req, res, next) => {
     authenticationVerifier(req, res, () => {
       if (conditions.some((condition) => condition(req.user, req.params.userId))) {
         next();
       } else {
-        responseHandler(res, HttpStatus.FORBIDDEN, "error", ERR_FORBIDDEN_ACTION);
+        responseHandler(res, HttpStatus.FORBIDDEN, 'error', ERR_FORBIDDEN_ACTION);
       }
     });
   };
 };
 
 export const accessLevelVerifier = permissionVerifier(
-  (user, userId) => user.id === userId, // User is accessing their own data
-  (user) => user.isAdmin // User is an admin
+  (user, userId) => user.id === userId,
+  (user) => user.isAdmin
 );
 
 export const isAdminVerifier = permissionVerifier((user) => user.isAdmin);

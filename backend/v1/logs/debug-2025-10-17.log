@@ -1,0 +1,386 @@
+2025-10-17 08:01:26 AM INFO: MongoDB connected 
+2025-10-17 08:01:26 AM INFO: Redis connected 
+2025-10-17 08:01:26 AM INFO: Server is running on port 3000 
+2025-10-17 08:01:51 AM INFO: Auth header for GET /api/chat/history: Present 
+2025-10-17 08:01:51 AM INFO: Decoded token: {"id":"68f0d0caa420a41b12d89efb","isAdmin":false,"iat":1760620615,"exp":1760707015} 
+2025-10-17 08:01:51 AM INFO: Authenticated userID: 68f0d0caa420a41b12d89efb for GET /api/chat/history 
+2025-10-17 08:01:51 AM INFO: Cache key for GET /api/chat/history: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:01:51 AM INFO: Cache miss for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:01:51 AM ERROR: GET /api/chat/history 500 28ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "9341b7db-8ea2-4326-a031-cbf08447c648",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "71"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 500
+  },
+  "responseTime": 28
+}
+2025-10-17 08:01:51 AM INFO: Cached response for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:04:28 AM ERROR: Login failed: jwt is not defined 
+2025-10-17 08:04:28 AM ERROR: POST /api/auth/login 500 159ms 
+{
+  "req": {
+    "url": "/api/auth/login",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "a6fa92f5-0061-4c85-aa16-a937668928b9",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "60"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/auth/login",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 500
+  },
+  "responseTime": 159
+}
+2025-10-17 08:16:35 AM INFO: MongoDB connected 
+2025-10-17 08:16:35 AM INFO: Redis connected 
+2025-10-17 08:16:35 AM INFO: Server is running on port 3000 
+2025-10-17 08:17:01 AM INFO: User logged in: 68f0d0caa420a41b12d89efb 
+2025-10-17 08:17:01 AM INFO: POST /api/auth/login 200 158ms 
+{
+  "req": {
+    "url": "/api/auth/login",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "669dc0d5-f7d6-4ff1-b3f5-a4a306ed5b43",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "60"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/auth/login",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 158
+}
+2025-10-17 08:19:20 AM INFO: Auth header for GET /api/chat/history: Present 
+2025-10-17 08:19:20 AM INFO: Decoded token: {"id":"68f0d0caa420a41b12d89efb","isAdmin":false,"iat":1760685421,"exp":1760771821} 
+2025-10-17 08:19:20 AM INFO: Authenticated userID: 68f0d0caa420a41b12d89efb for GET /api/chat/history 
+2025-10-17 08:19:20 AM INFO: Cache key for GET /api/chat/history: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:19:20 AM INFO: Cache hit for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:19:20 AM INFO: GET /api/chat/history 200 24ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "880641b8-ee16-493e-b086-a365d40ed70d",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "60"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 24
+}
+2025-10-17 08:20:41 AM INFO: Auth header for GET /api/chat/history: Present 
+2025-10-17 08:20:41 AM INFO: Decoded token: {"id":"68f0d0caa420a41b12d89efb","isAdmin":false,"iat":1760685421,"exp":1760771821} 
+2025-10-17 08:20:41 AM INFO: Authenticated userID: 68f0d0caa420a41b12d89efb for GET /api/chat/history 
+2025-10-17 08:20:41 AM INFO: Cache key for GET /api/chat/history: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:20:41 AM INFO: Cache hit for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:20:41 AM INFO: GET /api/chat/history 200 9ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "c6e1c2a7-7009-4f12-829e-9549c62614e0",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "60"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 9
+}
+2025-10-17 08:25:24 AM INFO: MongoDB connected 
+2025-10-17 08:25:24 AM INFO: Redis connected 
+2025-10-17 08:25:24 AM INFO: Server is running on port 3000 
+2025-10-17 08:27:07 AM INFO: Auth header for GET /api/chat/history: Present 
+2025-10-17 08:27:07 AM INFO: Decoded token: {"id":"68f0d0caa420a41b12d89efb","isAdmin":false,"iat":1760685421,"exp":1760771821} 
+2025-10-17 08:27:07 AM INFO: Authenticated userID: 68f0d0caa420a41b12d89efb for GET /api/chat/history 
+2025-10-17 08:27:07 AM INFO: Cache key for GET /api/chat/history: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:27:07 AM INFO: Cache hit for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:27:07 AM INFO: GET /api/chat/history 200 21ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "2b246a8b-c39f-431a-9667-b28ae1ce792a",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "60"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 21
+}
+2025-10-17 08:27:09 AM INFO: Auth header for GET /api/chat/history: Present 
+2025-10-17 08:27:09 AM INFO: Decoded token: {"id":"68f0d0caa420a41b12d89efb","isAdmin":false,"iat":1760685421,"exp":1760771821} 
+2025-10-17 08:27:09 AM INFO: Authenticated userID: 68f0d0caa420a41b12d89efb for GET /api/chat/history 
+2025-10-17 08:27:09 AM INFO: Cache key for GET /api/chat/history: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:27:09 AM INFO: Cache hit for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:27:09 AM INFO: GET /api/chat/history 200 9ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "0345880c-fd01-4daf-8d77-41e0811a09e2",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "60"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 9
+}
+2025-10-17 08:55:38 AM INFO: Auth header for GET /api/chat/history: Present 
+2025-10-17 08:55:38 AM INFO: Decoded token: {"id":"68f0d0caa420a41b12d89efb","isAdmin":false,"iat":1760685421,"exp":1760771821} 
+2025-10-17 08:55:38 AM INFO: Authenticated userID: 68f0d0caa420a41b12d89efb for GET /api/chat/history 
+2025-10-17 08:55:38 AM INFO: Cache key for GET /api/chat/history: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:55:38 AM INFO: Cache hit for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:55:38 AM INFO: GET /api/chat/history 200 16ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "20b3e925-960d-403b-9caa-005ba3d09557",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "60"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 16
+}
+2025-10-17 08:55:40 AM INFO: Auth header for GET /api/chat/history: Present 
+2025-10-17 08:55:40 AM INFO: Decoded token: {"id":"68f0d0caa420a41b12d89efb","isAdmin":false,"iat":1760685421,"exp":1760771821} 
+2025-10-17 08:55:40 AM INFO: Authenticated userID: 68f0d0caa420a41b12d89efb for GET /api/chat/history 
+2025-10-17 08:55:40 AM INFO: Cache key for GET /api/chat/history: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:55:40 AM INFO: Cache hit for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:55:40 AM INFO: GET /api/chat/history 200 8ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "99fd84a6-dbf6-4d74-aadb-993b09d2ac84",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "60"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 8
+}
+2025-10-17 08:56:22 AM INFO: Auth header for GET /api/chat/history: Present 
+2025-10-17 08:56:22 AM INFO: Decoded token: {"id":"68f0d0caa420a41b12d89efb","isAdmin":false,"iat":1760685421,"exp":1760771821} 
+2025-10-17 08:56:22 AM INFO: Authenticated userID: 68f0d0caa420a41b12d89efb for GET /api/chat/history 
+2025-10-17 08:56:22 AM INFO: Cache key for GET /api/chat/history: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:56:22 AM INFO: Cache miss for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:56:22 AM ERROR: GET /api/chat/history 500 13ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "d55c9809-1e5d-42d4-aca7-c914ad0027dc",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "60"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 500
+  },
+  "responseTime": 13
+}
+2025-10-17 08:56:22 AM INFO: Cached response for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:58:30 AM INFO: MongoDB connected 
+2025-10-17 08:58:31 AM INFO: Redis connected 
+2025-10-17 08:58:31 AM INFO: Server is running on port 3000 
+2025-10-17 08:58:46 AM INFO: Auth header for GET /api/chat/history: Present 
+2025-10-17 08:58:46 AM INFO: Decoded token: {"id":"68f0d0caa420a41b12d89efb","isAdmin":false,"iat":1760685421,"exp":1760771821} 
+2025-10-17 08:58:46 AM INFO: Authenticated userID: 68f0d0caa420a41b12d89efb for GET /api/chat/history 
+2025-10-17 08:58:46 AM INFO: Cache key for GET /api/chat/history: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:58:46 AM INFO: Cache miss for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 08:58:46 AM INFO: GET /api/chat/history 200 59ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "2552ea9d-9901-4d6a-823f-3ed90a0a6825",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "60"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 59
+}
+2025-10-17 08:58:46 AM INFO: Cached response for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 10:03:17 AM INFO: Auth header for POST /api/chat: Present 
+2025-10-17 10:03:18 AM INFO: Decoded token: {"id":"68f0d0caa420a41b12d89efb","isAdmin":false,"iat":1760685421,"exp":1760771821} 
+2025-10-17 10:03:18 AM INFO: Authenticated userID: 68f0d0caa420a41b12d89efb for POST /api/chat 
+2025-10-17 10:03:18 AM INFO: Cache cleared for keys: cache_POST_/api/chat_68f0d0caa420a41b12d89efb, cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 10:03:19 AM INFO: GeminiService: Response generated successfully. 
+2025-10-17 10:03:24 AM INFO: GeminiService: Response generated successfully. 
+2025-10-17 10:03:24 AM INFO: POST /api/chat 200 6937ms 
+{
+  "req": {
+    "url": "/api/chat",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "39b9a37b-d385-4269-8dae-4fe0f21948f3",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "46"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 6937
+}
+2025-10-17 10:03:36 AM INFO: Auth header for GET /api/chat/history: Present 
+2025-10-17 10:03:36 AM INFO: Decoded token: {"id":"68f0d0caa420a41b12d89efb","isAdmin":false,"iat":1760685421,"exp":1760771821} 
+2025-10-17 10:03:36 AM INFO: Authenticated userID: 68f0d0caa420a41b12d89efb for GET /api/chat/history 
+2025-10-17 10:03:36 AM INFO: Cache key for GET /api/chat/history: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 10:03:36 AM INFO: Cache miss for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-17 10:03:36 AM INFO: GET /api/chat/history 200 26ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "7f50f9bc-79da-4bd6-aaef-e0d4f305312b",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "46"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 26
+}
+2025-10-17 10:03:36 AM INFO: Cached response for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 

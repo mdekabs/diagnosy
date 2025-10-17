@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken"
 import crypto from 'crypto';
 import uuid from '../utils/uuid.js';
 import { emailQueue } from '../jobs/queues/email_queue.js';
@@ -12,7 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRATION = '1d';
 const PASSWORD_RESET_EXPIRATION = 3600000;
 const TOKEN_BYTES = 32;
-const GUEST_TOKEN_EXPIRATION = '1h';
+const GUEST_TOKEN_EXPIRATION = 3600; // 1 hour in seconds
 
 export class AuthService {
   static async createUser({ username, email, password }) {
@@ -111,12 +111,9 @@ export class AuthService {
   static async generateGuestId() {
     try {
       const guestId = uuid.generate();
-      const token = jwt.sign({ guestId, isGuest: true }, JWT_SECRET, {
-        expiresIn: GUEST_TOKEN_EXPIRATION,
-      });
-      await redisClient.set(`guest_${guestId}`, token, 'EX', 3600);
+      await redisClient.set(`guest_${guestId}`, 'active', 'EX', GUEST_TOKEN_EXPIRATION);
       logger.info(`Generated guest ID: ${guestId}`);
-      return { guestId, token };
+      return { guestId };
     } catch (err) {
       logger.error(`Failed to generate guest ID: ${err.message}`);
       throw new Error(`Failed to generate guest ID: ${err.message}`);
@@ -126,11 +123,11 @@ export class AuthService {
   static async getGuestId(guestId) {
     try {
       if (!guestId) {
-        throw new Error('Invalid or missing guest token');
+        throw new Error('Invalid or missing guest ID');
       }
-      const token = await redisClient.get(`guest_${guestId}`);
-      if (!token) {
-        throw new Error('Guest ID not found');
+      const status = await redisClient.get(`guest_${guestId}`);
+      if (!status) {
+        throw new Error('Guest ID not found or expired');
       }
       const chatData = await redisClient.get(`guest_chat:${guestId}`);
       logger.info(`Retrieved guestId: ${guestId}${chatData ? ' with chat history' : ''}`);

@@ -1,0 +1,73 @@
+2025-10-17 08:01:51 AM ERROR: GET /api/chat/history 500 28ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "9341b7db-8ea2-4326-a031-cbf08447c648",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "71"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 500
+  },
+  "responseTime": 28
+}
+2025-10-17 08:04:28 AM ERROR: Login failed: jwt is not defined 
+2025-10-17 08:04:28 AM ERROR: POST /api/auth/login 500 159ms 
+{
+  "req": {
+    "url": "/api/auth/login",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "a6fa92f5-0061-4c85-aa16-a937668928b9",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "60"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/auth/login",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 500
+  },
+  "responseTime": 159
+}
+2025-10-17 08:56:22 AM ERROR: GET /api/chat/history 500 13ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.48.0",
+      "accept": "*/*",
+      "postman-token": "d55c9809-1e5d-42d4-aca7-c914ad0027dc",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "60"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 500
+  },
+  "responseTime": 13
+}
