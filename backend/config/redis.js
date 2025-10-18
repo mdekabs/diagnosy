@@ -1,37 +1,60 @@
 import { createClient } from "redis";
-import { logger } from "./logger.js";
+import { LoggerConfig } from "./logger.js";
 
-const redisClient = createClient({
-  url: process.env.REDIS_URI,
-});
+export class RedisConfig {
+  static #logger = LoggerConfig.getLogger();
+  static #redisClient = null;
 
-const connectRedis = async () => {
-  try {
-    if (redisClient.isOpen) {
-      logger.info("Redis client already connected");
-      return;
+  static initialize() {
+    try {
+      this.#redisClient = createClient({
+        url: process.env.REDIS_URI,
+      });
+      this.#logger.info("Redis client initialized");
+    } catch (error) {
+      this.#logger.error(`Redis client initialization error: ${error.message}`);
+      throw new Error(`Redis client initialization failed: ${error.message}`);
     }
-    await redisClient.connect();
-    logger.info("Redis connected");
-  } catch (error) {
-    logger.error(`Redis connection error: ${error.message}`);
-    throw error;
   }
-};
 
-const disconnectRedis = async () => {
-  try {
-    if (redisClient.isOpen) {
-      await redisClient.quit();
-      logger.info("Redis disconnected");
-    } else {
-      logger.info("Redis client already disconnected");
+  static async connect() {
+    try {
+      if (!this.#redisClient) {
+        throw new Error("Redis client not initialized. Call RedisConfig.initialize() first.");
+      }
+      if (this.#redisClient.isOpen) {
+        this.#logger.info("Redis client already connected");
+        return;
+      }
+      await this.#redisClient.connect();
+      this.#logger.info("Redis connected");
+    } catch (error) {
+      this.#logger.error(`Redis connection error: ${error.message}`);
+      throw error;
     }
-  } catch (error) {
-    logger.error(`Redis disconnection error: ${error.message}`);
-    throw error;
   }
-};
 
-export default redisClient;
-export { connectRedis, disconnectRedis };
+  static async disconnect() {
+    try {
+      if (!this.#redisClient) {
+        throw new Error("Redis client not initialized. Call RedisConfig.initialize() first.");
+      }
+      if (this.#redisClient.isOpen) {
+        await this.#redisClient.quit();
+        this.#logger.info("Redis disconnected");
+      } else {
+        this.#logger.info("Redis client already disconnected");
+      }
+    } catch (error) {
+      this.#logger.error(`Redis disconnection error: ${error.message}`);
+      throw error;
+    }
+  }
+
+  static getClient() {
+    if (!this.#redisClient) {
+      throw new Error("Redis client not initialized. Call RedisConfig.initialize() first.");
+    }
+    return this.#redisClient;
+  }
+}

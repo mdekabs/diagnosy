@@ -1,18 +1,28 @@
 import dotenv from 'dotenv';
-import { logger } from './logger.js';
+import { logger } from './index.js';
 
-export const env = process.env.NODE_ENV || 'development';
+export class EnvConfig {
+  static env = process.env.NODE_ENV ?? 'development';
 
-// Map environment to respective .env file
-const envFileMap = {
-  development: '.env.development',
-  test: '.env.test',
-  production: '.env.production',
-};
+  static #envFileMap = {
+    development: '.env.development',
+    test: '.env.test',
+    production: '.env.production',
+  };
 
-const envFile = envFileMap[env] || '.env.development';
+  static #envFile = this.#envFileMap[this.env] || '.env.development';
 
-dotenv.config({ path: envFile, quite: true });
+  static initialize() {
+    try {
+      dotenv.config({ path: this.#envFile, quiet: true });
+      logger.info(`Environment configuration loaded for ${this.env} from ${this.#envFile}`);
+    } catch (error) {
+      logger.error(`Failed to load environment configuration from ${this.#envFile}: ${error.message}`);
+      throw new Error(`Environment configuration failed: ${error.message}`);
+    }
+  }
 
-
-export default env;
+  static getEnv() {
+    return this.env;
+  }
+}

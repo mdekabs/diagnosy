@@ -4,7 +4,7 @@ import { emailQueue } from '../jobs/queues/email_queue.js';
 import { generatePasswordResetEmail } from '../utils/index.js';
 import { updateBlacklist } from '../middleware/index.js';
 import User from '../models/user.js';
-import { logger } from '../config/logger.js';
+import { logger } from '../config/index.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRATION = '1d';

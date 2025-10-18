@@ -1,4 +1,4 @@
-import { logger } from "../../config/logger.js";
+import { logger } from "../../config/index.js";
 import sendMail from "../../utils/send_mail.js";
 
 export default async function (job, done) {

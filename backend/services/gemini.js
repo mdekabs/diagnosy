@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { logger } from "../config/logger.js";
+import { logger } from "../config/index.js";
 
 // Initialize OpenAI client with Gemini API configuration
 const openai = new OpenAI({

@@ -1,54 +1,8 @@
-import { AuthController } from '../controllers/authentication.js';
+import { AuthController } from '../controllers/index.js';
 import { authenticationVerifier } from '../middleware/tokenization.js';
 
 // Defines authentication routes for the Express router
 export default function authRoutes(router) {
-  /**
-   * @swagger
-   * /auth/guest:
-   *   post:
-   *     summary: Generate a guest ID and token
-   *     description: Creates a guest ID and JWT token for unauthenticated users to use guest routes (e.g., POST /chat/guest).
-   *     tags: [Authentication]
-   *     responses:
-   *       200:
-   *         description: Guest ID and token generated successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 type:
-   *                   type: string
-   *                   example: success
-   *                 message:
-   *                   type: string
-   *                   example: Guest ID and token generated successfully
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     guestId:
-   *                       type: string
-   *                       example: uuid-abc123
-   *                     token:
-   *                       type: string
-   *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-   *       500:
-   *         description: Internal server error
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 type:
-   *                   type: string
-   *                   example: error
-   *                 message:
-   *                   type: string
-   *                   example: Failed to generate guest ID
-   */
-  router.post('/auth/guest', AuthController.generateGuestId);
-
   /**
    * @swagger
    * /auth/me:

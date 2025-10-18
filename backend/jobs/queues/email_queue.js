@@ -1,5 +1,5 @@
 import Queue from "bull";
-import { logger } from "../../config/logger.js";
+import { logger } from "../../config/index.js";
 
 const emailQueue = new Queue("emailQueue", {
   redis: {

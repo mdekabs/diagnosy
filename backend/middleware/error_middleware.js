@@ -1,6 +1,6 @@
 import HttpStatus from "http-status-codes";
 import { responseHandler } from "../utils/index.js";
-import { logger } from "../config/logger.js";
+import { logger } from "../config/index.js";
 
 const errorMiddleware = (err, req, res, next) => {
   logger.error(`Error: ${err.message}, Stack: ${err.stack}`);

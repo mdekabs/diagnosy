@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import redisClient from '../config/redis.js';
 import { responseHandler } from '../utils/index.js';
 import HttpStatus from 'http-status-codes';
-import { logger } from '../config/logger.js';
+import { logger } from '../config/index.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 

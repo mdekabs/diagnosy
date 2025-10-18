@@ -1,7 +1,7 @@
 import HttpStatus from "http-status-codes";
 import { ChatService } from "../services/index.js";
 import { responseHandler } from "../utils/index.js";
-import { logger } from "../config/logger.js";
+import { logger } from "../config/index.js";
 
 export class ChatController {
   static async createChat(req, res) {

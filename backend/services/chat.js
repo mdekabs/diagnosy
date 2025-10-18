@@ -1,7 +1,7 @@
 import { Chat } from "../models/chat.js";
 import { GeminiService } from "./gemini.js";
 import mongoose from "mongoose";
-import { logger } from '../config/logger.js';
+import { logger } from '../config/index.js';
 
 const STATUS_SUCCESS = "success";
 const STATUS_ERROR = "error";

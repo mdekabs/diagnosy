@@ -3,86 +3,110 @@ import { createLogger, transports, format } from 'winston';
 import expressWinston from 'express-winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
-const LOG_DIR = 'v1/logs';
+export class LoggerConfig {
+  static #LOG_DIR = 'v1/logs';
+  static #LOG_LEVEL = 'info';
+  static #customTimestamp = format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss A' });
 
-// Ensure log directory exists, creating it if necessary
-if (!fs.existsSync(LOG_DIR)) {
-  fs.mkdirSync(LOG_DIR, { recursive: true });
+  // Winston logger instance
+  static #logger = null;
+
+  // Custom log format that filters sensitive data and pretty-prints metadata
+  static #prettyPrintFormat = format.printf(({ level, message, timestamp, meta }) => {
+    if (meta?.req?.headers?.authorization) delete meta.req.headers.authorization;
+    const metaString = meta ? `\n${JSON.stringify(meta, null, 2)}` : '';
+    return `${timestamp} ${level.toUpperCase()}: ${message} ${metaString}`;
+  });
+
+  static initialize() {
+    try {
+      // Ensure log directory exists, creating it if necessary
+      if (!fs.existsSync(this.#LOG_DIR)) {
+        fs.mkdirSync(this.#LOG_DIR, { recursive: true });
+      }
+
+      // Initialize Winston logger
+      this.#logger = createLogger({
+        level: this.#LOG_LEVEL,
+        format: format.combine(this.#customTimestamp, this.#prettyPrintFormat),
+        transports: [
+          // General application logs
+          new DailyRotateFile({
+            filename: `${this.#LOG_DIR}/app-%DATE%.log`,
+            datePattern: 'YYYY-MM-DD',
+            maxSize: '20m',
+            maxFiles: '14d',
+            level: this.#LOG_LEVEL,
+          }),
+          // Error-specific logs
+          new DailyRotateFile({
+            filename: `${this.#LOG_DIR}/errors-%DATE%.log`,
+            datePattern: 'YYYY-MM-DD',
+            maxSize: '20m',
+            maxFiles: '14d',
+            level: 'error',
+            handleExceptions: true,
+          }),
+          // Debug-level logs
+          new DailyRotateFile({
+            filename: `${this.#LOG_DIR}/debug-%DATE%.log`,
+            datePattern: 'YYYY-MM-DD',
+            maxSize: '20m',
+            maxFiles: '14d',
+            level: 'debug',
+          }),
+        ],
+        exceptionHandlers: [
+          new transports.File({ filename: `${this.#LOG_DIR}/exceptions.log` }),
+        ],
+      });
+
+      // Add console transport in non-production environments
+      if (process.env.NODE_ENV !== 'production') {
+        this.#logger.add(
+          new transports.Console({
+            format: format.combine(format.colorize(), this.#customTimestamp, this.#prettyPrintFormat),
+            handleExceptions: true,
+          })
+        );
+      }
+
+      // Set up global handler for unhandled promise rejections
+      process.on('unhandledRejection', (reason) => {
+        this.#logger.error(`Unhandled Rejection: ${reason}`);
+      });
+
+      this.#logger.info(`Logger initialized for ${process.env.NODE_ENV || 'development'} environment`);
+    } catch (error) {
+      console.error(`Failed to initialize logger: ${error.message}`);
+      throw new Error(`Logger initialization failed: ${error.message}`);
+    }
+  }
+
+  static getLogger() {
+    if (!this.#logger) {
+      throw new Error('Logger not initialized. Call LoggerConfig.initialize() first.');
+    }
+    return this.#logger;
+  }
+
+  static getAppLogger() {
+    if (!this.#logger) {
+      throw new Error('Logger not initialized. Call LoggerConfig.initialize() first.');
+    }
+    return expressWinston.logger({
+      winstonInstance: this.#logger,
+      meta: true,
+      statusLevels: true,
+      expressFormat: true,
+      colorize: false,
+    });
+  }
+
+  static getErrorLogger() {
+    if (!this.#logger) {
+      throw new Error('Logger not initialized. Call LoggerConfig.initialize() first.');
+    }
+    return expressWinston.errorLogger({ winstonInstance: this.#logger });
+  }
 }
-
-const LOG_LEVEL = 'info';
-const customTimestamp = format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss A' });
-
-// Custom log format that filters sensitive data and pretty-prints metadata
-// Masks authorization headers and structures log output
-const prettyPrintFormat = format.printf(({ level, message, timestamp, meta }) => {
-  // const statusCode = meta?.res?.statusCode; // Commented out but preserved
-  if (meta?.req?.headers?.authorization) delete meta.req.headers.authorization;
-  const metaString = meta ? `\n${JSON.stringify(meta, null, 2)}` : '';
-  return `${timestamp} ${level.toUpperCase()}: ${message} ${metaString}`;
-});
-
-// Winston logger instance for application logging
-// Configures daily rotating log files for different levels and exceptions
-export const logger = createLogger({
-  level: LOG_LEVEL,
-  format: format.combine(customTimestamp, prettyPrintFormat),
-  transports: [
-    // General application logs
-    new DailyRotateFile({
-      filename: `${LOG_DIR}/app-%DATE%.log`,
-      datePattern: 'YYYY-MM-DD',
-      maxSize: '20m',
-      maxFiles: '14d',
-      level: LOG_LEVEL,
-    }),
-    // Error-specific logs
-    new DailyRotateFile({
-      filename: `${LOG_DIR}/errors-%DATE%.log`,
-      datePattern: 'YYYY-MM-DD',
-      maxSize: '20m',
-      maxFiles: '14d',
-      level: 'error',
-      handleExceptions: true,
-    }),
-    // Debug-level logs
-    new DailyRotateFile({
-      filename: `${LOG_DIR}/debug-%DATE%.log`,
-      datePattern: 'YYYY-MM-DD',
-      maxSize: '20m',
-      maxFiles: '14d',
-      level: 'debug',
-    }),
-  ],
-  exceptionHandlers: [
-    new transports.File({ filename: `${LOG_DIR}/exceptions.log` })
-  ],
-});
-
-// Add console transport in non-production environments
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new transports.Console({
-    format: format.combine(format.colorize(), customTimestamp, prettyPrintFormat),
-    handleExceptions: true,
-  }));
-}
-
-// Global handler for unhandled promise rejections
-// Logs the rejection reason using the configured logger
-process.on('unhandledRejection', (reason) => {
-  logger.error(`Unhandled Rejection: ${reason}`);
-});
-
-// Express middleware for request/response logging
-// Integrates with Winston logger and includes metadata
-export const appLogger = expressWinston.logger({
-  winstonInstance: logger,
-  meta: true,
-  statusLevels: true,
-  expressFormat: true,
-  colorize: false,
-});
-
-// Express middleware for error logging
-// Logs errors using the configured Winston logger instance
-export const errorLogger = expressWinston.errorLogger({ winstonInstance: logger });

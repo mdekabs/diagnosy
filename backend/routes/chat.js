@@ -1,6 +1,5 @@
-import { ChatController } from "../controllers/chat.js";
-import { authenticationVerifier, optionalVerifier } from "../middleware/tokenization.js";
-import { cacheMiddleware, clearCache } from "../middleware/caching.js";
+import { ChatController } from '../controllers/index.js';
+import { authenticationVerifier, cacheMiddleware, clearCache, pagination } from '../middleware/index.js';
 
 // Defines chat routes for the Express router
 export default function chatRoutes(router) {
@@ -79,86 +78,29 @@ export default function chatRoutes(router) {
 
   /**
    * @swagger
-   * /chat/guest:
-   *   post:
-   *     summary: Create a chat for a guest user
-   *     description: Creates a new chat session for a guest user based on the provided symptom. Optionally accepts a guest JWT token for history tracking.
-   *     tags: [Chat]
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - symptom
-   *             properties:
-   *               symptom:
-   *                 type: string
-   *                 example: I have a headache and fever.
-   *     responses:
-   *       200:
-   *         description: Chat response generated successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 type:
-   *                   type: string
-   *                   example: success
-   *                 message:
-   *                   type: string
-   *                   example: Response generated successfully!
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     advice:
-   *                       type: string
-   *                       example: Your symptoms could indicate a viral infection or dehydration. Please consult a healthcare professional.
-   *                     disclaimer:
-   *                       type: string
-   *                       example: "Please note: This advice is not a substitute for professional medical care"
-   *       400:
-   *         description: Invalid input (e.g., missing or non-health-related symptom)
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 type:
-   *                   type: string
-   *                   example: error
-   *                 message:
-   *                   type: string
-   *                   example: Symptom is required
-   *       401:
-   *         description: Unauthorized (invalid or expired guest token, if provided)
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 type:
-   *                   type: string
-   *                   example: error
-   *                 message:
-   *                   type: string
-   *                   example: Invalid or expired guest token.
-   */
-  router.post("/chat/guest", optionalVerifier, clearCache, ChatController.createGuestChat);
-
-  /**
-   * @swagger
    * /chat/history:
    *   get:
    *     summary: Get chat history for an authenticated user
-   *     description: Retrieves the chat history for an authenticated user. Requires a valid user JWT token.
+   *     description: Retrieves the chat history for an authenticated user, with optional pagination. Requires a valid user JWT token.
    *     tags: [Chat]
    *     security:
    *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           default: 1
+   *         description: Page number for pagination
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           maximum: 100
+   *           default: 10
+   *         description: Number of chat history entries to return per page
    *     responses:
    *       200:
    *         description: Chat history retrieved successfully
@@ -208,6 +150,15 @@ export default function chatRoutes(router) {
    *                           type: string
    *                           format: date-time
    *                           example: 2025-10-14T04:15:01Z
+   *                     page:
+   *                       type: integer
+   *                       example: 1
+   *                     limit:
+   *                       type: integer
+   *                       example: 10
+   *                     total:
+   *                       type: integer
+   *                       example: 50
    *       401:
    *         description: Unauthorized (invalid or missing token)
    *         content:
@@ -235,5 +186,5 @@ export default function chatRoutes(router) {
    *                   type: string
    *                   example: Chat history not found
    */
-  router.get("/chat/history", authenticationVerifier, cacheMiddleware, ChatController.getChatHistory);
+  router.get("/chat/history", authenticationVerifier, cacheMiddleware, pagination, ChatController.getChatHistory);
 }
