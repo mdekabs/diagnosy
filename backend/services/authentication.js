@@ -1,10 +1,8 @@
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 import crypto from 'crypto';
-import uuid from '../utils/uuid.js';
 import { emailQueue } from '../jobs/queues/email_queue.js';
 import { generatePasswordResetEmail } from '../utils/index.js';
 import { updateBlacklist } from '../middleware/index.js';
-import redisClient from '../config/redis.js';
 import User from '../models/user.js';
 import { logger } from '../config/logger.js';
 
@@ -12,7 +10,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRATION = '1d';
 const PASSWORD_RESET_EXPIRATION = 3600000;
 const TOKEN_BYTES = 32;
-const GUEST_TOKEN_EXPIRATION = 3600; // 1 hour in seconds
 
 export class AuthService {
   static async createUser({ username, email, password }) {
@@ -106,40 +103,6 @@ export class AuthService {
     user.resetPasswordExpires = undefined;
     await user.save();
     logger.info(`Password reset successful for user: ${user._id}`);
-  }
-
-  static async generateGuestId() {
-    try {
-      const guestId = uuid.generate();
-      await redisClient.set(`guest_${guestId}`, 'active', 'EX', GUEST_TOKEN_EXPIRATION);
-      logger.info(`Generated guest ID: ${guestId}`);
-      return { guestId };
-    } catch (err) {
-      logger.error(`Failed to generate guest ID: ${err.message}`);
-      throw new Error(`Failed to generate guest ID: ${err.message}`);
-    }
-  }
-
-  static async getGuestId(guestId) {
-    try {
-      if (!guestId) {
-        throw new Error('Invalid or missing guest ID');
-      }
-      const status = await redisClient.get(`guest_${guestId}`);
-      if (!status) {
-        throw new Error('Guest ID not found or expired');
-      }
-      const chatData = await redisClient.get(`guest_chat:${guestId}`);
-      logger.info(`Retrieved guestId: ${guestId}${chatData ? ' with chat history' : ''}`);
-      return {
-        status: 'success',
-        message: 'Guest ID retrieved successfully',
-        data: { guestId },
-      };
-    } catch (err) {
-      logger.error(`getGuestId: ${err.message}`);
-      throw err;
-    }
   }
 
   static async getMe(userId) {

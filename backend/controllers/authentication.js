@@ -1,33 +1,11 @@
-import HttpStatus from 'http-status-codes';
-import { AuthService } from '../services/authentication.js';
-import { responseHandler } from '../utils/index.js';
-import { logger } from '../config/logger.js';
+import HttpStatus from "http-status-codes";
+import { AuthService } from "../services/index.js";
+import { responseHandler } from "../utils/index.js";
+import { logger } from "../config/logger.js";
 
 export class AuthController {
-  static async generateGuestId(req, res) {
-    try {
-      const data = await AuthService.generateGuestId();
-      responseHandler(res, HttpStatus.OK, 'success', 'Guest ID and token generated successfully', data);
-    } catch (err) {
-      logger.error(`Generate guest ID failed: ${err.message}`);
-      responseHandler(res, HttpStatus.INTERNAL_SERVER_ERROR, 'error', err.message);
-    }
-  }
-
-  static async getGuestId(req, res) {
-    try {
-      const result = await AuthService.getGuestId(req.guestId);
-      responseHandler(res, HttpStatus.OK, result.status, result.message, result.data);
-    } catch (err) {
-      logger.error(`getGuestId failed: ${err.message}`);
-      const status = err.message === 'Invalid or missing guest token' ? HttpStatus.UNAUTHORIZED : HttpStatus.NOT_FOUND;
-      responseHandler(res, status, 'error', err.message);
-    }
-  }
-
   static async getMe(req, res) {
     try {
-
       const result = await AuthService.getMe(req.userID);
       responseHandler(res, HttpStatus.OK, result.status, result.message, result.data);
     } catch (err) {
