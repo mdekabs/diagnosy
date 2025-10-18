@@ -1,9 +1,7 @@
 import dotenv from 'dotenv';
-import { logger } from './logger.js';
 
-export const env = process.env.NODE_ENV || 'development';
+export const env = process.env.NODE_ENV ?? 'development';
 
-// Map environment to respective .env file
 const envFileMap = {
   development: '.env.development',
   test: '.env.test',
@@ -12,7 +10,7 @@ const envFileMap = {
 
 const envFile = envFileMap[env] || '.env.development';
 
-dotenv.config({ path: envFile, quite: true });
+dotenv.config({ path: envFile, quiet: true });
 
 
 export default env;

@@ -34,5 +34,10 @@
     "winston-daily-rotate-file": "^5.0.0",
     "yaml": "^2.8.1",
     "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "chai": "^6.2.0",
+    "mocha": "^11.7.4",
+    "sinon": "^21.0.0"
   }
 }

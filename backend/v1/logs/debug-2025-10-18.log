@@ -138,3 +138,34 @@
   },
   "responseTime": 8855
 }
+2025-10-18 09:03:35 AM INFO: Auth header for GET /api/chat/history: Present 
+2025-10-18 09:03:35 AM INFO: Decoded token: {"id":"68f0d0caa420a41b12d89efb","isAdmin":false,"iat":1760773490,"exp":1760859890} 
+2025-10-18 09:03:35 AM INFO: Authenticated userID: 68f0d0caa420a41b12d89efb for GET /api/chat/history 
+2025-10-18 09:03:35 AM INFO: Cache key for GET /api/chat/history: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-18 09:03:35 AM INFO: Cache miss for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
+2025-10-18 09:03:35 AM INFO: getChatHistory: Chat history retrieved for userID 68f0d0caa420a41b12d89efb. 
+2025-10-18 09:03:35 AM INFO: GET /api/chat/history 200 29ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.49.0",
+      "accept": "*/*",
+      "postman-token": "c1972b59-2cdd-4cdc-bcca-188de6dd5fb8",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "72"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 29
+}
+2025-10-18 09:03:35 AM INFO: Cached response for key: cache_GET_/api/chat/history_68f0d0caa420a41b12d89efb 
