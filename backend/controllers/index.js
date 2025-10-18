@@ -1,2 +1,2 @@
-export { AuthController } from './auth_controller.js';
-export { ChatController } from './chat_controller.js';
+export { AuthController } from "./authentication.js";
+export { ChatController } from "./chat.js";

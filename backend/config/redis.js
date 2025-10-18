@@ -1,8 +1,8 @@
 import { createClient } from "redis";
-import { LoggerConfig } from "./logger.js";
+import { logger } from "./logger.js";
 
 export class RedisConfig {
-  static #logger = LoggerConfig.getLogger();
+  static #logger = logger;
   static #redisClient = null;
 
   static initialize() {

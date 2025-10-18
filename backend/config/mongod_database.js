@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import { LoggerConfig } from "./logger.js";
+import { logger } from "./logger.js";
 
 export class DatabaseConfig {
-  static #logger = LoggerConfig.getLogger();
+  static #logger = logger;
 
   static async connect() {
     try {

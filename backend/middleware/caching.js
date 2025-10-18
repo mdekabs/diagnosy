@@ -1,7 +1,6 @@
-import redisClient from '../config/redis.js';
+import { RedisConfig, logger } from '../config/index.js';
 import { responseHandler } from '../utils/index.js';
 import HttpStatus from 'http-status-codes';
-import { logger } from '../config/index.js';
 
 export const cacheMiddleware = async (req, res, next) => {
   try {
@@ -14,6 +13,7 @@ export const cacheMiddleware = async (req, res, next) => {
     const cacheKey = `cache_${req.method}_${req.originalUrl}_${userId || 'anonymous'}`;
     logger.info(`Cache key for ${req.method} ${req.originalUrl}: ${cacheKey}`);
     
+    const redisClient = RedisConfig.getClient();
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
       logger.info(`Cache hit for key: ${cacheKey}`);
@@ -51,6 +51,7 @@ export const clearCache = async (req, res, next) => {
       `cache_GET_/api/chat/history_${userId}`
     ];
     try {
+      const redisClient = RedisConfig.getClient();
       await redisClient.del(cacheKeys);
       logger.info(`Cache cleared for keys: ${cacheKeys.join(', ')}`);
     } catch (err) {
@@ -63,6 +64,7 @@ export const clearCache = async (req, res, next) => {
 // Clean invalid guest_chat:null keys
 export const cleanInvalidCache = async () => {
   try {
+    const redisClient = RedisConfig.getClient();
     const keys = await redisClient.keys('guest_chat:null');
     if (keys.length > 0) {
       await redisClient.del(keys);

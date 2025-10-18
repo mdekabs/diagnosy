@@ -1,8 +1,7 @@
 import jwt from 'jsonwebtoken';
-import redisClient from '../config/redis.js';
+import { RedisConfig, logger } from '../config/index.js';
 import { responseHandler } from '../utils/index.js';
 import HttpStatus from 'http-status-codes';
-import { logger } from '../config/index.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -14,12 +13,14 @@ const ERR_FORBIDDEN_ACTION = 'You are not allowed to perform this task.';
 
 // Checks if a token is blacklisted in Redis
 export const isTokenBlacklisted = async (token) => {
+  const redisClient = RedisConfig.getClient();
   const blacklisted = await redisClient.get(`blacklist:${token}`);
   return blacklisted === 'true';
 };
 
 // Adds a token to the Redis blacklist with an expiration time
 export const updateBlacklist = async (token, expiration = 3600) => {
+  const redisClient = RedisConfig.getClient();
   await redisClient.set(`blacklist:${token}`, 'true', 'EX', expiration);
   logger.info(`Token blacklisted for ${expiration}s`);
 };
@@ -36,6 +37,7 @@ export const authenticationVerifier = async (req, res, next) => {
 
   const token = authHeader.replace('Bearer ', '');
   try {
+    const redisClient = RedisConfig.getClient();
     if (!redisClient.isOpen) {
       throw new Error('Redis client is not initialized.');
     }
@@ -87,6 +89,7 @@ export const optionalVerifier = async (req, res, next) => {
 
   const guestId = authHeader.replace('Bearer ', '');
   try {
+    const redisClient = RedisConfig.getClient();
     if (!redisClient.isOpen) {
       throw new Error('Redis client is not initialized.');
     }
