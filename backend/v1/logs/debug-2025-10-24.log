@@ -1,0 +1,108 @@
+2025-10-24 20:52:12 PM INFO: Starting application in development environment 
+2025-10-24 20:52:19 PM ERROR: MongoDB connection error: bad auth : Authentication failed. 
+2025-10-24 21:18:17 PM INFO: Starting application in development environment 
+2025-10-24 21:18:20 PM INFO: MongoDB connected 
+2025-10-24 21:18:21 PM INFO: Redis client initialized 
+2025-10-24 21:18:21 PM INFO: Redis connected 
+2025-10-24 21:18:21 PM INFO: Swagger UI available at /api-docs 
+2025-10-24 21:18:21 PM INFO: Express server initialized 
+2025-10-24 21:18:21 PM INFO: Server is running on port 3000 
+2025-10-24 21:25:10 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:25:10 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:25:10 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:25:10 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:25:10 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:25:11 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:25:12 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:27:27 PM INFO: Starting application in development environment 
+2025-10-24 21:27:27 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:27:27 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:27:27 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:27:27 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:27:27 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:27:27 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:27:27 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:27:28 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:27:31 PM INFO: MongoDB connected 
+2025-10-24 21:27:31 PM INFO: Redis client initialized 
+2025-10-24 21:27:31 PM ERROR: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:27:31 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:28:37 PM INFO: Starting application in development environment 
+2025-10-24 21:28:37 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:28:37 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:28:37 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:28:37 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:28:37 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:28:37 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:28:37 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:28:39 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:28:39 PM INFO: MongoDB connected 
+2025-10-24 21:28:39 PM INFO: Redis client initialized 
+2025-10-24 21:28:41 PM INFO: Redis connected 
+2025-10-24 21:28:41 PM INFO: Swagger UI available at /api-docs 
+2025-10-24 21:28:41 PM INFO: Express server initialized 
+2025-10-24 21:28:41 PM INFO: Server is running on port 3000 
+2025-10-24 21:28:42 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:28:50 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:28:53 PM ERROR: Unhandled Rejection: ReferenceError: LoggerConfig is not defined 
+2025-10-24 21:29:02 PM INFO: Starting application in development environment 
+2025-10-24 21:29:02 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:29:02 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:29:02 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:29:02 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:29:02 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:29:02 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:29:03 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:29:04 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:29:04 PM INFO: MongoDB connected 
+2025-10-24 21:29:04 PM INFO: Redis client initialized 
+2025-10-24 21:29:05 PM INFO: Redis connected 
+2025-10-24 21:29:05 PM INFO: Swagger UI available at /api-docs 
+2025-10-24 21:29:05 PM INFO: Express server initialized 
+2025-10-24 21:29:05 PM INFO: Server is running on port 3000 
+2025-10-24 21:29:07 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:29:10 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:29:13 PM ERROR: Unhandled Rejection: ReferenceError: LoggerConfig is not defined 
+2025-10-24 21:29:15 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:29:30 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:29:35 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:29:50 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:29:55 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:32:11 PM INFO: Starting application in development environment 
+2025-10-24 21:32:11 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:32:11 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:32:11 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:32:11 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:32:11 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:32:11 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:32:11 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:32:12 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:32:14 PM INFO: MongoDB connected 
+2025-10-24 21:32:14 PM INFO: Redis client initialized 
+2025-10-24 21:32:15 PM INFO: Redis connected 
+2025-10-24 21:32:15 PM INFO: Swagger UI available at /api-docs 
+2025-10-24 21:32:15 PM INFO: Express server initialized 
+2025-10-24 21:32:15 PM INFO: Server is running on port 3000 
+2025-10-24 21:32:15 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:32:23 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:32:26 PM ERROR: Unhandled Rejection: ReferenceError: LoggerConfig is not defined 
+2025-10-24 21:32:43 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:33:03 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:33:23 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:33:43 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:34:03 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:34:23 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:34:43 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:35:03 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:35:23 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:35:44 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:36:04 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:36:24 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:36:44 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:37:04 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:37:24 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:37:44 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:38:04 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:38:24 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:38:44 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
+2025-10-24 21:39:04 PM ERROR: Email queue error: connect ECONNREFUSED 127.0.0.1:6379 
