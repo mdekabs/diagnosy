@@ -1,6 +1,7 @@
 import express from "express";
 import { env, logger, appLogger, errorLogger, DatabaseConfig, RedisConfig, SwaggerConfig } from "./config/index.js";
-import routes from "./routes/index.js";
+//import routes from "./routes/index.js";
+import from "./routes/index.js";
 import { errorMiddleware } from "./middleware/error_middleware.js";
 
 const app = express();
