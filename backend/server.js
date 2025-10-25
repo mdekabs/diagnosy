@@ -6,16 +6,14 @@ const PORT = process.env.PORT || 3000;
 
 const start = async () => {
   try {
-    // Create HTTP server with graceful shutdown
     const server = app.listen(PORT, () => {
       logger.info(`Server is running on port ${PORT}`);
     });
 
-    // Apply graceful shutdown middleware
     app.use(
       gracefulShutdown(server, {
-        timeout: 30000, // Wait up to 30 seconds for connections to close
-        logger: logger.info.bind(logger), // Log shutdown messages using Winston
+        timeout: 30000,
+        logger: logger.info.bind(logger),
       })
     );
   } catch (error) {
@@ -30,14 +28,9 @@ const shutdown = async (signal) => {
     const logger = LoggerConfig.getLogger();
     logger.info(`Received ${signal}. Initiating graceful shutdown...`);
 
-    // Close Express server (handled by express-graceful-shutdown middleware)
-    // Note: gracefulShutdown middleware automatically closes the server when SIGINT/SIGTERM is received
-
-    // Disconnect MongoDB
     await DatabaseConfig.disconnect();
     logger.info("MongoDB disconnected");
 
-    // Disconnect Redis
     await RedisConfig.disconnect();
     logger.info("Redis disconnected");
 
@@ -50,7 +43,6 @@ const shutdown = async (signal) => {
   }
 };
 
-// Handle termination signals
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 
