@@ -1,0 +1,13 @@
+2025-10-26 00:04:43 AM INFO: Starting application in development environment 
+2025-10-26 00:04:45 AM ERROR: MongoDB connection error: connect ECONNREFUSED 127.0.0.1:27017 
+2025-10-26 00:06:47 AM INFO: Starting application in development environment 
+2025-10-26 00:06:47 AM INFO: MongoDB connected 
+2025-10-26 00:06:47 AM INFO: Redis client initialized 
+2025-10-26 00:06:47 AM INFO: Redis connected 
+2025-10-26 00:06:47 AM INFO: Swagger UI available at /api-docs 
+2025-10-26 00:06:47 AM INFO: Express server initialized 
+2025-10-26 00:06:47 AM INFO: Server is running on port 3000 
+2025-10-26 00:06:49 AM INFO: Received SIGINT. Initiating graceful shutdown... 
+2025-10-26 00:06:49 AM INFO: MongoDB disconnected 
+2025-10-26 00:06:49 AM INFO: MongoDB disconnected 
+2025-10-26 00:06:49 AM INFO: Redis disconnected 

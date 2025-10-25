@@ -17,7 +17,6 @@ const start = async () => {
       })
     );
   } catch (error) {
-    const logger = LoggerConfig.getLogger();
     logger.error(`Server startup error: ${error.message}`);
     process.exit(1);
   }
@@ -25,7 +24,6 @@ const start = async () => {
 
 const shutdown = async (signal) => {
   try {
-    const logger = LoggerConfig.getLogger();
     logger.info(`Received ${signal}. Initiating graceful shutdown...`);
 
     await DatabaseConfig.disconnect();
@@ -37,7 +35,6 @@ const shutdown = async (signal) => {
     logger.info("Graceful shutdown completed.");
     process.exit(0);
   } catch (error) {
-    const logger = LoggerConfig.getLogger();
     logger.error(`Shutdown error: ${error.message}`);
     process.exit(1);
   }

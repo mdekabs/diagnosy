@@ -52,3 +52,9 @@ Error: write EIO
     at Console.log (/home/mdstorms/diagnosy/backend/node_modules/winston/lib/winston/transports/console.js:87:23)
     at Console._write (/home/mdstorms/diagnosy/backend/node_modules/winston-transport/modern.js:103:17)
     at doWrite (/home/mdstorms/diagnosy/backend/node_modules/readable-stream/lib/_stream_writable.js:390:139) 
+2025-10-26 00:04:45 AM ERROR: uncaughtException: connect ECONNREFUSED 127.0.0.1:27017
+MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+    at _handleConnectionErrors (/home/mdstorms/diagnosy/backend/node_modules/mongoose/lib/connection.js:1165:11)
+    at NativeConnection.openUri (/home/mdstorms/diagnosy/backend/node_modules/mongoose/lib/connection.js:1096:11)
+    at async DatabaseConfig.connect (file:///home/mdstorms/diagnosy/backend/config/mongod_database.js:9:7)
+    at async file:///home/mdstorms/diagnosy/backend/app.js:8:1 
