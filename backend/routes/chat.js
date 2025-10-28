@@ -1,14 +1,19 @@
 import { ChatController } from '../controllers/index.js';
-import { authenticationVerifier, cacheMiddleware, clearCache, pagination } from '../middleware/index.js';
+import { authenticationVerifier, cacheMiddleware, pagination } from '../middleware/index.js';
 
-// Defines chat routes for the Express router
+/**
+ * ------------------------------------------------------------------
+ *  Mental-Health Chat API Routes
+ *  All business logic lives in ChatService.
+ * ------------------------------------------------------------------
+ */
 export default function chatRoutes(router) {
   /**
    * @swagger
-   * /chat:
+   * /chat/start:
    *   post:
-   *     summary: Create a chat for an authenticated user
-   *     description: Creates a new chat session for an authenticated user based on the provided symptom. Requires a valid user JWT token.
+   *     summary: Start a new mental health conversation
+   *     description: Begins a supportive chat about stress, anxiety, mood, or emotional well-being.
    *     tags: [Chat]
    *     security:
    *       - bearerAuth: []
@@ -19,14 +24,14 @@ export default function chatRoutes(router) {
    *           schema:
    *             type: object
    *             required:
-   *               - symptom
+   *               - message
    *             properties:
-   *               symptom:
+   *               message:
    *                 type: string
-   *                 example: I have a sore throat.
+   *                 example: "I've been feeling really anxious at work."
    *     responses:
    *       200:
-   *         description: Chat response generated successfully
+   *         description: Supportive response generated
    *         content:
    *           application/json:
    *             schema:
@@ -37,31 +42,52 @@ export default function chatRoutes(router) {
    *                   example: success
    *                 message:
    *                   type: string
-   *                   example: Response generated successfully!
+   *                   example: I'm here to listen and support you.
    *                 data:
    *                   type: object
    *                   properties:
    *                     advice:
    *                       type: string
-   *                       example: A sore throat could be due to a viral infection or allergies. Please consult a healthcare professional.
-   *                     disclaimer:
-   *                       type: string
-   *                       example: "Please note: This advice is not a substitute for professional medical care"
+   *                     isNewSession:
+   *                       type: boolean
+   *                     isCrisis:
+   *                       type: boolean
+   *                       description: If true, show emergency hotline immediately
    *       400:
-   *         description: Invalid input (e.g., missing or non-health-related symptom)
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 type:
-   *                   type: string
-   *                   example: error
-   *                 message:
-   *                   type: string
-   *                   example: Symptom is required
+   *         description: Invalid or off-topic message
    *       401:
-   *         description: Unauthorized (invalid or missing token)
+   *         description: Unauthorized
+   */
+  router.post(
+    "/chat/start",
+    authenticationVerifier,
+    ChatController.createChat
+  );
+
+  /**
+   * @swagger
+   * /chat/continue:
+   *   post:
+   *     summary: Continue an existing mental health conversation
+   *     description: Send a follow-up message in the same emotional support session.
+   *     tags: [Chat]
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - message
+   *             properties:
+   *               message:
+   *                 type: string
+   *                 example: "What can I do to calm down right now?"
+   *     responses:
+   *       200:
+   *         description: Continued support
    *         content:
    *           application/json:
    *             schema:
@@ -69,19 +95,34 @@ export default function chatRoutes(router) {
    *               properties:
    *                 type:
    *                   type: string
-   *                   example: error
    *                 message:
    *                   type: string
-   *                   example: You are not authenticated. Please log in to get a new token.
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     advice:
+   *                       type: string
+   *                     isContinued:
+   *                       type: boolean
+   *                     isCrisis:
+   *                       type: boolean
+   *       400:
+   *         description: No active session or off-topic
+   *       401:
+   *         description: Unauthorized
    */
-  router.post("/chat", authenticationVerifier, clearCache, ChatController.createChat);
+  router.post(
+    "/chat/continue",
+    authenticationVerifier,
+    ChatController.continueChat
+  );
 
   /**
    * @swagger
    * /chat/history:
    *   get:
-   *     summary: Get chat history for an authenticated user
-   *     description: Retrieves the chat history for an authenticated user, with optional pagination. Requires a valid user JWT token.
+   *     summary: Get full chat history
+   *     description: Returns the complete conversation (user + assistant messages).
    *     tags: [Chat]
    *     security:
    *       - bearerAuth: []
@@ -90,20 +131,17 @@ export default function chatRoutes(router) {
    *         name: page
    *         schema:
    *           type: integer
-   *           minimum: 1
    *           default: 1
-   *         description: Page number for pagination
+   *         description: Optional pagination
    *       - in: query
    *         name: limit
    *         schema:
    *           type: integer
-   *           minimum: 1
-   *           maximum: 100
-   *           default: 10
-   *         description: Number of chat history entries to return per page
+   *           default: 50
+   *         description: Max messages per page
    *     responses:
    *       200:
-   *         description: Chat history retrieved successfully
+   *         description: History retrieved
    *         content:
    *           application/json:
    *             schema:
@@ -111,69 +149,52 @@ export default function chatRoutes(router) {
    *               properties:
    *                 type:
    *                   type: string
-   *                   example: success
    *                 message:
    *                   type: string
-   *                   example: Chat history retrieved successfully!
    *                 data:
    *                   type: object
    *                   properties:
-   *                     chats:
-   *                       type: object
-   *                       properties:
-   *                         _id:
-   *                           type: string
-   *                           example: chat-id-123
-   *                         userID:
-   *                           type: string
-   *                           example: 12345
-   *                         history:
-   *                           type: array
-   *                           items:
-   *                             type: object
-   *                             properties:
-   *                               role:
-   *                                 type: string
-   *                                 example: user
-   *                               content:
-   *                                 type: string
-   *                                 example: I have a sore throat.
-   *                               timestamp:
-   *                                 type: string
-   *                                 format: date-time
-   *                                 example: 2025-10-14T04:15:00Z
-   *                         createdAt:
-   *                           type: string
-   *                           format: date-time
-   *                           example: 2025-10-14T04:15:00Z
-   *                         updatedAt:
-   *                           type: string
-   *                           format: date-time
-   *                           example: 2025-10-14T04:15:01Z
-   *                     page:
-   *                       type: integer
-   *                       example: 1
-   *                     limit:
-   *                       type: integer
-   *                       example: 10
-   *                     total:
-   *                       type: integer
-   *                       example: 50
-   *       401:
-   *         description: Unauthorized (invalid or missing token)
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 type:
-   *                   type: string
-   *                   example: error
-   *                 message:
-   *                   type: string
-   *                   example: You are not authenticated. Please log in to get a new token.
+   *                     history:
+   *                       type: array
+   *                       items:
+   *                         type: object
+   *                         properties:
+   *                           role:
+   *                             type: string
+   *                             enum: [user, assistant]
+   *                           content:
+   *                             type: string
+   *                     startedAt:
+   *                       type: string
+   *                       format: date-time
+   *                     lastActive:
+   *                       type: string
+   *                       format: date-time
    *       404:
-   *         description: Chat history not found
+   *         description: No chat history
+   *       401:
+   *         description: Unauthorized
+   */
+  router.get(
+    "/chat/history",
+    authenticationVerifier,
+    cacheMiddleware,   // optional: cache per user
+    pagination,        // optional: if you later paginate in service
+    ChatController.getChatHistory
+  );
+
+  /**
+   * @swagger
+   * /chat/end:
+   *   post:
+   *     summary: End and clear the current chat session
+   *     description: Deletes the conversation. User can start fresh.
+   *     tags: [Chat]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Session ended
    *         content:
    *           application/json:
    *             schema:
@@ -181,10 +202,14 @@ export default function chatRoutes(router) {
    *               properties:
    *                 type:
    *                   type: string
-   *                   example: error
    *                 message:
    *                   type: string
-   *                   example: Chat history not found
+   *       401:
+   *         description: Unauthorized
    */
-  router.get("/chat/history", authenticationVerifier, cacheMiddleware, pagination, ChatController.getChatHistory);
+  router.post(
+    "/chat/end",
+    authenticationVerifier,
+    ChatController.endChat
+  );
 }

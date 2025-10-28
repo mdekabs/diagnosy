@@ -11,3 +11,7 @@
 2025-10-28 15:54:11 PM ERROR: Login failed: Invalid username or password. 
 2025-10-28 16:00:59 PM ERROR: Login failed: Invalid username or password. 
 2025-10-28 16:01:02 PM ERROR: Login failed: Invalid username or password. 
+2025-10-28 20:05:48 PM ERROR: createChat failed: I can only assist with health-related questions. Please ask about symptoms or medical conditions. 
+2025-10-28 20:26:16 PM ERROR: createChat: Please share how you're feeling or what's on your mind. 
+2025-10-28 20:41:38 PM ERROR: createChat: I specialize in stress, anxiety, and emotional well-being. Please share how you're feeling. 
+2025-10-28 20:42:31 PM ERROR: continueChat: No active conversation found. Start by sharing your feelings. 
