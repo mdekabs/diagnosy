@@ -11,3 +11,32 @@
 2025-10-26 00:06:49 AM INFO: MongoDB disconnected 
 2025-10-26 00:06:49 AM INFO: MongoDB disconnected 
 2025-10-26 00:06:49 AM INFO: Redis disconnected 
+2025-10-26 13:45:32 PM INFO: Starting application in development environment 
+2025-10-26 13:45:32 PM INFO: MongoDB connected 
+2025-10-26 13:45:32 PM INFO: Redis client initialized 
+2025-10-26 13:45:32 PM INFO: Redis connected 
+2025-10-26 13:45:32 PM INFO: Swagger UI available at /api-docs 
+2025-10-26 13:45:32 PM INFO: Express server initialized 
+2025-10-26 13:45:32 PM INFO: Server is running on port 3000 
+2025-10-26 13:46:27 PM INFO: Received SIGINT. Initiating graceful shutdown... 
+2025-10-26 13:46:27 PM INFO: MongoDB disconnected 
+2025-10-26 13:46:27 PM INFO: MongoDB disconnected 
+2025-10-26 13:46:27 PM INFO: Redis disconnected 
+2025-10-26 13:47:48 PM INFO: Starting application in development environment 
+2025-10-26 13:47:48 PM INFO: MongoDB connected 
+2025-10-26 13:47:48 PM INFO: Redis client initialized 
+2025-10-26 13:47:48 PM INFO: Redis connected 
+2025-10-26 13:47:48 PM INFO: Swagger UI available at /api-docs 
+2025-10-26 13:47:48 PM INFO: Express server initialized 
+2025-10-26 13:47:48 PM INFO: Server is running on port 3000 
+2025-10-26 13:53:50 PM INFO: Received SIGINT. Initiating graceful shutdown... 
+2025-10-26 13:53:50 PM INFO: MongoDB disconnected 
+2025-10-26 13:53:50 PM INFO: MongoDB disconnected 
+2025-10-26 13:53:50 PM INFO: Redis disconnected 
+2025-10-26 13:56:17 PM INFO: Starting application in development environment 
+2025-10-26 13:56:17 PM INFO: MongoDB connected 
+2025-10-26 13:56:17 PM INFO: Redis client initialized 
+2025-10-26 13:56:17 PM INFO: Redis connected 
+2025-10-26 13:56:17 PM INFO: Swagger UI available at /api-docs 
+2025-10-26 13:56:17 PM INFO: Express server initialized 
+2025-10-26 13:56:17 PM INFO: Server is running on port 3000 

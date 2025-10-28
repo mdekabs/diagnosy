@@ -24,12 +24,9 @@ export class AuthService {
 
     const newUser = new User({ username, email, password });
     const user = await newUser.save();
-    const accessToken = jwt.sign({ id: user._id.toString(), isAdmin: user.isAdmin }, JWT_SECRET, {
-      expiresIn: JWT_EXPIRATION,
-    });
 
     logger.info(`User registered: ${user._id}`);
-    return { userId: user._id.toString(), token: accessToken };
+    return { userId: user._id.toString() };
   }
 
   static async loginUser({ username, password }) {
