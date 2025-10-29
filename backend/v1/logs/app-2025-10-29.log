@@ -642,3 +642,23 @@
 2025-10-29 19:13:54 PM INFO: Express server initialized 
 2025-10-29 19:13:54 PM INFO: WebSocket server attached to HTTP server 
 2025-10-29 19:13:54 PM INFO: Server is running on port 3000 
+2025-10-29 20:36:48 PM INFO: Starting application in development environment 
+2025-10-29 20:36:48 PM INFO: MongoDB connected 
+2025-10-29 20:36:48 PM INFO: Redis client initialized 
+2025-10-29 20:36:48 PM INFO: Redis connected 
+2025-10-29 20:36:48 PM INFO: Swagger UI available at /api-docs 
+2025-10-29 20:36:48 PM INFO: Express server initialized 
+2025-10-29 20:36:48 PM INFO: WebSocket server attached to HTTP server 
+2025-10-29 20:36:48 PM INFO: Server is running on port 3000 
+2025-10-29 21:26:43 PM INFO: Starting application in development environment 
+2025-10-29 21:26:43 PM INFO: MongoDB connected 
+2025-10-29 21:26:43 PM INFO: Redis client initialized 
+2025-10-29 21:26:43 PM INFO: Redis connected 
+2025-10-29 21:26:43 PM INFO: Swagger UI available at /api-docs 
+2025-10-29 21:26:43 PM INFO: Express server initialized 
+2025-10-29 21:26:43 PM INFO: WebSocket server attached to HTTP server 
+2025-10-29 21:26:43 PM INFO: Server is running on port 3000 
+2025-10-29 21:27:28 PM INFO: Received SIGINT. Initiating graceful shutdown... 
+2025-10-29 21:27:28 PM INFO: MongoDB disconnected 
+2025-10-29 21:27:28 PM INFO: MongoDB disconnected 
+2025-10-29 21:27:28 PM INFO: Redis disconnected 

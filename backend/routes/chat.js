@@ -1,20 +1,14 @@
+// src/routes/chatRoutes.js
 import { ChatController } from '../controllers/index.js';
 import { authenticationVerifier, cacheMiddleware, pagination } from '../middleware/index.js';
 
 /**
  * ------------------------------------------------------------------
  * Mental-Health Chat API Routes
- * All real-time chat is handled by the WebSocket (WS) endpoint.
- * These HTTP routes are for utility functions (History, End Session).
+ * Only includes the chat history route.
  * ------------------------------------------------------------------
  */
 export default function chatRoutes(router) {
-
-  // --------------------------------------------------------------
-  // NOTE: /chat/start and /chat/continue routes have been removed.
-  // The core chat functionality now flows through the WebSocket.
-  // --------------------------------------------------------------
-
   /**
    * @swagger
    * /chat/history:
@@ -70,50 +64,16 @@ export default function chatRoutes(router) {
    *                             type: string
    *                             format: date-time
    *       404:
-   *         description: No chat history
+   *         description: No chat history found
    *       401:
    *         description: Unauthorized
    */
   router.get(
     '/chat/history',
     authenticationVerifier,
-    cacheMiddleware,  // optional: cache per user
-    pagination,       // optional: if you later paginate in service
+    cacheMiddleware,
+    pagination,
     ChatController.getChatHistory
-  );
-
-  // ----------------------------------------------------------------
-
-  /**
-   * @swagger
-   * /chat/end:
-   *   post:
-   *     summary: End and clear the current chat session
-   *     description: Deletes the conversation from the database. User can start a fresh, new session.
-   *     tags: [Chat]
-   *     security:
-   *       - bearerAuth: []
-   *     responses:
-   *       200:
-   *         description: Session ended
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 type:
-   *                   type: string
-   *                   example: success
-   *                 message:
-   *                   type: string
-   *                   example: Conversation ended. Take care.
-   *       401:
-   *         description: Unauthorized
-   */
-  router.post(
-    '/chat/end',
-    authenticationVerifier,
-    ChatController.endChat
   );
 }
 
