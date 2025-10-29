@@ -1,0 +1,644 @@
+2025-10-29 02:43:07 AM INFO: MongoDB connected 
+2025-10-29 02:43:07 AM INFO: Redis client initialized 
+2025-10-29 02:43:07 AM INFO: Redis connected 
+2025-10-29 02:43:07 AM INFO: Swagger UI available at /api-docs 
+2025-10-29 02:43:07 AM INFO: Server running on http://localhost:3000 
+2025-10-29 02:43:07 AM INFO: WebSocket: ws://localhost:3000/ws 
+2025-10-29 02:43:07 AM INFO: Server is running on port 3000 
+2025-10-29 02:46:15 AM INFO: Auth header for POST /api/chat/continue: Present 
+2025-10-29 02:46:16 AM INFO: Decoded token: {"id":"6900d53038ce155774f8749a","isAdmin":false,"iat":1761677859,"exp":1761764259} 
+2025-10-29 02:46:16 AM INFO: Authenticated userID: 6900d53038ce155774f8749a for POST /api/chat/continue 
+2025-10-29 02:46:16 AM INFO: POST /api/chat/continue 200 64ms 
+{
+  "req": {
+    "url": "/api/chat/continue",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.49.0",
+      "accept": "*/*",
+      "postman-token": "1b855ff3-1253-4fdf-919d-9bf5e73b5541",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "59"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/continue",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 64
+}
+2025-10-29 02:47:22 AM INFO: Auth header for POST /api/chat/start: Present 
+2025-10-29 02:47:22 AM INFO: Decoded token: {"id":"6900d53038ce155774f8749a","isAdmin":false,"iat":1761677859,"exp":1761764259} 
+2025-10-29 02:47:22 AM INFO: Authenticated userID: 6900d53038ce155774f8749a for POST /api/chat/start 
+2025-10-29 02:47:22 AM INFO: POST /api/chat/start 200 12ms 
+{
+  "req": {
+    "url": "/api/chat/start",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.49.0",
+      "accept": "*/*",
+      "postman-token": "0a2a688b-d423-4239-94e3-3fb37b390ec8",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "41"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/start",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 12
+}
+2025-10-29 02:47:24 AM INFO: Auth header for POST /api/chat/start: Present 
+2025-10-29 02:47:24 AM INFO: Decoded token: {"id":"6900d53038ce155774f8749a","isAdmin":false,"iat":1761677859,"exp":1761764259} 
+2025-10-29 02:47:24 AM INFO: Authenticated userID: 6900d53038ce155774f8749a for POST /api/chat/start 
+2025-10-29 02:47:24 AM INFO: POST /api/chat/start 200 7ms 
+{
+  "req": {
+    "url": "/api/chat/start",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.49.0",
+      "accept": "*/*",
+      "postman-token": "e992f75c-1dcb-4444-9828-ff2feffaf48c",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "41"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/start",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 7
+}
+2025-10-29 03:05:40 AM INFO: Auth header for GET undefined: Masked 
+2025-10-29 03:05:40 AM ERROR: Authentication failed: Invalid or missing Authorization header 
+2025-10-29 03:05:40 AM ERROR: Unhandled Rejection: TypeError: res.status is not a function 
+2025-10-29 03:06:15 AM INFO: Auth header for GET undefined: Masked 
+2025-10-29 03:06:15 AM ERROR: Authentication failed: Invalid or missing Authorization header 
+2025-10-29 03:06:15 AM ERROR: Unhandled Rejection: TypeError: res.status is not a function 
+2025-10-29 03:06:39 AM INFO: Auth header for GET undefined: Masked 
+2025-10-29 03:06:39 AM ERROR: Authentication failed: Invalid or missing Authorization header 
+2025-10-29 03:06:39 AM ERROR: Unhandled Rejection: TypeError: res.status is not a function 
+2025-10-29 03:09:34 AM INFO: Auth header for GET undefined: Masked 
+2025-10-29 03:09:34 AM ERROR: Authentication failed: Invalid or missing Authorization header 
+2025-10-29 03:09:34 AM ERROR: Unhandled Rejection: TypeError: res.status is not a function 
+2025-10-29 03:10:04 AM INFO: Auth header for GET undefined: Masked 
+2025-10-29 03:10:04 AM ERROR: Authentication failed: Invalid or missing Authorization header 
+2025-10-29 03:10:04 AM ERROR: Unhandled Rejection: TypeError: res.status is not a function 
+2025-10-29 03:10:46 AM INFO: Auth header for GET undefined: Masked 
+2025-10-29 03:10:46 AM ERROR: Authentication failed: Invalid or missing Authorization header 
+2025-10-29 03:10:46 AM ERROR: Unhandled Rejection: TypeError: res.status is not a function 
+2025-10-29 03:13:08 AM INFO: Auth header for GET undefined: Masked 
+2025-10-29 03:13:08 AM ERROR: Authentication failed: Invalid or missing Authorization header 
+2025-10-29 03:13:08 AM ERROR: Unhandled Rejection: TypeError: res.status is not a function 
+2025-10-29 03:13:40 AM INFO: SIGINT received. Closing server... 
+2025-10-29 03:13:40 AM INFO: Received SIGINT. Initiating graceful shutdown... 
+2025-10-29 03:13:40 AM INFO: MongoDB disconnected 
+2025-10-29 03:13:40 AM INFO: MongoDB disconnected 
+2025-10-29 03:13:40 AM INFO: Redis disconnected 
+2025-10-29 04:39:28 AM INFO: Starting application in development environment 
+2025-10-29 04:39:28 AM INFO: MongoDB connected 
+2025-10-29 04:39:28 AM INFO: Redis client initialized 
+2025-10-29 04:39:28 AM INFO: Redis connected 
+2025-10-29 04:39:28 AM INFO: Swagger UI available at /api-docs 
+2025-10-29 04:39:28 AM INFO: Express server initialized 
+2025-10-29 04:39:28 AM INFO: WebSocket server attached to HTTP server 
+2025-10-29 04:39:28 AM INFO: Server is running on port 3000 
+2025-10-29 05:06:23 AM INFO: Received SIGINT. Initiating graceful shutdown... 
+2025-10-29 05:06:23 AM INFO: MongoDB disconnected 
+2025-10-29 05:06:23 AM INFO: MongoDB disconnected 
+2025-10-29 05:06:23 AM INFO: Redis disconnected 
+2025-10-29 13:33:02 PM INFO: Starting application in development environment 
+2025-10-29 13:33:02 PM INFO: MongoDB connected 
+2025-10-29 13:33:02 PM INFO: Redis client initialized 
+2025-10-29 13:33:02 PM INFO: Redis connected 
+2025-10-29 13:33:02 PM INFO: Swagger UI available at /api-docs 
+2025-10-29 13:33:02 PM INFO: Express server initialized 
+2025-10-29 13:33:02 PM INFO: WebSocket server attached to HTTP server 
+2025-10-29 13:33:02 PM INFO: Server is running on port 3000 
+2025-10-29 13:34:05 PM INFO: Auth header for POST /api/chat/start: Present 
+2025-10-29 13:34:05 PM INFO: Decoded token: {"id":"6900d53038ce155774f8749a","isAdmin":false,"iat":1761677859,"exp":1761764259} 
+2025-10-29 13:34:05 PM INFO: Authenticated userID: 6900d53038ce155774f8749a for POST /api/chat/start 
+2025-10-29 13:34:06 PM INFO: GeminiService: non-stream response generated successfully 
+2025-10-29 13:34:06 PM INFO: POST /api/chat/start 200 1548ms 
+{
+  "req": {
+    "url": "/api/chat/start",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.49.0",
+      "accept": "*/*",
+      "postman-token": "35e59041-10cc-424b-bb0c-b0ec05ff0705",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "41"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/start",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 1548
+}
+2025-10-29 13:37:12 PM INFO: New WebSocket connection established. 
+2025-10-29 13:37:52 PM ERROR: WebSocket Error for User postman_tester_888: input must be a 24 character hex string, 12 byte Uint8Array, or an integer 
+2025-10-29 13:51:42 PM INFO: Received SIGINT. Initiating graceful shutdown... 
+2025-10-29 13:51:42 PM INFO: MongoDB disconnected 
+2025-10-29 13:51:42 PM INFO: MongoDB disconnected 
+2025-10-29 13:51:42 PM INFO: Redis disconnected 
+2025-10-29 14:54:22 PM INFO: Starting application in development environment 
+2025-10-29 14:54:22 PM INFO: MongoDB connected 
+2025-10-29 14:54:22 PM INFO: Redis client initialized 
+2025-10-29 14:54:22 PM INFO: Redis connected 
+2025-10-29 14:54:22 PM INFO: Swagger UI available at /api-docs 
+2025-10-29 14:54:22 PM INFO: Express server initialized 
+2025-10-29 14:54:22 PM INFO: WebSocket server attached to HTTP server 
+2025-10-29 14:54:22 PM INFO: Server is running on port 3000 
+2025-10-29 14:54:46 PM INFO: Token verified for User ID: 6900d53038ce155774f8749a 
+2025-10-29 14:54:46 PM INFO: New WS connection established for user: 6900d53038ce155774f8749a 
+2025-10-29 14:55:40 PM INFO: GeminiService: non-stream response generated successfully 
+2025-10-29 14:55:40 PM ERROR: GeminiService.generateResponseStream error: 400 status code (no body) 
+2025-10-29 14:55:40 PM ERROR: WebSocket Error for User 6900d53038ce155774f8749a: 400 status code (no body) 
+2025-10-29 15:08:03 PM INFO: Starting application in development environment 
+2025-10-29 15:08:03 PM INFO: MongoDB connected 
+2025-10-29 15:08:03 PM INFO: Redis client initialized 
+2025-10-29 15:08:03 PM INFO: Redis connected 
+2025-10-29 15:08:03 PM INFO: Swagger UI available at /api-docs 
+2025-10-29 15:08:03 PM INFO: Express server initialized 
+2025-10-29 15:08:03 PM INFO: WebSocket server attached to HTTP server 
+2025-10-29 15:08:03 PM INFO: Server is running on port 3000 
+2025-10-29 15:08:20 PM INFO: Token verified for User ID: 6900d53038ce155774f8749a 
+2025-10-29 15:08:20 PM INFO: New WS connection established for user: 6900d53038ce155774f8749a 
+2025-10-29 15:09:32 PM INFO: GeminiService: non-stream response generated successfully 
+2025-10-29 15:09:33 PM ERROR: GeminiService.generateResponseStream error: {"error":{"message":"{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Please ensure that single turn requests end with a user role or the role field is empty.\",\n    \"status\": \"INVALID_ARGUMENT\"\n  }\n}\n","code":400,"status":"Bad Request"}} 
+2025-10-29 15:09:33 PM ERROR: WebSocket Error for User 6900d53038ce155774f8749a: {"error":{"message":"{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Please ensure that single turn requests end with a user role or the role field is empty.\",\n    \"status\": \"INVALID_ARGUMENT\"\n  }\n}\n","code":400,"status":"Bad Request"}} 
+2025-10-29 15:14:27 PM INFO: Starting application in development environment 
+2025-10-29 15:14:27 PM INFO: MongoDB connected 
+2025-10-29 15:14:27 PM INFO: Redis client initialized 
+2025-10-29 15:14:27 PM INFO: Redis connected 
+2025-10-29 15:14:27 PM INFO: Swagger UI available at /api-docs 
+2025-10-29 15:14:27 PM INFO: Express server initialized 
+2025-10-29 15:14:27 PM INFO: WebSocket server attached to HTTP server 
+2025-10-29 15:14:27 PM INFO: Server is running on port 3000 
+2025-10-29 15:15:27 PM INFO: Starting application in development environment 
+2025-10-29 15:15:27 PM INFO: MongoDB connected 
+2025-10-29 15:15:27 PM INFO: Redis client initialized 
+2025-10-29 15:15:27 PM INFO: Redis connected 
+2025-10-29 15:15:27 PM INFO: Swagger UI available at /api-docs 
+2025-10-29 15:15:27 PM INFO: Express server initialized 
+2025-10-29 15:15:27 PM INFO: WebSocket server attached to HTTP server 
+2025-10-29 15:15:27 PM INFO: Server is running on port 3000 
+2025-10-29 15:15:34 PM INFO: Token verified for User ID: 6900d53038ce155774f8749a 
+2025-10-29 15:15:34 PM INFO: New WS connection established for user: 6900d53038ce155774f8749a 
+2025-10-29 15:15:37 PM INFO: GeminiService sending non-stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "Analyze the user's message below and respond with only one of these three tags, no other text: [OFF_TOPIC|CRISIS|SAFE].\nOFF_TOPIC: The message is a general knowledge question or blocked phrase.\nCRISIS: The message expresses self-harm or suicidal intent.\nSAFE: The message is related to mental health, anxiety, or general well-being.\nUser Message: \"I'm having a lot of stress from work lately.\""
+      }
+    ]
+  }
+] 
+2025-10-29 15:15:39 PM INFO: GeminiService: non-stream response generated successfully 
+2025-10-29 15:15:39 PM INFO: GeminiService sending stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "You are a warm, supportive mental wellness companion.\n- Your response must be under 150 words.\n- Do not include the disclaimer in your response; it will be added by the system.\n- User input: \"I'm having a lot of stress from work lately.\""
+      }
+    ]
+  }
+] 
+2025-10-29 15:15:45 PM INFO: GeminiService: stream completed successfully 
+2025-10-29 15:22:28 PM INFO: GeminiService sending stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "should i tell you about my mental health today so you can tell me what to do?"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "It sounds like you're looking for some support with your mental health today, and I'm here to listen. I can't tell you exactly what to *do*, because I'm not a therapist and everyone's situation is unique. But if you'd like to share what's on your mind, I can offer some general information, coping tips, and support based on what you're going through.\n\nIt's okay to feel however you're feeling right now. You're not alone.\n\nAlso, please remember: I am not a substitute for professional medical advice.\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "i am burn out and my brain is exhausted"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "I hear you. Burnout and mental exhaustion can be incredibly draining. It sounds like you're carrying a heavy load right now. Can you tell me a little more about what's been going on that's led you to feel this way? Things like:\n\n*   What do you think are the primary sources of your burnout? (Work, relationships, personal expectations, etc.?)\n*   How long have you been feeling this way?\n*   What does \"exhausted\" feel like for you? (e.g., Difficulty concentrating? Physical fatigue? Loss of motivation?)\n\nNo pressure to share anything you're not comfortable with, but the more information you provide, the better I can understand and offer support.\n\nIn the meantime, please know that it's okay to acknowledge and honor your feelings. You deserve to rest and recharge.\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "its relationship that is causing the burnout. my girlfriend just left me after 14 years of relationship. i am so confused right now"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Oh, my heart goes out to you. Ending a 14-year relationship is a huge life event, and it's completely understandable that you're feeling burned out, exhausted, and confused right now. That's a lot to process.\n\nIt's okay to feel disoriented and overwhelmed. You've lost a significant part of your life and routine, and it's going to take time to adjust. Be kind to yourself during this period.\n\nDo you feel up to sharing a bit more about what's making you feel particularly burned out in this situation? Sometimes, just talking about it can help untangle some of the confusion. Or, if you prefer, we can focus on some immediate self-care strategies to help you cope with the exhaustion.\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "i live in gwagwalada Abuja, can you direct me to a therapist?"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "I understand you're looking for a therapist in Gwagwalada, Abuja. I don't have direct access to a real-time directory of therapists in your specific location. Information like that changes frequently.\n\nHowever, I can suggest some resources that might help you find a therapist in your area:\n\n*   **Online Directories:**\n    *   **Mental Health Nigeria:** This is a website dedicated to mental health resources in Nigeria. [https://mentalhealthnigeria.org/](https://mentalhealthnigeria.org/)\n    *   **Google:** You can try a Google search for \"therapists in Gwagwalada Abuja\" or \"psychologists in Gwagwalada Abuja.\"\n\nWhen you contact a potential therapist, it's a good idea to ask about their experience, fees, and areas of specialization to make sure they're a good fit for you. It's perfectly normal to \"shop around\" until you find someone you feel comfortable with.\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "I'm having a lot of stress from work lately."
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Oh, my dear, I'm so sorry to hear you're carrying a lot of stress from work right now. Work stress can be incredibly heavy, and it's completely understandable to feel overwhelmed by it. Please know you're not alone in experiencing this.\n\nIs there anything small you might be able to do just for yourself today, even for a few minutes, to find a tiny moment of peace? Or would you like to talk a bit more about what's making it feel so heavy? I'm here to listen, and I'm sending you so much strength and warmth."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "I'm having a lot of stress from work lately and i need help."
+      }
+    ]
+  }
+] 
+2025-10-29 15:22:36 PM ERROR: GeminiService.generateResponseStream error: {"error":{"message":"{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"The model is overloaded. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n","code":503,"status":"Service Unavailable"}} 
+2025-10-29 15:22:36 PM ERROR: WebSocket Error for User 6900d53038ce155774f8749a: {"error":{"message":"{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"The model is overloaded. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n","code":503,"status":"Service Unavailable"}} 
+2025-10-29 15:32:36 PM INFO: Starting application in development environment 
+2025-10-29 15:32:36 PM INFO: MongoDB connected 
+2025-10-29 15:32:36 PM INFO: Redis client initialized 
+2025-10-29 15:32:36 PM INFO: Redis connected 
+2025-10-29 15:32:36 PM INFO: Swagger UI available at /api-docs 
+2025-10-29 15:32:36 PM INFO: Express server initialized 
+2025-10-29 15:32:36 PM INFO: WebSocket server attached to HTTP server 
+2025-10-29 15:32:36 PM INFO: Server is running on port 3000 
+2025-10-29 15:33:41 PM INFO: Token verified for User ID: 6900d53038ce155774f8749a 
+2025-10-29 15:33:41 PM INFO: New WS connection established for user: 6900d53038ce155774f8749a 
+2025-10-29 15:33:46 PM INFO: GeminiService sending non-stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "Analyze the user's message below and respond with only one of these three tags, no other text: [OFF_TOPIC|CRISIS|SAFE].\nOFF_TOPIC: The message is a general knowledge question or blocked phrase.\nCRISIS: The message expresses self-harm or suicidal intent.\nSAFE: The message is related to mental health, anxiety, or general well-being.\nUser Message: \"I'm having a lot of stress from work lately and i need help.\""
+      }
+    ]
+  }
+] 
+2025-10-29 15:33:48 PM INFO: GeminiService: non-stream response generated successfully 
+2025-10-29 15:33:48 PM INFO: GeminiService sending stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "You are a warm, supportive mental wellness companion.\n- Your response must be under 150 words.\n- Do not include the disclaimer in your response; it will be added by the system.\n- User input: \"I'm having a lot of stress from work lately and i need help.\""
+      }
+    ]
+  }
+] 
+2025-10-29 15:33:56 PM INFO: GeminiService: stream completed successfully 
+2025-10-29 15:33:56 PM INFO: Stream finished for user 6900d53038ce155774f8749a. Finalizing session. 
+2025-10-29 15:37:19 PM INFO: GeminiService sending stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "i am burn out and my brain is exhausted"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "I hear you. Burnout and mental exhaustion can be incredibly draining. It sounds like you're carrying a heavy load right now. Can you tell me a little more about what's been going on that's led you to feel this way? Things like:\n\n*   What do you think are the primary sources of your burnout? (Work, relationships, personal expectations, etc.?)\n*   How long have you been feeling this way?\n*   What does \"exhausted\" feel like for you? (e.g., Difficulty concentrating? Physical fatigue? Loss of motivation?)\n\nNo pressure to share anything you're not comfortable with, but the more information you provide, the better I can understand and offer support.\n\nIn the meantime, please know that it's okay to acknowledge and honor your feelings. You deserve to rest and recharge.\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "its relationship that is causing the burnout. my girlfriend just left me after 14 years of relationship. i am so confused right now"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Oh, my heart goes out to you. Ending a 14-year relationship is a huge life event, and it's completely understandable that you're feeling burned out, exhausted, and confused right now. That's a lot to process.\n\nIt's okay to feel disoriented and overwhelmed. You've lost a significant part of your life and routine, and it's going to take time to adjust. Be kind to yourself during this period.\n\nDo you feel up to sharing a bit more about what's making you feel particularly burned out in this situation? Sometimes, just talking about it can help untangle some of the confusion. Or, if you prefer, we can focus on some immediate self-care strategies to help you cope with the exhaustion.\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "i live in gwagwalada Abuja, can you direct me to a therapist?"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "I understand you're looking for a therapist in Gwagwalada, Abuja. I don't have direct access to a real-time directory of therapists in your specific location. Information like that changes frequently.\n\nHowever, I can suggest some resources that might help you find a therapist in your area:\n\n*   **Online Directories:**\n    *   **Mental Health Nigeria:** This is a website dedicated to mental health resources in Nigeria. [https://mentalhealthnigeria.org/](https://mentalhealthnigeria.org/)\n    *   **Google:** You can try a Google search for \"therapists in Gwagwalada Abuja\" or \"psychologists in Gwagwalada Abuja.\"\n\nWhen you contact a potential therapist, it's a good idea to ask about their experience, fees, and areas of specialization to make sure they're a good fit for you. It's perfectly normal to \"shop around\" until you find someone you feel comfortable with.\n"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "I'm having a lot of stress from work lately."
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Oh, my dear, I'm so sorry to hear you're carrying a lot of stress from work right now. Work stress can be incredibly heavy, and it's completely understandable to feel overwhelmed by it. Please know you're not alone in experiencing this.\n\nIs there anything small you might be able to do just for yourself today, even for a few minutes, to find a tiny moment of peace? Or would you like to talk a bit more about what's making it feel so heavy? I'm here to listen, and I'm sending you so much strength and warmth."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "I'm having a lot of stress from work lately and i need help."
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Oh, sweetheart, I hear how much you're struggling with work stress, and it sounds incredibly tough. It's completely understandable to feel overwhelmed when things get so heavy. Please know you're not alone in feeling this way, and it takes real strength to acknowledge you need help.\n\nTake a deep breath with me for a moment. Even small pauses can create a little space. I'm here to listen without judgment. Would you like to share a little more about what feels most pressing right now, or just talk about what's on your mind? We can take this one step at a time, together."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "yes. i want to go somewhere quiete."
+      }
+    ]
+  }
+] 
+2025-10-29 15:37:28 PM INFO: GeminiService: stream completed successfully 
+2025-10-29 15:37:28 PM INFO: Stream finished for user 6900d53038ce155774f8749a. Finalizing session. 
+2025-10-29 15:58:27 PM INFO: Auth header for GET /api/chat/history: Masked 
+2025-10-29 15:58:27 PM ERROR: Authentication failed: Invalid or missing Authorization header 
+2025-10-29 15:58:27 PM WARN: GET /api/chat/history 401 8ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "user-agent": "PostmanRuntime/7.49.0",
+      "accept": "*/*",
+      "postman-token": "3965bbdc-f4bb-4f57-b336-13059fe5d2fe",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 401
+  },
+  "responseTime": 8
+}
+2025-10-29 16:00:07 PM INFO: Auth header for GET /api/chat/history: Present 
+2025-10-29 16:00:07 PM INFO: Decoded token: {"id":"6900d53038ce155774f8749a","isAdmin":false,"iat":1761677859,"exp":1761764259} 
+2025-10-29 16:00:07 PM INFO: Authenticated userID: 6900d53038ce155774f8749a for GET /api/chat/history 
+2025-10-29 16:00:07 PM INFO: Cache key for GET /api/chat/history: cache_GET_/api/chat/history_6900d53038ce155774f8749a 
+2025-10-29 16:00:07 PM INFO: Cache hit for key: cache_GET_/api/chat/history_6900d53038ce155774f8749a 
+2025-10-29 16:00:07 PM INFO: GET /api/chat/history 200 15ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.49.0",
+      "accept": "*/*",
+      "postman-token": "f2fc1e0c-92ff-4a6f-88fa-dda096ce75d1",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "41"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 15
+}
+2025-10-29 16:08:01 PM INFO: Auth header for GET /api/chat/history: Present 
+2025-10-29 16:08:01 PM INFO: Decoded token: {"id":"6900d53038ce155774f8749a","isAdmin":false,"iat":1761677859,"exp":1761764259} 
+2025-10-29 16:08:01 PM INFO: Authenticated userID: 6900d53038ce155774f8749a for GET /api/chat/history 
+2025-10-29 16:08:01 PM INFO: Cache key for GET /api/chat/history: cache_GET_/api/chat/history_6900d53038ce155774f8749a 
+2025-10-29 16:08:01 PM INFO: Cache miss for key: cache_GET_/api/chat/history_6900d53038ce155774f8749a 
+2025-10-29 16:08:01 PM INFO: GET /api/chat/history 200 72ms 
+{
+  "req": {
+    "url": "/api/chat/history",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.49.0",
+      "accept": "*/*",
+      "postman-token": "93733ae0-20fd-41fa-bcc3-a4bcc2f4e721",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "41"
+    },
+    "method": "GET",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/chat/history",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 72
+}
+2025-10-29 16:08:01 PM INFO: Cached response for key: cache_GET_/api/chat/history_6900d53038ce155774f8749a 
+2025-10-29 16:13:14 PM INFO: Starting application in development environment 
+2025-10-29 16:13:14 PM INFO: MongoDB connected 
+2025-10-29 16:13:14 PM INFO: Redis client initialized 
+2025-10-29 16:13:14 PM INFO: Redis connected 
+2025-10-29 16:13:14 PM INFO: Swagger UI available at /api-docs 
+2025-10-29 16:13:14 PM INFO: Express server initialized 
+2025-10-29 16:13:14 PM INFO: WebSocket server attached to HTTP server 
+2025-10-29 16:13:14 PM INFO: Server is running on port 3000 
+2025-10-29 16:35:05 PM INFO: Starting application in development environment 
+2025-10-29 16:35:05 PM INFO: MongoDB connected 
+2025-10-29 16:35:05 PM INFO: Redis client initialized 
+2025-10-29 16:35:05 PM INFO: Redis connected 
+2025-10-29 16:35:05 PM INFO: Swagger UI available at /api-docs 
+2025-10-29 16:35:05 PM INFO: Express server initialized 
+2025-10-29 16:35:05 PM INFO: WebSocket server attached to HTTP server 
+2025-10-29 16:35:05 PM INFO: Server is running on port 3000 
+2025-10-29 16:35:50 PM INFO: Token verified for User ID: 6900d53038ce155774f8749a 
+2025-10-29 16:35:50 PM INFO: New WebSocket connection established for user: 6900d53038ce155774f8749a 
+2025-10-29 16:36:00 PM INFO: GeminiService sending non-stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "Analyze the user's message below and respond with only one of these three tags, no other text: [OFF_TOPIC|CRISIS|SAFE].\nOFF_TOPIC: The message is a general knowledge question or blocked phrase.\nCRISIS: The message expresses self-harm or suicidal intent.\nSAFE: The message is related to mental health, anxiety, or general well-being.\nUser Message: \"i am stressed\""
+      }
+    ]
+  }
+] 
+2025-10-29 16:36:04 PM INFO: GeminiService: non-stream response generated successfully 
+2025-10-29 16:36:04 PM INFO: GeminiService sending stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "You are a warm, supportive mental wellness companion.\n- Your response must be under 150 words.\n- Do not include the disclaimer in your response; it will be added by the system.\n- User input: \"i am stressed\""
+      }
+    ]
+  }
+] 
+2025-10-29 16:36:05 PM ERROR: GeminiService.generateResponseStream error: {"error":{"message":"{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"The model is overloaded. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n","code":503,"status":"Service Unavailable"}} 
+2025-10-29 16:36:05 PM ERROR: Stream processing or finalization error for user 6900d53038ce155774f8749a: {"error":{"message":"{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"The model is overloaded. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n","code":503,"status":"Service Unavailable"}} 
+2025-10-29 16:38:35 PM INFO: WebSocket connection closed for user: 6900d53038ce155774f8749a 
+2025-10-29 16:38:47 PM WARN: WS connection denied: Missing token. 
+2025-10-29 16:38:48 PM WARN: WS connection denied: Missing token. 
+2025-10-29 16:38:49 PM WARN: WS connection denied: Missing token. 
+2025-10-29 16:39:02 PM WARN: JWT verification failed: jwt malformed 
+2025-10-29 16:39:02 PM ERROR: WS connection denied: Invalid token: jwt malformed 
+2025-10-29 16:39:37 PM INFO: Token verified for User ID: 6900d53038ce155774f8749a 
+2025-10-29 16:39:37 PM INFO: New WebSocket connection established for user: 6900d53038ce155774f8749a 
+2025-10-29 16:40:12 PM INFO: Auth header for POST /api/auth/logout: Present 
+2025-10-29 16:40:12 PM INFO: Decoded token: {"id":"6900d53038ce155774f8749a","isAdmin":false,"iat":1761677859,"exp":1761764259} 
+2025-10-29 16:40:12 PM INFO: Authenticated userID: 6900d53038ce155774f8749a for POST /api/auth/logout 
+2025-10-29 16:40:12 PM INFO: Token blacklisted for 3600s 
+2025-10-29 16:40:12 PM INFO: User logged out, token blacklisted 
+2025-10-29 16:40:12 PM INFO: POST /api/auth/logout 200 14ms 
+{
+  "req": {
+    "url": "/api/auth/logout",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.49.0",
+      "accept": "*/*",
+      "postman-token": "d410c097-1a47-4c61-9d27-06afabb10183",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "41"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/auth/logout",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 14
+}
+2025-10-29 16:41:00 PM INFO: GeminiService sending non-stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "Analyze the user's message below and respond with only one of these three tags, no other text: [OFF_TOPIC|CRISIS|SAFE].\nOFF_TOPIC: The message is a general knowledge question or blocked phrase.\nCRISIS: The message expresses self-harm or suicidal intent.\nSAFE: The message is related to mental health, anxiety, or general well-being.\nUser Message: \"i am stressed\""
+      }
+    ]
+  }
+] 
+2025-10-29 16:41:04 PM INFO: GeminiService: non-stream response generated successfully 
+2025-10-29 16:41:04 PM INFO: GeminiService sending stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "You are a warm, supportive mental wellness companion.\n- Your response must be under 150 words.\n- Do not include the disclaimer in your response; it will be added by the system.\n- User input: \"i am stressed\""
+      }
+    ]
+  }
+] 
+2025-10-29 16:41:10 PM INFO: GeminiService: stream completed successfully 
+2025-10-29 16:41:10 PM INFO: Stream finished for user 6900d53038ce155774f8749a. Finalizing session. 
+2025-10-29 16:50:23 PM INFO: WebSocket connection closed for user: 6900d53038ce155774f8749a 
+2025-10-29 19:13:54 PM INFO: Starting application in development environment 
+2025-10-29 19:13:54 PM INFO: MongoDB connected 
+2025-10-29 19:13:54 PM INFO: Redis client initialized 
+2025-10-29 19:13:54 PM INFO: Redis connected 
+2025-10-29 19:13:54 PM INFO: Swagger UI available at /api-docs 
+2025-10-29 19:13:54 PM INFO: Express server initialized 
+2025-10-29 19:13:54 PM INFO: WebSocket server attached to HTTP server 
+2025-10-29 19:13:54 PM INFO: Server is running on port 3000 

@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/genai": "^1.27.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "bull": "^4.16.5",
@@ -32,6 +33,7 @@
     "uuid": "^13.0.0",
     "winston": "^3.18.3",
     "winston-daily-rotate-file": "^5.0.0",
+    "ws": "^8.18.3",
     "yaml": "^2.8.1",
     "yamljs": "^0.3.0"
   },

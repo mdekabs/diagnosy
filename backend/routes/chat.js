@@ -3,126 +3,24 @@ import { authenticationVerifier, cacheMiddleware, pagination } from '../middlewa
 
 /**
  * ------------------------------------------------------------------
- *  Mental-Health Chat API Routes
- *  All business logic lives in ChatService.
+ * Mental-Health Chat API Routes
+ * All real-time chat is handled by the WebSocket (WS) endpoint.
+ * These HTTP routes are for utility functions (History, End Session).
  * ------------------------------------------------------------------
  */
 export default function chatRoutes(router) {
-  /**
-   * @swagger
-   * /chat/start:
-   *   post:
-   *     summary: Start a new mental health conversation
-   *     description: Begins a supportive chat about stress, anxiety, mood, or emotional well-being.
-   *     tags: [Chat]
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - message
-   *             properties:
-   *               message:
-   *                 type: string
-   *                 example: "I've been feeling really anxious at work."
-   *     responses:
-   *       200:
-   *         description: Supportive response generated
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 type:
-   *                   type: string
-   *                   example: success
-   *                 message:
-   *                   type: string
-   *                   example: I'm here to listen and support you.
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     advice:
-   *                       type: string
-   *                     isNewSession:
-   *                       type: boolean
-   *                     isCrisis:
-   *                       type: boolean
-   *                       description: If true, show emergency hotline immediately
-   *       400:
-   *         description: Invalid or off-topic message
-   *       401:
-   *         description: Unauthorized
-   */
-  router.post(
-    "/chat/start",
-    authenticationVerifier,
-    ChatController.createChat
-  );
 
-  /**
-   * @swagger
-   * /chat/continue:
-   *   post:
-   *     summary: Continue an existing mental health conversation
-   *     description: Send a follow-up message in the same emotional support session.
-   *     tags: [Chat]
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - message
-   *             properties:
-   *               message:
-   *                 type: string
-   *                 example: "What can I do to calm down right now?"
-   *     responses:
-   *       200:
-   *         description: Continued support
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 type:
-   *                   type: string
-   *                 message:
-   *                   type: string
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     advice:
-   *                       type: string
-   *                     isContinued:
-   *                       type: boolean
-   *                     isCrisis:
-   *                       type: boolean
-   *       400:
-   *         description: No active session or off-topic
-   *       401:
-   *         description: Unauthorized
-   */
-  router.post(
-    "/chat/continue",
-    authenticationVerifier,
-    ChatController.continueChat
-  );
+  // --------------------------------------------------------------
+  // NOTE: /chat/start and /chat/continue routes have been removed.
+  // The core chat functionality now flows through the WebSocket.
+  // --------------------------------------------------------------
 
   /**
    * @swagger
    * /chat/history:
    *   get:
    *     summary: Get full chat history
-   *     description: Returns the complete conversation (user + assistant messages).
+   *     description: Returns the complete conversation (user + assistant messages) stored in the database.
    *     tags: [Chat]
    *     security:
    *       - bearerAuth: []
@@ -149,6 +47,7 @@ export default function chatRoutes(router) {
    *               properties:
    *                 type:
    *                   type: string
+   *                   example: success
    *                 message:
    *                   type: string
    *                 data:
@@ -164,31 +63,33 @@ export default function chatRoutes(router) {
    *                             enum: [user, assistant]
    *                           content:
    *                             type: string
-   *                     startedAt:
-   *                       type: string
-   *                       format: date-time
-   *                     lastActive:
-   *                       type: string
-   *                       format: date-time
+   *                           startedAt:
+   *                             type: string
+   *                             format: date-time
+   *                           lastActive:
+   *                             type: string
+   *                             format: date-time
    *       404:
    *         description: No chat history
    *       401:
    *         description: Unauthorized
    */
   router.get(
-    "/chat/history",
+    '/chat/history',
     authenticationVerifier,
-    cacheMiddleware,   // optional: cache per user
-    pagination,        // optional: if you later paginate in service
+    cacheMiddleware,  // optional: cache per user
+    pagination,       // optional: if you later paginate in service
     ChatController.getChatHistory
   );
+
+  // ----------------------------------------------------------------
 
   /**
    * @swagger
    * /chat/end:
    *   post:
    *     summary: End and clear the current chat session
-   *     description: Deletes the conversation. User can start fresh.
+   *     description: Deletes the conversation from the database. User can start a fresh, new session.
    *     tags: [Chat]
    *     security:
    *       - bearerAuth: []
@@ -202,14 +103,17 @@ export default function chatRoutes(router) {
    *               properties:
    *                 type:
    *                   type: string
+   *                   example: success
    *                 message:
    *                   type: string
+   *                   example: Conversation ended. Take care.
    *       401:
    *         description: Unauthorized
    */
   router.post(
-    "/chat/end",
+    '/chat/end',
     authenticationVerifier,
     ChatController.endChat
   );
 }
+
