@@ -3,5 +3,4 @@
 .env.production
 node_modules/
 package-lock.json
-./v1/
-./logs/
+logs/

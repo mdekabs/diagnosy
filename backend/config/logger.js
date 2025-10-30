@@ -3,7 +3,7 @@ import expressWinston from 'express-winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import fs from 'fs';
 
-const LOG_DIR = 'v1/logs';
+const LOG_DIR = 'logs';
 
 // Ensure log directory exists, creating it if necessary
 if (!fs.existsSync(LOG_DIR)) {
