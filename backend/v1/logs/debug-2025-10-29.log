@@ -662,3 +662,11 @@
 2025-10-29 21:27:28 PM INFO: MongoDB disconnected 
 2025-10-29 21:27:28 PM INFO: MongoDB disconnected 
 2025-10-29 21:27:28 PM INFO: Redis disconnected 
+2025-10-29 21:56:20 PM INFO: Starting application in development environment 
+2025-10-29 21:56:20 PM INFO: MongoDB connected 
+2025-10-29 21:56:20 PM INFO: Redis client initialized 
+2025-10-29 21:56:20 PM INFO: Redis connected 
+2025-10-29 21:56:20 PM INFO: Swagger UI available at /api-docs 
+2025-10-29 21:56:20 PM INFO: Express server initialized 
+2025-10-29 21:56:20 PM INFO: WebSocket server attached to HTTP server 
+2025-10-29 21:56:20 PM INFO: Server is running on port 3000 

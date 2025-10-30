@@ -1,0 +1,8 @@
+2025-10-30 07:41:45 AM INFO: Starting application in development environment 
+2025-10-30 07:41:45 AM INFO: MongoDB connected 
+2025-10-30 07:41:45 AM INFO: Redis client initialized 
+2025-10-30 07:41:45 AM INFO: Redis connected 
+2025-10-30 07:41:45 AM INFO: Swagger UI available at /api-docs 
+2025-10-30 07:41:45 AM INFO: Express application initialized 
+2025-10-30 07:41:45 AM INFO: WebSocket server attached to HTTP server 
+2025-10-30 07:41:45 AM INFO: Server is running on port 3000 
