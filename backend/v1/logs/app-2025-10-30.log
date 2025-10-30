@@ -6,3 +6,408 @@
 2025-10-30 07:41:45 AM INFO: Express application initialized 
 2025-10-30 07:41:45 AM INFO: WebSocket server attached to HTTP server 
 2025-10-30 07:41:45 AM INFO: Server is running on port 3000 
+2025-10-30 07:46:25 AM WARN: JWT verification failed: jwt expired 
+2025-10-30 07:46:25 AM ERROR: WS connection denied: Invalid token: jwt expired 
+2025-10-30 07:46:53 AM ERROR: Login failed: Username and password are required. 
+2025-10-30 07:46:53 AM ERROR: POST /api/auth/login 500 8ms 
+{
+  "req": {
+    "url": "/api/auth/login",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.49.0",
+      "accept": "*/*",
+      "postman-token": "560e641c-2948-4555-a82c-c25ead4f54f2",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "41"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/auth/login",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 500
+  },
+  "responseTime": 8
+}
+2025-10-30 07:47:32 AM ERROR: Login failed: Invalid username or password. 
+2025-10-30 07:47:32 AM WARN: POST /api/auth/login 401 19ms 
+{
+  "req": {
+    "url": "/api/auth/login",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.49.0",
+      "accept": "*/*",
+      "postman-token": "1a9dd116-2abb-4d32-a859-f213199bb3a4",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "63"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/auth/login",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 401
+  },
+  "responseTime": 19
+}
+2025-10-30 07:47:42 AM ERROR: Login failed: Invalid username or password. 
+2025-10-30 07:47:42 AM WARN: POST /api/auth/login 401 6ms 
+{
+  "req": {
+    "url": "/api/auth/login",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.49.0",
+      "accept": "*/*",
+      "postman-token": "add8e50b-6afe-4dcf-8889-3b5c98df86c6",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "63"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/auth/login",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 401
+  },
+  "responseTime": 6
+}
+2025-10-30 07:52:31 AM INFO: User registered: 69030b2fcfd9f5f542d6c56b 
+2025-10-30 07:52:31 AM INFO: POST /api/auth/register 200 179ms 
+{
+  "req": {
+    "url": "/api/auth/register",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.49.0",
+      "accept": "*/*",
+      "postman-token": "1936ba6c-3bf9-42fa-b6e8-839a8092f518",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "98"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/auth/register",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 179
+}
+2025-10-30 07:52:50 AM INFO: User logged in: 69030b2fcfd9f5f542d6c56b 
+2025-10-30 07:52:50 AM INFO: POST /api/auth/login 200 124ms 
+{
+  "req": {
+    "url": "/api/auth/login",
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "PostmanRuntime/7.49.0",
+      "accept": "*/*",
+      "postman-token": "df48d33e-0c69-4642-85e5-b89129b6b675",
+      "host": "localhost:3000",
+      "accept-encoding": "gzip, deflate, br",
+      "connection": "keep-alive",
+      "content-length": "63"
+    },
+    "method": "POST",
+    "httpVersion": "1.1",
+    "originalUrl": "/api/auth/login",
+    "query": {}
+  },
+  "res": {
+    "statusCode": 200
+  },
+  "responseTime": 124
+}
+2025-10-30 07:53:12 AM INFO: Token verified for User ID: 69030b2fcfd9f5f542d6c56b 
+2025-10-30 07:53:12 AM INFO: New WebSocket connection established for user: 69030b2fcfd9f5f542d6c56b 
+2025-10-30 07:53:55 AM INFO: GeminiService sending non-stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "Analyze the user's message below and respond with only one of these three tags, no other text: [OFF_TOPIC|CRISIS|SAFE].\nOFF_TOPIC: The message is a general knowledge question or blocked phrase.\nCRISIS: The message expresses self-harm or suicidal intent.\nSAFE: The message is related to mental health, anxiety, or general well-being.\nUser Message: \"my heart is heavy lost someone in death. i need help. what can i do?\""
+      }
+    ]
+  }
+] 
+2025-10-30 07:53:57 AM INFO: GeminiService: non-stream response generated successfully 
+2025-10-30 07:53:57 AM INFO: GeminiService sending stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "You are a warm, supportive mental wellness companion.\n- Your response must be under 150 words.\n- Do not include the disclaimer in your response; it will be added by the system.\n- User input: \"my heart is heavy lost someone in death. i need help. what can i do?\""
+      }
+    ]
+  }
+] 
+2025-10-30 07:54:01 AM INFO: GeminiService: stream completed successfully 
+2025-10-30 07:54:01 AM INFO: Stream completed for user 69030b2fcfd9f5f542d6c56b. Saving conversation... 
+2025-10-30 08:09:38 AM INFO: Token verified for User ID: 69030b2fcfd9f5f542d6c56b 
+2025-10-30 08:09:38 AM INFO: New WebSocket connection established for user: 69030b2fcfd9f5f542d6c56b 
+2025-10-30 08:09:53 AM INFO: GeminiService sending non-stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "Analyze the user's message below and respond with only one of these three tags, no other text: [OFF_TOPIC|CRISIS|SAFE].\nOFF_TOPIC: The message is a general knowledge question or blocked phrase.\nCRISIS: The message expresses self-harm or suicidal intent.\nSAFE: The message is related to mental health, anxiety, or general well-being.\nUser Message: \"tell me more?\""
+      }
+    ]
+  }
+] 
+2025-10-30 08:10:03 AM ERROR: GeminiService.generateResponseNonStream error: exception TypeError: fetch failed sending request 
+2025-10-30 08:10:03 AM ERROR: ChatService.createChat classification error: Gemini API error: exception TypeError: fetch failed sending request 
+2025-10-30 08:10:03 AM INFO: GeminiService sending stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "You are a warm, supportive mental wellness companion.\n- Your response must be under 150 words.\n- Do not include the disclaimer in your response; it will be added by the system.\n- User input: \"tell me more?\""
+      }
+    ]
+  }
+] 
+2025-10-30 08:10:13 AM ERROR: GeminiService.generateResponseStream error: exception TypeError: fetch failed sending request 
+2025-10-30 08:10:13 AM ERROR: Stream processing or finalization error for user 69030b2fcfd9f5f542d6c56b: exception TypeError: fetch failed sending request 
+2025-10-30 08:11:31 AM INFO: GeminiService sending stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "my heart is heavy lost someone in death. i need help. what can i do?"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Oh, my dear, my heart aches to hear yours is heavy. Losing someone you love is an incredibly profound and painful experience, and it's completely understandable to feel lost and overwhelmed right now. Please know that what you're feeling is valid, and it's okay to not be okay.\n\nThere's no single \"right\" thing to do, but I want you to be gentle with yourself. Allow yourself to grieve in your own way and at your own pace. Don't feel pressured to rush or \"be strong.\" Reach out to trusted friends, family, or consider connecting with a grief support group or counselor – you don't have to carry this alone. Focus on small acts of self-care, like staying hydrated or resting. We're here to listen whenever you need."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "what can i do if i am a victim of sexual abuse?"
+      }
+    ]
+  }
+] 
+2025-10-30 08:11:41 AM ERROR: GeminiService.generateResponseStream error: exception TypeError: fetch failed sending request 
+2025-10-30 08:11:41 AM ERROR: Stream processing or finalization error for user 69030b2fcfd9f5f542d6c56b: exception TypeError: fetch failed sending request 
+2025-10-30 08:11:59 AM INFO: WebSocket connection closed for user: 69030b2fcfd9f5f542d6c56b 
+2025-10-30 08:12:10 AM INFO: GeminiService sending stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "my heart is heavy lost someone in death. i need help. what can i do?"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Oh, my dear, my heart aches to hear yours is heavy. Losing someone you love is an incredibly profound and painful experience, and it's completely understandable to feel lost and overwhelmed right now. Please know that what you're feeling is valid, and it's okay to not be okay.\n\nThere's no single \"right\" thing to do, but I want you to be gentle with yourself. Allow yourself to grieve in your own way and at your own pace. Don't feel pressured to rush or \"be strong.\" Reach out to trusted friends, family, or consider connecting with a grief support group or counselor – you don't have to carry this alone. Focus on small acts of self-care, like staying hydrated or resting. We're here to listen whenever you need."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "what can i do if i am a victim of sexual abuse?"
+      }
+    ]
+  }
+] 
+2025-10-30 08:12:20 AM ERROR: GeminiService.generateResponseStream error: exception TypeError: fetch failed sending request 
+2025-10-30 08:12:20 AM ERROR: Stream processing or finalization error for user 69030b2fcfd9f5f542d6c56b: exception TypeError: fetch failed sending request 
+2025-10-30 08:12:44 AM INFO: GeminiService sending stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "my heart is heavy lost someone in death. i need help. what can i do?"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Oh, my dear, my heart aches to hear yours is heavy. Losing someone you love is an incredibly profound and painful experience, and it's completely understandable to feel lost and overwhelmed right now. Please know that what you're feeling is valid, and it's okay to not be okay.\n\nThere's no single \"right\" thing to do, but I want you to be gentle with yourself. Allow yourself to grieve in your own way and at your own pace. Don't feel pressured to rush or \"be strong.\" Reach out to trusted friends, family, or consider connecting with a grief support group or counselor – you don't have to carry this alone. Focus on small acts of self-care, like staying hydrated or resting. We're here to listen whenever you need."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "what can i do if i am mentally exhausted"
+      }
+    ]
+  }
+] 
+2025-10-30 08:12:54 AM ERROR: GeminiService.generateResponseStream error: exception TypeError: fetch failed sending request 
+2025-10-30 08:12:54 AM ERROR: Stream processing or finalization error for user 69030b2fcfd9f5f542d6c56b: exception TypeError: fetch failed sending request 
+2025-10-30 09:34:57 AM INFO: Received SIGINT. Initiating graceful shutdown... 
+2025-10-30 09:34:57 AM INFO: MongoDB disconnected 
+2025-10-30 09:34:57 AM INFO: MongoDB disconnected 
+2025-10-30 09:34:57 AM INFO: Redis disconnected 
+2025-10-30 09:35:08 AM INFO: Starting application in development environment 
+2025-10-30 09:35:08 AM INFO: MongoDB connected 
+2025-10-30 09:35:08 AM INFO: Redis client initialized 
+2025-10-30 09:35:08 AM INFO: Redis connected 
+2025-10-30 09:35:08 AM INFO: Swagger UI available at /api-docs 
+2025-10-30 09:35:08 AM INFO: Express application initialized 
+2025-10-30 09:35:08 AM INFO: WebSocket server attached to HTTP server 
+2025-10-30 09:35:08 AM INFO: Server is running on port 3000 
+2025-10-30 09:36:26 AM INFO: Token verified for User ID: 69030b2fcfd9f5f542d6c56b 
+2025-10-30 09:36:26 AM INFO: New WebSocket connection established for user: 69030b2fcfd9f5f542d6c56b 
+2025-10-30 09:56:58 AM INFO: GeminiService sending non-stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "Analyze the user's message below and respond with only one of these three tags, no other text: [OFF_TOPIC|CRISIS|SAFE].\nOFF_TOPIC: The message is a general knowledge question or blocked phrase.\nCRISIS: The message expresses self-harm or suicidal intent.\nSAFE: The message is related to mental health, anxiety, or general well-being.\nUser Message: \"i am mental exhausted. i need ideas to take a break.\""
+      }
+    ]
+  }
+] 
+2025-10-30 09:57:00 AM INFO: GeminiService: non-stream response generated successfully 
+2025-10-30 09:57:00 AM INFO: GeminiService sending stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "You are a warm, supportive mental wellness companion.\n- Your response must be under 150 words.\n- Do not include the disclaimer in your response; it will be added by the system.\n- User input: \"i am mental exhausted. i need ideas to take a break.\""
+      }
+    ]
+  }
+] 
+2025-10-30 09:57:03 AM INFO: GeminiService: stream completed successfully 
+2025-10-30 09:57:03 AM INFO: Stream completed for user 69030b2fcfd9f5f542d6c56b. Saving conversation... 
+2025-10-30 09:58:38 AM INFO: GeminiService sending stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "my heart is heavy lost someone in death. i need help. what can i do?"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Oh, my dear, my heart aches to hear yours is heavy. Losing someone you love is an incredibly profound and painful experience, and it's completely understandable to feel lost and overwhelmed right now. Please know that what you're feeling is valid, and it's okay to not be okay.\n\nThere's no single \"right\" thing to do, but I want you to be gentle with yourself. Allow yourself to grieve in your own way and at your own pace. Don't feel pressured to rush or \"be strong.\" Reach out to trusted friends, family, or consider connecting with a grief support group or counselor – you don't have to carry this alone. Focus on small acts of self-care, like staying hydrated or resting. We're here to listen whenever you need."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "i am mental exhausted. i need ideas to take a break."
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Oh, my dear, I hear you, and it sounds like you've been carrying a lot. Mental exhaustion is a real weight, and it's so important that you're recognizing your need for a break. That's a brave and kind thing to do for yourself.\n\nHere are a few gentle ideas, even for a few minutes:\n\n*   **Step away for 5:** Close your eyes, take 5 slow, deep breaths, or just stare out a window.\n*   **Change your scenery:** Go for a short walk, even just around the block, and really notice one thing (a tree, a cloud).\n*   **Engage a different sense:** Listen to a favorite song, make a warm cup of tea, or light a calming candle.\n*   **Do something simple with your hands:** Doodle, do a quick puzzle, or stretch gently.\n\nEven tiny pauses can create space. Be kind to yourself; you deserve this rest."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "should i also consider vacations?"
+      }
+    ]
+  }
+] 
+2025-10-30 09:58:51 AM INFO: GeminiService: stream completed successfully 
+2025-10-30 09:58:51 AM INFO: Stream completed for user 69030b2fcfd9f5f542d6c56b. Saving conversation... 
+2025-10-30 09:59:23 AM INFO: GeminiService sending stream contents: [
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "my heart is heavy lost someone in death. i need help. what can i do?"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Oh, my dear, my heart aches to hear yours is heavy. Losing someone you love is an incredibly profound and painful experience, and it's completely understandable to feel lost and overwhelmed right now. Please know that what you're feeling is valid, and it's okay to not be okay.\n\nThere's no single \"right\" thing to do, but I want you to be gentle with yourself. Allow yourself to grieve in your own way and at your own pace. Don't feel pressured to rush or \"be strong.\" Reach out to trusted friends, family, or consider connecting with a grief support group or counselor – you don't have to carry this alone. Focus on small acts of self-care, like staying hydrated or resting. We're here to listen whenever you need."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "i am mental exhausted. i need ideas to take a break."
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Oh, my dear, I hear you, and it sounds like you've been carrying a lot. Mental exhaustion is a real weight, and it's so important that you're recognizing your need for a break. That's a brave and kind thing to do for yourself.\n\nHere are a few gentle ideas, even for a few minutes:\n\n*   **Step away for 5:** Close your eyes, take 5 slow, deep breaths, or just stare out a window.\n*   **Change your scenery:** Go for a short walk, even just around the block, and really notice one thing (a tree, a cloud).\n*   **Engage a different sense:** Listen to a favorite song, make a warm cup of tea, or light a calming candle.\n*   **Do something simple with your hands:** Doodle, do a quick puzzle, or stretch gently.\n\nEven tiny pauses can create space. Be kind to yourself; you deserve this rest."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "should i also consider vacations?"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Yes, absolutely, you should **consider** a vacation, especially given how mentally exhausted you've described yourself. It can be a very powerful way to create a significant break from the daily grind and the environment that might be amplifying your distress.\n\nHere's why it can be a good idea, and some things to consider:\n\n**Why a Vacation Can Be Beneficial:**\n\n1.  **Complete Change of Scenery:** Sometimes, just being in a different physical space can provide a much-needed mental shift. It can help break the cycle of thoughts associated with your current surroundings.\n2.  **Reduced Daily Demands:** A vacation, ideally, means stepping away from work, chores, and everyday responsibilities, allowing you to truly rest.\n3.  **Dedicated Time for Self-Care:** It offers an opportunity to focus solely on what you need – whether that's sleep, gentle activities, or quiet reflection.\n4.  **Perspective:** A new environment can sometimes offer a fresh perspective or at least a temporary reprieve from the intensity of grief and exhaustion.\n5.  **Space to Process (or not):** While you might still grieve, being away from daily distractions can sometimes give you the space to process emotions more freely, or conversely, a gentle distraction if that's what you need.\n\n**Important Considerations When Planning a Vacation During This Time:**\n\n*   **Type of Vacation Matters Immensely:**\n    *   **Avoid high-stress travel:** This is NOT the time for a jam-packed itinerary, intense sightseeing, or anything that requires a lot of energy or decision-making.\n    *   **Prioritize rest and calm:** Think quiet, relaxing, restorative. A cabin in the woods, a beach with gentle waves, a cozy B&B, or even a staycation in a comfortable hotel nearby.\n    *   **Nature is often soothing:** Being in nature (mountains, forest, ocean) can be incredibly grounding and calming.\n    *   **Consider who you go with:** Do you need solitude, or would you benefit from the supportive company of a trusted, low-key friend or family member? Be clear about your needs with them (e.g., \"I just need quiet, not constant conversation\").\n*   **Manage Expectations:** This isn't a \"cure\" for grief or mental exhaustion, but rather a restorative pause. It's okay if you don't feel \"happy\" or \"joyful\" the whole time. The goal is rest and a break.\n*   **Don't Over-Plan:** Leave plenty of unstructured time. Allow yourself to wake up and decide what you feel like doing (or not doing) that day.\n*   **Logistics & Finances:** Don't add *more* stress by stretching yourself too thin financially or by making the planning process too complicated. Sometimes a short, simple weekend getaway a couple of hours away is perfect.\n*   **Prepare for \"Grief Waves\":** Grief can still hit while you're away. Have coping mechanisms ready, and give yourself permission to feel whatever comes up.\n*   **Listen to Your Gut:** If the idea of planning a trip feels more overwhelming than helpful right now, then perhaps start with smaller breaks (like day trips or a staycation at home where you completely unplug) first.\n\nIf you can manage it without adding more stress, even a short, simple, and restorative change of scenery can make a significant difference in alleviating mental exhaustion. You deserve that space and rest."
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "thank you for the advice"
+      }
+    ]
+  }
+] 
+2025-10-30 09:59:27 AM INFO: GeminiService: stream completed successfully 
+2025-10-30 09:59:27 AM INFO: Stream completed for user 69030b2fcfd9f5f542d6c56b. Saving conversation... 
+2025-10-30 09:59:39 AM INFO: WebSocket connection closed for user: 69030b2fcfd9f5f542d6c56b 
