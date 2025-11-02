@@ -92,9 +92,7 @@ export class ChatService {
 
     // Prepare context (decrypt using getters)
     const context = chat.getDecryptedHistory().slice(-10);
-    const contextPrompt = context
-      .map((m) => `${m.role}: ${m.content}`)
-      .join(" | ");
+    const contextPrompt = context.map((m) => `${m.role}: ${m.content}`).join(" | ");
 
     const promptText = CONTINUE_PROMPT(contextPrompt, input);
     const messages = [
@@ -132,9 +130,7 @@ export class ChatService {
     }
 
     // Append disclaimer once per session
-    const disclaimerNote = !chat.disclaimerAdded
-      ? `\n\n_${DISCLAIMER}_`
-      : "";
+    const disclaimerNote = !chat.disclaimerAdded ? `\n\n_${DISCLAIMER}_` : "";
     const fullResponse = `${finalResponse}${disclaimerNote}`;
 
     // Save both user and assistant turns (encrypted automatically)
@@ -179,6 +175,30 @@ export class ChatService {
   }
 
   /**
+   * Retrieve a specific chat by chatId (decrypted).
+   */
+  static async getChatById(chatId) {
+    if (!chatId) throw new Error("Chat ID is required.");
+
+    const chat = await Chat.findById(chatId);
+    if (!chat) throw new Error(M.CHAT_NOT_FOUND);
+
+    const history = chat.getDecryptedHistory();
+
+    return {
+      status: STATUS.SUCCESS,
+      message: M.RESPONSE_SUCCESS,
+      data: {
+        chatId: chat._id,
+        userID: chat.userID,
+        history,
+        startedAt: chat.createdAt,
+        lastActive: chat.updatedAt,
+      },
+    };
+  }
+
+  /**
    * Clear all messages but keep the chat document.
    */
   static async clearChat(userID) {
@@ -203,3 +223,4 @@ export class ChatService {
     };
   }
 }
+

@@ -7,7 +7,7 @@ import { logger } from "../config/index.js";
 /**
  * ------------------------------------------------------------------
  *  ChatController – HTTP-only layer
- *  Handles chat history retrieval.
+ *  Handles chat-related HTTP requests.
  * ------------------------------------------------------------------
  */
 export class ChatController {
@@ -24,6 +24,29 @@ export class ChatController {
       );
     } catch (err) {
       logger.error(`getChatHistory: ${err.message}`);
+      responseHandler(
+        res,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "error",
+        err.message
+      );
+    }
+  }
+
+  /** GET /api/chat/:id */
+  static async getChatById(req, res) {
+    try {
+      const chatId = req.params.id;
+      const result = await ChatService.getChatById(chatId, req.userID);
+      responseHandler(
+        res,
+        HttpStatus.OK,
+        result.status,
+        result.message,
+        result.data
+      );
+    } catch (err) {
+      logger.error(`getChatById: ${err.message}`);
       responseHandler(
         res,
         HttpStatus.INTERNAL_SERVER_ERROR,
