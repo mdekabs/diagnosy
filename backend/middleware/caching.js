@@ -4,73 +4,63 @@ import HttpStatus from 'http-status-codes';
 
 export const cacheMiddleware = async (req, res, next) => {
   try {
+    // Skip caching for non-GET requests
+    if (req.method !== 'GET') return next();
+
     const userId = req.userID || req.guestId;
-    if (!userId && req.method === 'GET') {
+    if (!userId) {
       logger.error(`Cache middleware: Missing userID for ${req.method} ${req.originalUrl}`);
-      return responseHandler(res, HttpStatus.UNAUTHORIZED, 'error', 'Authentication required for cached route');
+      return responseHandler(res, HttpStatus.UNAUTHORIZED, 'error', 'Authentication required');
     }
 
-    const cacheKey = `cache_${req.method}_${req.originalUrl}_${userId || 'anonymous'}`;
-    logger.info(`Cache key for ${req.method} ${req.originalUrl}: ${cacheKey}`);
-    
+    const cacheKey = `cache_${req.originalUrl}_${userId}`;
     const redisClient = RedisConfig.getClient();
+
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
-      logger.info(`Cache hit for key: ${cacheKey}`);
+      logger.info(`Cache hit: ${cacheKey}`);
       return res.status(HttpStatus.OK).json(JSON.parse(cachedData));
     }
-    
-    logger.info(`Cache miss for key: ${cacheKey}`);
-    res.locals.cacheKey = cacheKey;
-    
-    // Override res.json to cache GET responses only
+
+    logger.info(`Cache miss: ${cacheKey}`);
+
+    // Override res.json to cache GET responses
     const originalJson = res.json;
     res.json = function (data) {
-      if (req.method === 'GET' && !res.headersSent) {
-        redisClient.set(cacheKey, JSON.stringify(data), 'EX', 3600)
-          .then(() => logger.info(`Cached response for key: ${cacheKey}`))
-          .catch(err => logger.error(`Failed to cache response for ${cacheKey}: ${err.message}`));
-      }
+      redisClient
+        .set(cacheKey, JSON.stringify(data), 'EX', 3600)
+        .then(() => logger.info(`Cached response for ${cacheKey}`))
+        .catch(err => logger.error(`Failed to cache response: ${err.message}`));
       return originalJson.call(this, data);
     };
-    
+
     next();
   } catch (err) {
-    logger.error(`Cache middleware error for ${req.method} ${req.originalUrl}: ${err.message}`);
+    logger.error(`Cache middleware error: ${err.message}`);
     next();
   }
 };
 
-// Clear cache after mutations
 export const clearCache = async (req, res, next) => {
-  const userId = req.userID || req.guestId;
-  if (userId) {
-    // Clear both POST and GET /api/chat/history caches
-    const cacheKeys = [
-      `cache_${req.method}_${req.originalUrl}_${userId}`,
-      `cache_GET_/api/chat/history_${userId}`
-    ];
-    try {
-      const redisClient = RedisConfig.getClient();
-      await redisClient.del(cacheKeys);
-      logger.info(`Cache cleared for keys: ${cacheKeys.join(', ')}`);
-    } catch (err) {
-      logger.error(`Clear cache error for ${cacheKeys.join(', ')}: ${err.message}`);
-    }
-  }
-  next();
-};
-
-// Clean invalid guest_chat:null keys
-export const cleanInvalidCache = async () => {
   try {
+    // Only clear on write operations
+    if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) return next();
+
+    const userId = req.userID || req.guestId;
+    if (!userId) return next();
+
     const redisClient = RedisConfig.getClient();
-    const keys = await redisClient.keys('guest_chat:null');
-    if (keys.length > 0) {
-      await redisClient.del(keys);
-      logger.info(`Cleaned ${keys.length} invalid guest_chat:null keys`);
+
+    // Find all cache keys for that user
+    const userKeys = await redisClient.keys(`cache_*_${userId}`);
+    if (userKeys.length > 0) {
+      await redisClient.del(userKeys);
+      logger.info(`Cleared ${userKeys.length} cache keys for user: ${userId}`);
     }
+
+    next();
   } catch (err) {
-    logger.error(`Error cleaning invalid cache keys: ${err.message}`);
+    logger.error(`Error clearing cache: ${err.message}`);
+    next();
   }
 };
