@@ -26,7 +26,7 @@ export class AuthService {
     const user = await newUser.save();
 
     logger.info(`User registered: ${user._id}`);
-    return { userId: user._id.toString() };
+   // return { userId: user._id.toString() };
   }
 
   static async loginUser({ username, password }) {
