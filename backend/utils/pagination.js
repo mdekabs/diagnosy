@@ -31,7 +31,7 @@ function sanitizePaginationParams(page, limit) {
  * @returns {Array} - Array of HATEOAS links.
  */
 function generatePaginationLinks(page, limit, totalItems, baseUrl) {
-  const totalPages = Math.ceil(totalItems / limit);
+  const totalPages = Math.max(1, Math.ceil(totalItems / limit));
   const makeLink = (p) =>
     `${baseUrl}?${PAGINATION_CONSTANTS.PAGE_PARAM}=${p}&${PAGINATION_CONSTANTS.LIMIT_PARAM}=${limit}`;
 

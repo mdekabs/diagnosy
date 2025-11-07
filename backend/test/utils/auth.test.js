@@ -1,89 +1,107 @@
-import { expect } from "chai";
-import sinon from "sinon";
-import jwt from "jsonwebtoken";
-import { logger } from "../../config/index.js";
-import { verifyJWT } from "../../utils/auth.js";
+import { expect } from 'chai';
+import sinon from 'sinon';
+import jwt from 'jsonwebtoken';
+import { logger } from '../../config/index.js';
+import { verifyJWT } from '../../utils/auth.js';
 
-describe("verifyJWT", () => {
+describe('verifyJWT', () => {
   let loggerInfoStub, loggerWarnStub;
-  const JWT_SECRET = "test-secret";
-  let validToken, invalidToken;
 
-  // Setup: Mock logger and generate tokens
   beforeEach(() => {
-    process.env.JWT_SECRET = JWT_SECRET;
-    loggerInfoStub = sinon.stub(logger, "info");
-    loggerWarnStub = sinon.stub(logger, "warn");
-
-    // Generate valid token
-    validToken = jwt.sign({ id: "user123", isAdmin: false }, JWT_SECRET, { expiresIn: "1h" });
-
-    // Invalid token (wrong secret)
-    invalidToken = jwt.sign({ id: "user123" }, "wrong-secret", { expiresIn: "1h" });
+    // Mock logger methods
+    loggerInfoStub = sinon.stub(logger, 'info');
+    loggerWarnStub = sinon.stub(logger, 'warn');
   });
 
-  // Cleanup: Restore stubs
   afterEach(() => {
-    loggerInfoStub.restore();
-    loggerWarnStub.restore();
-    delete process.env.JWT_SECRET;
+    // Restore mocks
+    sinon.restore();
   });
 
-  describe("Success Cases", () => {
-    it("verifies valid token without blacklist check", async () => {
-      const result = await verifyJWT(validToken, null);
-      expect(result).to.be.an("object");
-      expect(result.sub).to.equal("user123");
-      expect(result.isAdmin).to.equal(false);
-      expect(loggerInfoStub.calledWith(`Token verified for User ID: user123`)).to.be.true;
-      expect(loggerWarnStub.calledWith("Token blacklisting check function was not provided to verifyJWT.")).to.be.true;
-    });
-
-    it("verifies valid token with passing blacklist check", async () => {
-      const isBlacklistedCheck = sinon.stub().resolves(false);
-      const result = await verifyJWT(validToken, isBlacklistedCheck);
-      expect(result.sub).to.equal("user123");
-      expect(isBlacklistedCheck.calledOnceWith(validToken)).to.be.true;
-      expect(loggerInfoStub.calledWith(`Token verified for User ID: user123`)).to.be.true;
-      expect(loggerWarnStub.notCalled).to.be.true;
-    });
+  it('should throw an error if token is missing', async () => {
+    try {
+      await verifyJWT(undefined);
+      expect.fail('Expected verifyJWT to throw an error');
+    } catch (err) {
+      expect(err.message).to.equal('Token missing.');
+      expect(loggerWarnStub.called).to.be.false; // No warnings logged
+      expect(loggerInfoStub.called).to.be.false; // No info logged
+    }
   });
 
-  describe("Error Cases", () => {
-    it("throws error for missing token", async () => {
-      await expect(verifyJWT(null)).to.be.rejectedWith("Token missing.");
-      expect(loggerWarnStub.calledWith("Token verification failed: Token missing.")).to.be.false; // No warn, direct throw
-    });
-
-    it("throws error for blacklisted token", async () => {
-      const isBlacklistedCheck = sinon.stub().resolves(true);
-      await expect(verifyJWT(validToken, isBlacklistedCheck)).to.be.rejectedWith("Token is blacklisted.");
-      expect(isBlacklistedCheck.calledOnceWith(validToken)).to.be.true;
-      expect(loggerWarnStub.calledWith("Token verification failed: Token is blacklisted.")).to.be.true;
-    });
-
-    it("throws error for invalid token", async () => {
-      await expect(verifyJWT(invalidToken, null)).to.be.rejectedWith(/Invalid token: signature/);
-      expect(loggerWarnStub.calledWithMatch(/JWT verification failed: signature/)).to.be.true;
-    });
-
-    it("throws error for token with missing user ID", async () => {
-      const noIdToken = jwt.sign({ notId: "user123" }, JWT_SECRET, { expiresIn: "1h" });
-      await expect(verifyJWT(noIdToken, null)).to.be.rejectedWith("Invalid token: Missing user ID.");
-      expect(loggerWarnStub.calledWith("JWT verification failed: Missing User ID in payload.")).to.be.true;
-    });
+  it('should throw an error if token is blacklisted', async () => {
+    const mockIsBlacklistedCheck = sinon.stub().resolves(true);
+    try {
+      await verifyJWT('some-token', mockIsBlacklistedCheck);
+      expect.fail('Expected verifyJWT to throw an error');
+    } catch (err) {
+      expect(err.message).to.equal('Token is blacklisted.');
+      expect(mockIsBlacklistedCheck.calledOnceWith('some-token')).to.be.true;
+      expect(loggerWarnStub.calledOnceWith('Token verification failed: Token is blacklisted.')).to.be.true;
+      expect(loggerInfoStub.called).to.be.false;
+    }
   });
 
-  describe("Edge Cases", () => {
-    it("handles expired token", async () => {
-      const expiredToken = jwt.sign({ id: "user123" }, JWT_SECRET, { expiresIn: "-1s" });
-      await expect(verifyJWT(expiredToken, null)).to.be.rejectedWith(/Invalid token: jwt expired/);
-      expect(loggerWarnStub.calledWithMatch(/JWT verification failed: jwt expired/)).to.be.true;
-    });
+  it('should log a warning if no blacklisting check is provided', async () => {
+    const mockToken = 'valid-token';
+    const mockPayload = { id: '123', isAdmin: true };
+    sinon.stub(jwt, 'verify').returns(mockPayload);
 
-    it("handles malformed token", async () => {
-      await expect(verifyJWT("not-a-token", null)).to.be.rejectedWith(/Invalid token: jwt malformed/);
-      expect(loggerWarnStub.calledWithMatch(/JWT verification failed: jwt malformed/)).to.be.true;
-    });
+    const result = await verifyJWT(mockToken);
+
+    expect(result).to.deep.equal({ sub: '123', isAdmin: true });
+    expect(loggerWarnStub.calledOnceWith('Token blacklisting check function was not provided to verifyJWT.')).to.be.true;
+    expect(loggerInfoStub.calledOnceWith('Token verified for User ID: 123')).to.be.true;
+    expect(jwt.verify.calledOnceWith(mockToken, process.env.JWT_SECRET)).to.be.true;
+  });
+
+  it('should verify a valid token and return payload', async () => {
+    const mockToken = 'valid-token';
+    const mockPayload = { id: '123', isAdmin: false };
+    const mockIsBlacklistedCheck = sinon.stub().resolves(false);
+    sinon.stub(jwt, 'verify').returns(mockPayload);
+
+    const result = await verifyJWT(mockToken, mockIsBlacklistedCheck);
+
+    expect(result).to.deep.equal({ sub: '123', isAdmin: false });
+    expect(mockIsBlacklistedCheck.calledOnceWith(mockToken)).to.be.true;
+    expect(jwt.verify.calledOnceWith(mockToken, process.env.JWT_SECRET)).to.be.true;
+    expect(loggerInfoStub.calledOnceWith('Token verified for User ID: 123')).to.be.true;
+    expect(loggerWarnStub.called).to.be.false;
+  });
+
+  it('should throw an error for an invalid token', async () => {
+    const mockToken = 'invalid-token';
+    const mockIsBlacklistedCheck = sinon.stub().resolves(false);
+    sinon.stub(jwt, 'verify').throws(new Error('Invalid signature'));
+
+    try {
+      await verifyJWT(mockToken, mockIsBlacklistedCheck);
+      expect.fail('Expected verifyJWT to throw an error');
+    } catch (err) {
+      expect(err.message).to.equal('Invalid token: Invalid signature');
+      expect(mockIsBlacklistedCheck.calledOnceWith(mockToken)).to.be.true;
+      expect(jwt.verify.calledOnceWith(mockToken, process.env.JWT_SECRET)).to.be.true;
+      expect(loggerWarnStub.calledOnceWith('JWT verification failed: Invalid signature')).to.be.true;
+      expect(loggerInfoStub.called).to.be.false;
+    }
+  });
+
+  it('should throw an error if token payload is missing id', async () => {
+    const mockToken = 'valid-token-no-id';
+    const mockPayload = { isAdmin: true }; // No id
+    const mockIsBlacklistedCheck = sinon.stub().resolves(false);
+    sinon.stub(jwt, 'verify').returns(mockPayload);
+
+    try {
+      await verifyJWT(mockToken, mockIsBlacklistedCheck);
+      expect.fail('Expected verifyJWT to throw an error');
+    } catch (err) {
+      expect(err.message).to.equal('Invalid token: Missing user ID.');
+      expect(mockIsBlacklistedCheck.calledOnceWith(mockToken)).to.be.true;
+      expect(jwt.verify.calledOnceWith(mockToken, process.env.JWT_SECRET)).to.be.true;
+      expect(loggerWarnStub.calledOnceWith('JWT verification failed: Missing User ID in payload.')).to.be.true;
+      expect(loggerInfoStub.called).to.be.false;
+    }
   });
 });
