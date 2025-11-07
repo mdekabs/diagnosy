@@ -14,13 +14,16 @@ export class ChatController {
   /** GET /api/chat/history */
   static async getChatHistory(req, res) {
     try {
-      const result = await ChatService.getChatHistory(req.userID);
+      const { page, limit } = req.query;
+      const baseUrl = `${req.protocol}://${req.get("host")}${req.originalUrl.split("?")[0]}`;
+      const result = await ChatService.getChatHistory(req.userID, page, limit, baseUrl);
       responseHandler(
         res,
         HttpStatus.OK,
         result.status,
         result.message,
-        result.data
+        result.data,
+        result.pagination
       );
     } catch (err) {
       logger.error(`getChatHistory: ${err.message}`);
@@ -37,13 +40,16 @@ export class ChatController {
   static async getChatById(req, res) {
     try {
       const chatId = req.params.id;
-      const result = await ChatService.getChatById(chatId, req.userID);
+      const { page, limit } = req.query;
+      const baseUrl = `${req.protocol}://${req.get("host")}${req.originalUrl.split("?")[0]}`;
+      const result = await ChatService.getChatById(chatId, page, limit, baseUrl);
       responseHandler(
         res,
         HttpStatus.OK,
         result.status,
         result.message,
-        result.data
+        result.data,
+        result.pagination
       );
     } catch (err) {
       logger.error(`getChatById: ${err.message}`);
@@ -58,4 +64,3 @@ export class ChatController {
 }
 
 export default ChatController;
-

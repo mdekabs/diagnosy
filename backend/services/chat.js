@@ -13,6 +13,7 @@ import {
   isCrisis,
   isBlocked,
 } from "../utils/chat_helpers.js";
+import { sanitizePaginationParams, generatePaginationLinks } from "../utils/pagination.js";
 
 /**
  * ChatService
@@ -133,9 +134,9 @@ export class ChatService {
     const disclaimerNote = !chat.disclaimerAdded ? `\n\n_${DISCLAIMER}_` : "";
     const fullResponse = `${finalResponse}${disclaimerNote}`;
 
-    // Save both user and assistant turns (encrypted automatically)
+    // Save both user and assistant turns (encrypted automatically via setter)
     await chat.addMessage("user", input);
-    await chat.addMessage("assistant", finalResponse);
+    await chat.addMessage("assistant", fullResponse);
 
     // Mark disclaimer added
     chat.disclaimerAdded = true;
@@ -155,35 +156,105 @@ export class ChatService {
   }
 
   /**
-   * Retrieve decrypted chat history for a user.
+   * Retrieve decrypted chat history for a user with database-level pagination and HATEOAS.
    */
-  static async getChatHistory(userID) {
-    const chat = await Chat.findOne({ userID: toId(userID) });
-    if (!chat) throw new Error(M.CHAT_NOT_FOUND);
+  static async getChatHistory(userID, page, limit, baseUrl) {
+    const { page: sanitizedPage, limit: sanitizedLimit } = sanitizePaginationParams(page, limit);
+    const userIdObj = toId(userID);
 
-    const history = chat.getDecryptedHistory();
+    // Step 1: Get total items count
+    const chat = await Chat.findOne({ userID: userIdObj });
+    if (!chat) throw new Error(M.CHAT_NOT_FOUND);
+    const totalItems = chat.history.length;
+
+    // Step 2: Aggregate to paginate history array
+    const pipeline = [
+      { $match: { userID: userIdObj } },
+      { $unwind: "$history" },
+      { $sort: { "history.timestamp": -1 } }, // Ensure sorting by timestamp
+      { $skip: (sanitizedPage - 1) * sanitizedLimit },
+      { $limit: sanitizedLimit },
+      {
+        $project: {
+          role: "$history.role",
+          content: "$history.content",
+          timestamp: "$history.timestamp",
+        },
+      },
+    ];
+
+    const paginatedHistory = await Chat.aggregate(pipeline).option({ getters: true });
+
+    // Step 3: Decrypt history using Mongoose getters
+    // Since toJSON: { getters: true } is set, content is automatically decrypted
+    const decryptedHistory = paginatedHistory.map((msg) => ({
+      role: msg.role,
+      content: msg.content, // Decrypted by getter
+      timestamp: msg.timestamp,
+    }));
+
+    // Step 4: Calculate pagination metadata
+    const totalPages = Math.ceil(totalItems / sanitizedLimit);
 
     return {
       status: STATUS.SUCCESS,
       message: M.RESPONSE_SUCCESS,
       data: {
-        history,
+        history: decryptedHistory,
         startedAt: chat.createdAt,
         lastActive: chat.updatedAt,
+      },
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: sanitizedPage,
+        limit: sanitizedLimit,
+        links: generatePaginationLinks(sanitizedPage, sanitizedLimit, totalItems, baseUrl),
       },
     };
   }
 
   /**
-   * Retrieve a specific chat by chatId (decrypted).
+   * Retrieve a specific chat by chatId (decrypted) with database-level pagination and HATEOAS.
    */
-  static async getChatById(chatId) {
+  static async getChatById(chatId, page, limit, baseUrl) {
     if (!chatId) throw new Error("Chat ID is required.");
 
+    const { page: sanitizedPage, limit: sanitizedLimit } = sanitizePaginationParams(page, limit);
+
+    // Step 1: Get total items count
     const chat = await Chat.findById(chatId);
     if (!chat) throw new Error(M.CHAT_NOT_FOUND);
+    const totalItems = chat.history.length;
 
-    const history = chat.getDecryptedHistory();
+    // Step 2: Aggregate to paginate history array
+    const pipeline = [
+      { $match: { _id: toId(chatId) } },
+      { $unwind: "$history" },
+      { $sort: { "history.timestamp": -1 } }, // Ensure sorting by timestamp
+      { $skip: (sanitizedPage - 1) * sanitizedLimit },
+      { $limit: sanitizedLimit },
+      {
+        $project: {
+          role: "$history.role",
+          content: "$history.content",
+          timestamp: "$history.timestamp",
+        },
+      },
+    ];
+
+    const paginatedHistory = await Chat.aggregate(pipeline).option({ getters: true });
+
+    // Step 3: Decrypt history using Mongoose getters
+    // Since toJSON: { getters: true } is set, content is automatically decrypted
+    const decryptedHistory = paginatedHistory.map((msg) => ({
+      role: msg.role,
+      content: msg.content, // Decrypted by getter
+      timestamp: msg.timestamp,
+    }));
+
+    // Step 4: Calculate pagination metadata
+    const totalPages = Math.ceil(totalItems / sanitizedLimit);
 
     return {
       status: STATUS.SUCCESS,
@@ -191,9 +262,16 @@ export class ChatService {
       data: {
         chatId: chat._id,
         userID: chat.userID,
-        history,
+        history: decryptedHistory,
         startedAt: chat.createdAt,
         lastActive: chat.updatedAt,
+      },
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: sanitizedPage,
+        limit: sanitizedLimit,
+        links: generatePaginationLinks(sanitizedPage, sanitizedLimit, totalItems, baseUrl),
       },
     };
   }
