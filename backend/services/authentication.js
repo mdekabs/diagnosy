@@ -1,187 +1,200 @@
-import jwt from "jsonwebtoken";
-import crypto from "crypto";
-import { emailQueue } from "../jobs/queues/email_queue.js";
-import { generatePasswordResetEmail } from "../utils/index.js";
-import { updateBlacklist } from "../middleware/index.js";
-import User from "../models/user.js";
-import { logger } from "../config/index.js";
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import { emailQueue } from '../jobs/queues/email_queue.js';
+import { generatePasswordResetEmail } from '../utils/index.js';
+import { updateBlacklist } from '../middleware/index.js';
+import User from '../models/user.js';
+import { logger } from '../config/index.js';
 
 // --- Constants ---
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRATION = "1d"; // Access token lifetime
+const JWT_SECRET = process.env.JWT_SECRET ?? '';
+const JWT_EXPIRATION = '1d';
 const PASSWORD_RESET_EXPIRATION = 3600000; // 1 hour in ms
 const TOKEN_BYTES = 32;
+const ERRORS = {
+  MISSING_FIELDS: 'Username, email, and password are required.',
+  EMAIL_IN_USE: 'Email is already in use.',
+  INVALID_CREDENTIALS: 'Invalid username or password.',
+  ACCOUNT_LOCKED: (time) => `Account locked. Try again after ${time}.`,
+  MISSING_TOKEN: 'Token is required.',
+  INVALID_TOKEN: 'Invalid or expired reset token.',
+  MISSING_TOKEN_PASSWORD: 'Token and new password are required.',
+  USER_NOT_FOUND: 'User not found.',
+  INVALID_USER_TOKEN: 'Invalid or missing user token.',
+  LOGOUT_FAILED: (msg) => `Logout failed: ${msg}`,
+};
+
+/**
+ * @typedef {Object} UserCredentials
+ * @property {string} username - User's username
+ * @property {string} email - User's email address
+ * @property {string} password - User's password
+ */
+
+/**
+ * @typedef {Object} LoginCredentials
+ * @property {string} username - User's username
+ * @property {string} password - User's password
+ */
+
+/**
+ * @typedef {Object} ResetPasswordData
+ * @property {string} token - Password reset token
+ * @property {string} newPassword - New password to set
+ */
 
 /**
  * AuthService
- * -------------------------------------------------------------
- * Handles registration, login, logout, password recovery,
- * and authenticated user retrieval.
- * -------------------------------------------------------------
+ * @class
+ * @description Manages user authentication operations: registration, login, logout, password recovery, and user details retrieval.
  */
-export class AuthService {
+export const AuthService = {
   /**
-   * Register a new user
+   * Registers a new user with provided credentials
+   * @async
+   * @param {UserCredentials} credentials - User registration data
+   * @returns {Promise<{status: string, message: string}>} Registration result
+   * @throws {Error} If credentials are incomplete or email is in use
    */
-  static async createUser({ username, email, password }) {
-    if (!username || !email || !password) {
-      throw new Error("Username, email, and password are required.");
-    }
+  createUser: async ({ username, email, password } = {}) => {
+    if (!username || !email || !password) throw new Error(ERRORS.MISSING_FIELDS);
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw new Error("Email is already in use.");
-    }
+    const existingUser = await User.findOne({ email }).exec();
+    if (existingUser) throw new Error(ERRORS.EMAIL_IN_USE);
 
-    const newUser = new User({ username, email, password });
-    const savedUser = await newUser.save();
-
-    logger.info(`User registered successfully: ${savedUser._id}`);
-    return { status: "success", message: "User registered successfully" };
-  }
+    const user = await new User({ username, email, password }).save();
+    logger.info(`User registered: ${user._id}`);
+    return { status: 'success', message: 'User registered successfully' };
+  },
 
   /**
-   * Login user (stateless session)
-   * - Verifies credentials
-   * - Updates login attempts and lastLogin timestamp
-   * - Returns JWT signed with session timestamp
+   * Authenticates a user and generates a JWT token
+   * @async
+   * @param {LoginCredentials} credentials - User login credentials
+   * @returns {Promise<{status: string, message: string, data: {userId: string, token: string}}>} Login result
+   * @throws {Error} If credentials are invalid or account is locked
    */
-  static async loginUser({ username, password }) {
-    if (!username || !password) {
-      throw new Error("Username and password are required.");
-    }
+  loginUser: async ({ username, password } = {}) => {
+    if (!username || !password) throw new Error(ERRORS.MISSING_FIELDS);
 
-    const user = await User.findOne({ username });
-    if (!user) {
-      throw new Error("Invalid username or password.");
-    }
+    const user = await User.findOne({ username }).exec();
+    if (!user) throw new Error(ERRORS.INVALID_CREDENTIALS);
 
-    // Check lock state
     if (!user.canLogin()) {
-      throw new Error(
-        `Account locked. Try again after ${new Date(
-          user.lockUntil
-        ).toLocaleTimeString()}`
-      );
+      throw new Error(ERRORS.ACCOUNT_LOCKED(new Date(user.lockUntil).toLocaleTimeString()));
     }
 
-    // Verify password
-    const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) {
+    if (!(await user.comparePassword(password))) {
       await user.incrementLoginAttempts();
-      throw new Error("Incorrect password.");
+      throw new Error(ERRORS.INVALID_CREDENTIALS);
     }
 
-    // Reset login attempts & update lastLogin in the model
     const { currentLoginTime } = await User.recordLoginSuccess(user._id);
-
-    // Generate JWT with embedded session timestamp
-    const accessToken = jwt.sign(
-      {
-        id: user._id.toString(),
-        isAdmin: user.isAdmin,
-        iat_session: currentLoginTime, // timestamp used for stateless validation
-      },
+    const token = jwt.sign(
+      { id: user._id.toString(), isAdmin: user.isAdmin ?? false, iat_session: currentLoginTime },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRATION }
     );
 
-    logger.info(`User login successful: ${user._id}`);
+    logger.info(`User login: ${user._id}`);
     return {
-      status: "success",
-      message: "Login successful",
-      data: { userId: user._id.toString(), token: accessToken },
+      status: 'success',
+      message: 'Login successful',
+      data: { userId: user._id.toString(), token },
     };
-  }
+  },
 
   /**
-   * Logout user (adds token to Redis blacklist)
+   * Logs out a user by blacklisting their token
+   * @async
+   * @param {string} token - JWT token to blacklist
+   * @returns {Promise<{status: string, message: string}>} Logout result
+   * @throws {Error} If token is missing or blacklisting fails
    */
-  static async logoutUser(token) {
-    if (!token) throw new Error("Token is required.");
+  logoutUser: async (token) => {
+    if (!token) throw new Error(ERRORS.MISSING_TOKEN);
 
     try {
       await updateBlacklist(token);
-      logger.info("User logged out — token blacklisted.");
-      return { status: "success", message: "Logout successful" };
+      logger.info('User logged out: token blacklisted');
+      return { status: 'success', message: 'Logout successful' };
     } catch (err) {
-      logger.error(`Logout failed: ${err.message}`);
-      throw new Error(`Logout failed: ${err.message}`);
+      logger.error(ERRORS.LOGOUT_FAILED(err.message));
+      throw new Error(ERRORS.LOGOUT_FAILED(err.message));
     }
-  }
+  },
 
   /**
-   * Initiate password reset via email queue
+   * Initiates password reset process by sending reset email
+   * @async
+   * @param {string} email - User's email address
+   * @returns {Promise<{status: string, message: string}>} Password reset initiation result
+   * @throws {Error} If email is missing or user not found
    */
-  static async forgotPassword(email) {
-    if (!email) throw new Error("Email is required.");
+  forgotPassword: async (email) => {
+    if (!email) throw new Error(ERRORS.MISSING_FIELDS);
 
-    const user = await User.findOne({ email });
-    if (!user) throw new Error("User not found.");
+    const user = await User.findOne({ email }).exec();
+    if (!user) throw new Error(ERRORS.USER_NOT_FOUND);
 
-    // Generate and assign reset token
-    const resetToken = crypto.randomBytes(TOKEN_BYTES).toString("hex");
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = Date.now() + PASSWORD_RESET_EXPIRATION;
-    await user.save();
+    const resetToken = crypto.randomBytes(TOKEN_BYTES).toString('hex');
+    await User.updateOne(
+      { _id: user._id },
+      {
+        resetPasswordToken: resetToken,
+        resetPasswordExpires: Date.now() + PASSWORD_RESET_EXPIRATION,
+      }
+    ).exec();
 
-    // Queue password reset email
-    await emailQueue.add(
-      "sendEmail",
-      generatePasswordResetEmail(user.email, resetToken)
-    );
-
-    logger.info(`Password reset requested for user: ${user._id}`);
-    return {
-      status: "success",
-      message: "Password reset email sent successfully.",
-    };
-  }
+    await emailQueue.add('sendEmail', generatePasswordResetEmail(user.email, resetToken));
+    logger.info(`Password reset requested: ${user._id}`);
+    return { status: 'success', message: 'Password reset email sent successfully' };
+  },
 
   /**
-   * Complete password reset process
+   * Completes password reset with provided token and new password
+   * @async
+   * @param {ResetPasswordData} data - Password reset data
+   * @returns {Promise<{status: string, message: string}>} Password reset result
+   * @throws {Error} If token or new password is missing or invalid
    */
-  static async resetPassword({ token, newPassword }) {
-    if (!token || !newPassword) {
-      throw new Error("Token and new password are required.");
-    }
+  resetPassword: async ({ token, newPassword } = {}) => {
+    if (!token || !newPassword) throw new Error(ERRORS.MISSING_TOKEN_PASSWORD);
 
     const user = await User.findOne({
       resetPasswordToken: token,
       resetPasswordExpires: { $gt: Date.now() },
-    });
+    }).exec();
 
-    if (!user) throw new Error("Invalid or expired reset token.");
+    if (!user) throw new Error(ERRORS.INVALID_TOKEN);
 
-    // Update password and clear reset fields
-    user.password = newPassword;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
-    await user.save();
+    await User.updateOne(
+      { _id: user._id },
+      { password: newPassword, resetPasswordToken: undefined, resetPasswordExpires: undefined }
+    ).exec();
 
-    logger.info(`Password reset successful for user: ${user._id}`);
-    return { status: "success", message: "Password reset successful." };
-  }
+    logger.info(`Password reset: ${user._id}`);
+    return { status: 'success', message: 'Password reset successful' };
+  },
 
   /**
-   * Get authenticated user details (lightweight)
+   * Retrieves authenticated user details
+   * @async
+   * @param {string} userId - ID of the authenticated user
+   * @returns {Promise<{status: string, message: string, data: {userId: string, username: string, email: string}}>} User details
+   * @throws {Error} If userId is invalid or user not found
    */
-  static async getMe(userId) {
-    if (!userId) throw new Error("Invalid or missing user token.");
+  getMe: async (userId) => {
+    if (!userId) throw new Error(ERRORS.INVALID_USER_TOKEN);
 
-    const user = await User.findById(userId).select("username email");
-    if (!user) throw new Error("User not found.");
+    const user = await User.findById(userId).select('username email').exec();
+    if (!user) throw new Error(ERRORS.USER_NOT_FOUND);
 
-    logger.info(`Retrieved profile for userId: ${userId}`);
+    logger.info(`Profile retrieved: ${userId}`);
     return {
-      status: "success",
-      message: "User details retrieved successfully.",
-      data: {
-        userId: user._id.toString(),
-        username: user.username,
-        email: user.email,
-      },
+      status: 'success',
+      message: 'User details retrieved successfully',
+      data: { userId: user._id.toString(), username: user.username, email: user.email },
     };
-  }
-}
-
+  },
+};
