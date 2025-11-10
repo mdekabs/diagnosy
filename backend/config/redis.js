@@ -1,60 +1,89 @@
-import { createClient } from "redis";
-import { logger } from "./logger.js";
+import { createClient } from 'redis';
+import { logger } from './logger.js';
 
-export class RedisConfig {
-  static #logger = logger;
-  static #redisClient = null;
+// --- Constants ---
+const REDIS_URI = process.env.REDIS_URI ?? '';
+const ERRORS = {
+  NOT_INITIALIZED: 'Redis client not initialized. Call RedisConfig.initialize() first.',
+  INITIALIZE_FAILED: (msg) => `Redis client initialization failed: ${msg}`,
+  CONNECT_FAILED: (msg) => `Redis connection error: ${msg}`,
+  DISCONNECT_FAILED: (msg) => `Redis disconnection error: ${msg}`,
+};
 
-  static initialize() {
+let redisClient = null;
+
+/**
+ * RedisConfig
+ * @description Manages Redis client initialization, connection, disconnection, and access.
+ */
+export const RedisConfig = {
+  /**
+   * Initializes the Redis client
+   * @returns {void}
+   * @throws {Error} If initialization fails
+   */
+  initialize: () => {
     try {
-      this.#redisClient = createClient({
-        url: process.env.REDIS_URI,
-      });
-      this.#logger.info("Redis client initialized");
+      if (!REDIS_URI) throw new Error('Redis URI is missing');
+      redisClient = createClient({ url: REDIS_URI });
+      logger.info('Redis client initialized');
     } catch (error) {
-      this.#logger.error(`Redis client initialization error: ${error.message}`);
-      throw new Error(`Redis client initialization failed: ${error.message}`);
+      logger.error(ERRORS.INITIALIZE_FAILED(error.message));
+      throw new Error(ERRORS.INITIALIZE_FAILED(error.message));
     }
-  }
+  },
 
-  static async connect() {
+  /**
+   * Connects to Redis
+   * @async
+   * @returns {Promise<void>} Resolves when connected or already connected
+   * @throws {Error} If client is not initialized or connection fails
+   */
+  connect: async () => {
     try {
-      if (!this.#redisClient) {
-        throw new Error("Redis client not initialized. Call RedisConfig.initialize() first.");
-      }
-      if (this.#redisClient.isOpen) {
-        this.#logger.info("Redis client already connected");
+      if (!redisClient) throw new Error(ERRORS.NOT_INITIALIZED);
+      if (redisClient.isOpen) {
+        logger.info('Redis client already connected');
         return;
       }
-      await this.#redisClient.connect();
-      this.#logger.info("Redis connected");
+      await redisClient.connect();
+      logger.info('Redis connected');
     } catch (error) {
-      this.#logger.error(`Redis connection error: ${error.message}`);
-      throw error;
+      logger.error(ERRORS.CONNECT_FAILED(error.message));
+      throw new Error(ERRORS.CONNECT_FAILED(error.message));
     }
-  }
+  },
 
-  static async disconnect() {
+  /**
+   * Disconnects from Redis
+   * @async
+   * @returns {Promise<void>} Resolves when disconnected or already disconnected
+   * @throws {Error} If client is not initialized or disconnection fails
+   */
+  disconnect: async () => {
     try {
-      if (!this.#redisClient) {
-        throw new Error("Redis client not initialized. Call RedisConfig.initialize() first.");
-      }
-      if (this.#redisClient.isOpen) {
-        await this.#redisClient.quit();
-        this.#logger.info("Redis disconnected");
+      if (!redisClient) throw new Error(ERRORS.NOT_INITIALIZED);
+      if (redisClient.isOpen) {
+        await redisClient.quit();
+        logger.info('Redis disconnected');
       } else {
-        this.#logger.info("Redis client already disconnected");
+        logger.info('Redis client already disconnected');
       }
     } catch (error) {
-      this.#logger.error(`Redis disconnection error: ${error.message}`);
-      throw error;
+      logger.error(ERRORS.DISCONNECT_FAILED(error.message));
+      throw new Error(ERRORS.DISCONNECT_FAILED(error.message));
     }
-  }
+  },
 
-  static getClient() {
-    if (!this.#redisClient) {
-      throw new Error("Redis client not initialized. Call RedisConfig.initialize() first.");
-    }
-    return this.#redisClient;
-  }
-}
+  /**
+   * Retrieves the Redis client instance
+   * @returns {Object} Redis client instance
+   * @throws {Error} If client is not initialized
+   */
+  getClient: () => {
+    if (!redisClient) throw new Error(ERRORS.NOT_INITIALIZED);
+    return redisClient;
+  },
+};
+
+export default RedisConfig;

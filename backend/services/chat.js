@@ -1,6 +1,6 @@
-import { Chat } from "../models/chat.js";
-import { GeminiService } from "./gemini.js";
-import { logger } from "../config/index.js";
+import { Chat } from '../models/chat.js';
+import { GeminiService } from './gemini.js';
+import { logger } from '../config/index.js';
 import {
   STATUS,
   M,
@@ -12,26 +12,51 @@ import {
   toId,
   isCrisis,
   isBlocked,
-} from "../utils/chat_helpers.js";
-import { sanitizePaginationParams, generatePaginationLinks } from "../utils/pagination.js";
+} from '../utils/chat_helpers.js';
+import { sanitizePaginationParams, generatePaginationLinks, getPaginatedHistory } from '../utils/pagination.js';
+
+// --- Constants ---
+const ERRORS = {
+  NO_INPUT: M.NO_INPUT,
+  REFUSAL: M.REFUSAL,
+  CHAT_NOT_FOUND: M.CHAT_NOT_FOUND,
+  CHAT_ID_REQUIRED: 'Chat ID is required.',
+};
+
+/**
+ * @typedef {Object} PaginationParams
+ * @property {number} page - Page number for pagination
+ * @property {number} limit - Items per page
+ * @property {string} baseUrl - Base URL for HATEOAS links
+ */
+
+/**
+ * @typedef {Object} FinalizeResponseData
+ * @property {string} userID - User ID
+ * @property {string} input - User input message
+ * @property {string} aiResponse - AI-generated response
+ * @property {string} [chatId] - Chat session ID (optional)
+ */
 
 /**
  * ChatService
- * -----------------
- * Handles chat creation, continuation, finalization, and retrieval
- * for the mental health companion feature.
+ * @description Manages chat operations for the mental health companion feature, including creation, continuation, finalization, and history retrieval.
  */
-export class ChatService {
+export const ChatService = {
   /**
-   * Create a new chat session and stream an AI response.
+   * Creates a new chat session and streams an AI response
+   * @async
+   * @param {string} userID - User ID
+   * @param {string} message - User's input message
+   * @returns {Promise<{status: string, stream?: AsyncIterable, metadata?: {userID: string, input: string, isNewSession: boolean, chatId: null}, data?: {advice: string, isCrisis: boolean, isContinued: boolean}}>} Chat creation result
+   * @throws {Error} If input is invalid or message is blocked
    */
-  static async createChat(userID, message) {
-    if (!message?.trim()) throw new Error(M.NO_INPUT);
+  createChat: async (userID, message) => {
+    if (!message?.trim()) throw new Error(ERRORS.NO_INPUT);
     const input = message.trim();
     const userIdObj = toId(userID);
 
-    // Quick filters
-    if (isBlocked(input)) throw new Error(M.REFUSAL);
+    if (isBlocked(input)) throw new Error(ERRORS.REFUSAL);
     if (isCrisis(input)) {
       return {
         status: STATUS.SUCCESS,
@@ -39,16 +64,14 @@ export class ChatService {
       };
     }
 
-    // Step 1: classify the message
     try {
       const classificationPrompt = CLASSIFICATION_PROMPT(input);
-      const classificationRaw = await GeminiService.generateResponseNonStream([
-        { role: "user", content: classificationPrompt },
-      ]);
-      const classification = classificationRaw.toUpperCase().trim();
+      const classification = (await GeminiService.generateResponseNonStream([
+        { role: 'user', content: classificationPrompt },
+      ])).toUpperCase().trim();
 
-      if (classification.includes("OFF_TOPIC")) throw new Error(M.REFUSAL);
-      if (classification.includes("CRISIS")) {
+      if (classification.includes('OFF_TOPIC')) throw new Error(ERRORS.REFUSAL);
+      if (classification.includes('CRISIS')) {
         return {
           status: STATUS.SUCCESS,
           data: { advice: CRISIS_RESPONSE, isCrisis: true, isContinued: false },
@@ -56,13 +79,10 @@ export class ChatService {
       }
     } catch (err) {
       logger.error(`Classification error: ${err.message}`);
-      // continue safely
     }
 
-    // Step 2: stream AI response
-    const chatPrompt = CHAT_PROMPT(input);
     const stream = await GeminiService.generateResponseStream([
-      { role: "user", content: chatPrompt },
+      { role: 'user', content: CHAT_PROMPT(input) },
     ]);
 
     return {
@@ -70,17 +90,22 @@ export class ChatService {
       stream,
       metadata: { userID: userIdObj, input, isNewSession: true, chatId: null },
     };
-  }
+  },
 
   /**
-   * Continue an existing chat session and stream a response.
+   * Continues an existing chat session and streams a response
+   * @async
+   * @param {string} userID - User ID
+   * @param {string} message - User's input message
+   * @returns {Promise<{status: string, stream: AsyncIterable, metadata: {userID: string, input: string, chatId: string}}>} Chat continuation result
+   * @throws {Error} If input is invalid, message is blocked, or chat not found
    */
-  static async continueChat(userID, message) {
-    if (!message?.trim()) throw new Error(M.NO_INPUT);
+  continueChat: async (userID, message) => {
+    if (!message?.trim()) throw new Error(ERRORS.NO_INPUT);
     const input = message.trim();
     const userIdObj = toId(userID);
 
-    if (isBlocked(input)) throw new Error(M.REFUSAL);
+    if (isBlocked(input)) throw new Error(ERRORS.REFUSAL);
     if (isCrisis(input)) {
       return {
         status: STATUS.SUCCESS,
@@ -88,20 +113,16 @@ export class ChatService {
       };
     }
 
-    const chat = await Chat.findOne({ userID: userIdObj });
-    if (!chat || chat.history.length === 0) throw new Error(M.CHAT_NOT_FOUND);
+    const chat = await Chat.findOne({ userID: userIdObj }).exec();
+    if (!chat || !chat.history.length) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    // Prepare context (decrypt using getters)
     const context = chat.getDecryptedHistory().slice(-10);
-    const contextPrompt = context.map((m) => `${m.role}: ${m.content}`).join(" | ");
-
-    const promptText = CONTINUE_PROMPT(contextPrompt, input);
     const messages = [
       ...context.map((m) => ({
-        role: m.role === "assistant" ? "model" : "user",
+        role: m.role === 'assistant' ? 'model' : 'user',
         content: m.content,
       })),
-      { role: "user", content: input },
+      { role: 'user', content: input },
     ];
 
     const stream = await GeminiService.generateResponseStream(messages);
@@ -109,39 +130,35 @@ export class ChatService {
     return {
       status: STATUS.SUCCESS,
       stream,
-      metadata: { userID: userIdObj, input, chatId: chat._id },
+      metadata: { userID: userIdObj, input, chatId: chat._id.toString() },
     };
-  }
+  },
 
   /**
-   * Finalize the response: append both user and assistant messages to DB.
+   * Finalizes a chat response by saving user and AI messages
+   * @async
+   * @param {FinalizeResponseData} data - Chat response data
+   * @returns {Promise<{status: string, message: string, data: {advice: string, isNewSession: boolean, isContinued: boolean, isCrisis: boolean}}>} Finalization result
+   * @throws {Error} If chat not found or DB error occurs
    */
-  static async finalizeResponse({ userID, input, aiResponse, chatId }) {
+  finalizeResponse: async ({ userID, input, aiResponse, chatId }) => {
     const userIdObj = toId(userID);
     const chat = chatId
-      ? await Chat.findById(chatId)
+      ? await Chat.findById(chatId).exec()
       : await Chat.findOrCreate(userIdObj);
 
-    if (!chat) throw new Error("Chat not found or DB error.");
+    if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    // Crisis handling
-    let finalResponse = aiResponse;
-    if (isCrisis(aiResponse)) {
-      finalResponse = CRISIS_RESPONSE;
-    }
+    const finalResponse = isCrisis(aiResponse) ? CRISIS_RESPONSE : aiResponse;
+    const fullResponse = `${finalResponse}${!chat.disclaimerAdded ? `\n\n_${DISCLAIMER}_` : ''}`;
 
-    // Append disclaimer once per session
-    const disclaimerNote = !chat.disclaimerAdded ? `\n\n_${DISCLAIMER}_` : "";
-    const fullResponse = `${finalResponse}${disclaimerNote}`;
+    await chat.addMessage('user', input);
+    await chat.addMessage('assistant', fullResponse);
 
-    // Save both user and assistant turns (encrypted automatically via setter)
-    await chat.addMessage("user", input);
-    await chat.addMessage("assistant", fullResponse);
-
-    // Mark disclaimer added
-    chat.disclaimerAdded = true;
-    chat.lastActive = new Date();
-    await chat.save();
+    await Chat.updateOne(
+      { _id: chat._id },
+      { disclaimerAdded: true, lastActive: new Date() }
+    ).exec();
 
     return {
       status: STATUS.SUCCESS,
@@ -153,54 +170,36 @@ export class ChatService {
         isCrisis: finalResponse === CRISIS_RESPONSE,
       },
     };
-  }
+  },
 
   /**
-   * Retrieve decrypted chat history for a user with database-level pagination and HATEOAS.
+   * Retrieves paginated chat history for a user
+   * @async
+   * @param {string} userID - User ID
+   * @param {number} page - Page number
+   * @param {number} limit - Items per page
+   * @param {string} baseUrl - Base URL for HATEOAS links
+   * @returns {Promise<{status: string, message: string, data: {history: Array, startedAt: Date, lastActive: Date}, pagination: {totalItems: number, totalPages: number, currentPage: number, limit: number, links: Object}}>} Paginated chat history
+   * @throws {Error} If chat not found
    */
-  static async getChatHistory(userID, page, limit, baseUrl) {
+  getChatHistory: async (userID, page, limit, baseUrl) => {
     const { page: sanitizedPage, limit: sanitizedLimit } = sanitizePaginationParams(page, limit);
     const userIdObj = toId(userID);
 
-    // Step 1: Get total items count
-    const chat = await Chat.findOne({ userID: userIdObj });
-    if (!chat) throw new Error(M.CHAT_NOT_FOUND);
-    const totalItems = chat.history.length;
+    const chat = await Chat.findOne({ userID: userIdObj }).exec();
+    if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    // Step 2: Aggregate to paginate history array
-    const pipeline = [
-      { $match: { userID: userIdObj } },
-      { $unwind: "$history" },
-      { $sort: { "history.timestamp": -1 } }, // Ensure sorting by timestamp
-      { $skip: (sanitizedPage - 1) * sanitizedLimit },
-      { $limit: sanitizedLimit },
-      {
-        $project: {
-          role: "$history.role",
-          content: "$history.content",
-          timestamp: "$history.timestamp",
-        },
-      },
-    ];
-
-    const paginatedHistory = await Chat.aggregate(pipeline).option({ getters: true });
-
-    // Step 3: Decrypt history using Mongoose getters
-    // Since toJSON: { getters: true } is set, content is automatically decrypted
-    const decryptedHistory = paginatedHistory.map((msg) => ({
-      role: msg.role,
-      content: msg.content, // Decrypted by getter
-      timestamp: msg.timestamp,
-    }));
-
-    // Step 4: Calculate pagination metadata
-    const totalPages = Math.ceil(totalItems / sanitizedLimit);
+    const { history, totalItems, totalPages } = await getPaginatedHistory(
+      { userID: userIdObj },
+      sanitizedPage,
+      sanitizedLimit
+    );
 
     return {
       status: STATUS.SUCCESS,
       message: M.RESPONSE_SUCCESS,
       data: {
-        history: decryptedHistory,
+        history,
         startedAt: chat.createdAt,
         lastActive: chat.updatedAt,
       },
@@ -212,57 +211,38 @@ export class ChatService {
         links: generatePaginationLinks(sanitizedPage, sanitizedLimit, totalItems, baseUrl),
       },
     };
-  }
+  },
 
   /**
-   * Retrieve a specific chat by chatId (decrypted) with database-level pagination and HATEOAS.
+   * Retrieves paginated chat history by chat ID
+   * @async
+   * @param {string} chatId - Chat ID
+   * @param {number} page - Page number
+   * @param {number} limit - Items per page
+   * @param {string} baseUrl - Base URL for HATEOAS links
+   * @returns {Promise<{status: string, message: string, data: {chatId: string, userID: string, history: Array, startedAt: Date, lastActive: Date}, pagination: {totalItems: number, totalPages: number, currentPage: number, limit: number, links: Object}}>} Paginated chat history
+   * @throws {Error} If chat ID is missing or chat not found
    */
-  static async getChatById(chatId, page, limit, baseUrl) {
-    if (!chatId) throw new Error("Chat ID is required.");
+  getChatById: async (chatId, page, limit, baseUrl) => {
+    if (!chatId) throw new Error(ERRORS.CHAT_ID_REQUIRED);
 
     const { page: sanitizedPage, limit: sanitizedLimit } = sanitizePaginationParams(page, limit);
+    const chat = await Chat.findById(chatId).exec();
+    if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    // Step 1: Get total items count
-    const chat = await Chat.findById(chatId);
-    if (!chat) throw new Error(M.CHAT_NOT_FOUND);
-    const totalItems = chat.history.length;
-
-    // Step 2: Aggregate to paginate history array
-    const pipeline = [
-      { $match: { _id: toId(chatId) } },
-      { $unwind: "$history" },
-      { $sort: { "history.timestamp": -1 } }, // Ensure sorting by timestamp
-      { $skip: (sanitizedPage - 1) * sanitizedLimit },
-      { $limit: sanitizedLimit },
-      {
-        $project: {
-          role: "$history.role",
-          content: "$history.content",
-          timestamp: "$history.timestamp",
-        },
-      },
-    ];
-
-    const paginatedHistory = await Chat.aggregate(pipeline).option({ getters: true });
-
-    // Step 3: Decrypt history using Mongoose getters
-    // Since toJSON: { getters: true } is set, content is automatically decrypted
-    const decryptedHistory = paginatedHistory.map((msg) => ({
-      role: msg.role,
-      content: msg.content, // Decrypted by getter
-      timestamp: msg.timestamp,
-    }));
-
-    // Step 4: Calculate pagination metadata
-    const totalPages = Math.ceil(totalItems / sanitizedLimit);
+    const { history, totalItems, totalPages } = await getPaginatedHistory(
+      { _id: toId(chatId) },
+      sanitizedPage,
+      sanitizedLimit
+    );
 
     return {
       status: STATUS.SUCCESS,
       message: M.RESPONSE_SUCCESS,
       data: {
-        chatId: chat._id,
+        chatId: chat._id.toString(),
         userID: chat.userID,
-        history: decryptedHistory,
+        history,
         startedAt: chat.createdAt,
         lastActive: chat.updatedAt,
       },
@@ -274,30 +254,32 @@ export class ChatService {
         links: generatePaginationLinks(sanitizedPage, sanitizedLimit, totalItems, baseUrl),
       },
     };
-  }
+  },
 
   /**
-   * Clear all messages but keep the chat document.
+   * Clears all messages in a user's chat session
+   * @async
+   * @param {string} userID - User ID
+   * @returns {Promise<{status: string, message: string}>} Clear result
+   * @throws {Error} If chat not found
    */
-  static async clearChat(userID) {
-    const chat = await Chat.findOne({ userID: toId(userID) });
-    if (!chat) throw new Error(M.CHAT_NOT_FOUND);
+  clearChat: async (userID) => {
+    const userIdObj = toId(userID);
+    const chat = await Chat.findOne({ userID: userIdObj }).exec();
+    if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    chat.history = [];
-    chat.disclaimerAdded = false;
-    await chat.save();
-
-    return { status: STATUS.SUCCESS, message: "Conversation cleared." };
-  }
+    await Chat.updateOne({ userID: userIdObj }, { history: [], disclaimerAdded: false }).exec();
+    return { status: STATUS.SUCCESS, message: 'Conversation cleared' };
+  },
 
   /**
-   * End (delete) a user’s chat session completely.
+   * Deletes a user's chat session
+   * @async
+   * @param {string} userID - User ID
+   * @returns {Promise<{status: string, message: string}>} Deletion result
    */
-  static async endChat(userID) {
-    await Chat.deleteOne({ userID: toId(userID) });
-    return {
-      status: STATUS.SUCCESS,
-      message: "Conversation ended. Take care.",
-    };
-  }
-}
+  endChat: async (userID) => {
+    await Chat.deleteOne({ userID: toId(userID) }).exec();
+    return { status: STATUS.SUCCESS, message: 'Conversation ended. Take care.' };
+  },
+};

@@ -1,79 +1,94 @@
-// src/services/gemini.js (Updated with Google Gen AI SDK)
+import { GoogleGenAI } from '@google/genai';
+import { logger } from '../config/index.js';
 
-import { GoogleGenAI } from "@google/genai";
-import { logger } from "../config/index.js";
+// --- Constants ---
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? '';
+const GEMINI_MODEL = 'gemini-2.5-flash';
+const ERRORS = {
+  API_KEY_MISSING: 'GEMINI_API_KEY missing, service initialization failed.',
+  EMPTY_RESPONSE: 'Empty response from Gemini',
+  API_ERROR: (msg) => `Gemini API error: ${msg}`,
+};
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-// Using a standard, available streaming model
-const GEMINI_MODEL = "gemini-2.5-flash"; 
-
+// Initialize Google Gen AI
 if (!GEMINI_API_KEY) {
-    logger.error("FATAL: GEMINI_API_KEY is missing. GeminiService cannot initialize.");
-    throw new Error("GEMINI_API_KEY missing, service initialization failed.");
+  logger.error(`FATAL: ${ERRORS.API_KEY_MISSING}`);
+  throw new Error(ERRORS.API_KEY_MISSING);
 }
 
-const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY }); 
+const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
-export class GeminiService {
-    
-    /**
-     * Converts your internal message format ({role: "user/assistant", content: string})
-     * to the Gemini API format ({role: "user/model", parts: [{ text: string }]}).
-     * @param {Array<Object>} messages - Array of internal message objects.
-     * @returns {Array<Object>} Transformed contents array for the Gemini API.
-     */
-    static transformMessages(messages) {
-        return messages.map(msg => ({
-            // Map internal 'assistant' to 'model' for the API
-            role: msg.role === 'assistant' ? 'model' : msg.role, 
-            parts: [{ text: msg.content }]
-        }));
+/**
+ * GeminiService
+ * @description Manages interactions with the Google Gemini AI API for generating non-streaming and streaming responses.
+ */
+export const GeminiService = {
+  /**
+   * Converts internal message format ({role: "user/assistant", content: string})
+   * to Gemini API format ({role: "user/model", parts: [{ text: string }]}).
+   * @param {{role: string, content: string}[]} messages - Array of internal message objects
+   * @returns {{role: string, parts: {text: string}[]}[]} Transformed contents array for Gemini API
+   */
+  transformMessages: (messages) =>
+    messages.map((msg) => ({
+      role: msg.role === 'assistant' ? 'model' : msg.role,
+      parts: [{ text: msg.content }],
+    })),
+
+  /**
+   * Generates a non-streaming response from the Gemini API (used for classification)
+   * @async
+   * @param {{role: string, content: string}[]} messages - Array of message objects
+   * @returns {Promise<string>} Generated response text
+   * @throws {Error} If the API call fails or response is empty
+   */
+  generateResponseNonStream: async (messages) => {
+    try {
+      const transformedMessages = GeminiService.transformMessages(messages);
+      logger.debug(`Sending non-stream contents: ${JSON.stringify(transformedMessages, null, 2)}`);
+
+      const response = await ai.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: transformedMessages,
+      });
+
+      const text = response.text;
+      if (!text) throw new Error(ERRORS.EMPTY_RESPONSE);
+
+      logger.info('Non-stream response generated successfully');
+      return text;
+    } catch (err) {
+      logger.error(`Non-stream error: ${err.message}`);
+      throw new Error(ERRORS.API_ERROR(err.message));
     }
+  },
 
-    // --- Non-Streaming Call (Used for Classification) ---
-    static async generateResponseNonStream(messages) {
-        try {
-            const transformedMessages = GeminiService.transformMessages(messages);
-            
-            logger.info("GeminiService sending non-stream contents: " + JSON.stringify(transformedMessages, null, 2)); // 🔍 DEBUG LOG
-            
-            const response = await ai.models.generateContent({
-                model: GEMINI_MODEL,
-                contents: transformedMessages,
-            });
+  /**
+   * Generates a streaming response from the Gemini API (used for chat)
+   * @async
+   * @param {{role: string, content: string}[]} messages - Array of message objects
+   * @returns {AsyncIterable<string>} Stream of response tokens
+   * @throws {Error} If the API call fails
+   */
+  generateResponseStream: async function* (messages) {
+    try {
+      const transformedMessages = GeminiService.transformMessages(messages);
+      logger.debug(`Sending stream contents: ${JSON.stringify(transformedMessages, null, 2)}`);
 
-            const full = response.text;
-            if (!full) throw new Error("Empty response from Gemini");
+      const responseStream = await ai.models.generateContentStream({
+        model: GEMINI_MODEL,
+        contents: transformedMessages,
+      });
 
-            logger.info("GeminiService: non-stream response generated successfully");
-            return full;
-        } catch (err) {
-            logger.error(`GeminiService.generateResponseNonStream error: ${err.message}`);
-            throw new Error(`Gemini API error: ${err.message}`);
-        }
+      for await (const chunk of responseStream) {
+        const token = chunk.text;
+        if (token) yield token;
+      }
+
+      logger.info('Stream completed successfully');
+    } catch (err) {
+      logger.error(`Stream error: ${err.message}`);
+      throw new Error(ERRORS.API_ERROR(err.message));
     }
-
-    // --- Streaming Call (Used for Chat) ---
-    static async *generateResponseStream(messages) {
-        try {
-            const transformedMessages = GeminiService.transformMessages(messages);
-            
-            logger.info("GeminiService sending stream contents: " + JSON.stringify(transformedMessages, null, 2)); // 🔍 DEBUG LOG
-            
-            const responseStream = await ai.models.generateContentStream({
-                model: GEMINI_MODEL,
-                contents: transformedMessages,
-            });
-
-            for await (const chunk of responseStream) {
-                const token = chunk.text;
-                if (token) yield token;
-            }
-
-            logger.info("GeminiService: stream completed successfully");
-        } catch (err) {
-            logger.error(`GeminiService.generateResponseStream error: ${err.message}`);
-            throw err;
-        }
-    }
-}
+  },
+};

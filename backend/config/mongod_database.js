@@ -1,26 +1,50 @@
-import mongoose from "mongoose";
-import { logger } from "./logger.js";
+import mongoose from 'mongoose';
+import { logger } from './logger.js';
 
-export class DatabaseConfig {
-  static #logger = logger;
+// --- Constants ---
+const DB_URI = process.env.DB ?? '';
+const ERRORS = {
+  CONNECT_FAILED: (msg) => `MongoDB connection error: ${msg}`,
+  DISCONNECT_FAILED: (msg) => `MongoDB disconnection error: ${msg}`,
+};
 
-  static async connect() {
+/**
+ * DatabaseConfig
+ * @description Manages MongoDB connection and disconnection operations.
+ */
+export const DatabaseConfig = {
+  /**
+   * Connects to MongoDB using the configured URI
+   * @async
+   * @returns {Promise<void>} Resolves when connected
+   * @throws {Error} If connection fails
+   */
+  connect: async () => {
     try {
-      await mongoose.connect(process.env.DB);
-      this.#logger.info("MongoDB connected");
+      if (!DB_URI) throw new Error('MongoDB URI is missing');
+      await mongoose.connect(DB_URI);
+      logger.info('MongoDB connected');
     } catch (error) {
-      this.#logger.error(`MongoDB connection error: ${error.message}`);
-      throw error;
+      logger.error(ERRORS.CONNECT_FAILED(error.message));
+      throw new Error(ERRORS.CONNECT_FAILED(error.message));
     }
-  }
+  },
 
-  static async disconnect() {
+  /**
+   * Disconnects from MongoDB
+   * @async
+   * @returns {Promise<void>} Resolves when disconnected
+   * @throws {Error} If disconnection fails
+   */
+  disconnect: async () => {
     try {
       await mongoose.disconnect();
-      this.#logger.info("MongoDB disconnected");
+      logger.info('MongoDB disconnected');
     } catch (error) {
-      this.#logger.error(`MongoDB disconnection error: ${error.message}`);
-      throw error;
+      logger.error(ERRORS.DISCONNECT_FAILED(error.message));
+      throw new Error(ERRORS.DISCONNECT_FAILED(error.message));
     }
-  }
-}
+  },
+};
+
+export default DatabaseConfig;
