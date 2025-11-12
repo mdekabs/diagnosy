@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Diagnosy Chat</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #chat-box {
+      width: 100%;
+      height: 400px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      overflow-y: auto;
+      background: #fafafa;
+      margin-bottom: 15px;
+    }
+    #messageInput { width: 70%; }
+    .user-msg { color: #0066cc; margin: 5px 0; }
+    .server-msg { color: #333; margin: 5px 0; }
+    .system-msg { color: #999; font-style: italic; margin: 5px 0; }
+    .chat-token { color: #444; display: block; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+
+<h2>Diagnosy WebSocket Chat</h2>
+
+<label>JWT Token:</label><br>
+<input id="token" style="width:400px;" /><br><br>
+
+<button id="connectBtn">Connect</button>
+<br><br>
+
+<div id="chat-box"></div>
+
+<input id="messageInput" type="text" placeholder="Type your message..." />
+<button id="sendBtn">Send</button>
+
+<script>
+  let ws;
+  let currentMessage = "";
+
+  function addToChat(html, type="server-msg") {
+    const box = document.getElementById("chat-box");
+    const div = document.createElement("div");
+    div.className = type;
+    div.innerHTML = html;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  document.getElementById("connectBtn").onclick = () => {
+    const token = document.getElementById("token").value.trim();
+    if (!token) return alert("Enter your JWT token first.");
+
+    ws = new WebSocket(`ws://${window.location.host}/ws?token=${token}`);
+
+    ws.onopen = () => addToChat("Connected to server.", "system-msg");
+    ws.onclose = () => addToChat("Disconnected.", "system-msg");
+    ws.onerror = (err) => addToChat("Error: " + err.message, "system-msg");
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        switch(data.type) {
+          case "chat_response":
+            if (!data.payload.isContinued) currentMessage = "";
+            break;
+
+          case "chat_token":
+            currentMessage += data.payload.token;
+            addToChat(currentMessage, "chat-token");
+            break;
+
+          case "session_complete":
+            addToChat(`<strong>System:</strong> ${data.payload.message}`, "system-msg");
+            break;
+
+          case "error":
+            addToChat(`<strong>Error:</strong> ${data.payload.message}`, "system-msg");
+            break;
+
+          default:
+            addToChat(JSON.stringify(data), "server-msg");
+        }
+      } catch (e) {
+        addToChat("Server (raw): " + event.data, "server-msg");
+      }
+    };
+  };
+
+  document.getElementById("sendBtn").onclick = () => {
+    const message = document.getElementById("messageInput").value.trim();
+    if (!message || !ws) return;
+
+    ws.send(JSON.stringify({ message }));
+    addToChat("You: " + message, "user-msg");
+    document.getElementById("messageInput").value = "";
+  };
+</script>
+
+</body>
+</html>

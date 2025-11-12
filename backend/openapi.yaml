@@ -7,6 +7,14 @@ info:
     and Bull queue-based email processing.
 servers:
   - url: http://localhost:3000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
 paths:
   /chat/history:
     get:
@@ -556,7 +564,6 @@ paths:
                   message:
                     type: string
                     example: Invalid or expired reset token
-components: {}
 tags:
   - name: Chat
     description: Endpoints for chat history and message retrieval

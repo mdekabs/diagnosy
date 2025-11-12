@@ -10,6 +10,7 @@ const start = async () => {
     try {
         serverInstance = httpServer.listen(PORT, () => {
             logger.info(`Server is running on port ${PORT}`);
+            logger.info("chat with AI at base_url/chat.html");
         });
 
         gracefulShutdown(serverInstance, {

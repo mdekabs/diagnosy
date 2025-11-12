@@ -27,6 +27,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(appLogger);
 
+app.use(express.static("pub"));
+
 app.use("/api", routes);
 
 app.use(errorLogger);
