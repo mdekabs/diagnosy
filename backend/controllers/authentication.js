@@ -17,25 +17,7 @@ const ERROR_STATUSES = {
   'Token and new password are required': HttpStatus.BAD_REQUEST,
 };
 
-/**
- * @typedef {Object} ResponseData
- * @property {string} status - Response status ('success' or 'error')
- * @property {string} message - Response message
- * @property {Object} [data] - Optional response data
- */
-
-/**
- * AuthController
- * @description Handles HTTP requests for authentication operations, interfacing with AuthService.
- */
 export const AuthController = {
-  /**
-   * Retrieves authenticated user details
-   * @async
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   * @returns {Promise<void>} Responds with user details or error
-   */
   getMe: async (req, res) => {
     try {
       const result = await AuthService.getMe(req.userID);
@@ -47,18 +29,10 @@ export const AuthController = {
     }
   },
 
-  /**
-   * Registers a new user
-   * @async
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   * @returns {Promise<void>} Responds with registration result or error
-   */
   register: async (req, res) => {
     try {
-      const { username, email, password } = req.body;
-      const data = await AuthService.createUser({ username, email, password });
-      responseHandler(res, HttpStatus.OK, 'success', 'Registration successful', data);
+      const result = await AuthService.createUser(req.body);
+      responseHandler(res, HttpStatus.OK, 'success', 'Registration successful', result);
     } catch (err) {
       logger.error(`Register failed: ${err.message}`);
       const status = ERROR_STATUSES[err.message] || HttpStatus.INTERNAL_SERVER_ERROR;
@@ -66,18 +40,10 @@ export const AuthController = {
     }
   },
 
-  /**
-   * Logs in a user
-   * @async
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   * @returns {Promise<void>} Responds with login result or error
-   */
   login: async (req, res) => {
     try {
-      const { username, password } = req.body;
-      const data = await AuthService.loginUser({ username, password });
-      responseHandler(res, HttpStatus.OK, 'success', 'Login successful', data);
+      const result = await AuthService.loginUser(req.body);
+      responseHandler(res, HttpStatus.OK, 'success', 'Login successful', result);
     } catch (err) {
       logger.error(`Login failed: ${err.message}`);
       const status = ERROR_STATUSES[err.message] || HttpStatus.INTERNAL_SERVER_ERROR;
@@ -85,13 +51,6 @@ export const AuthController = {
     }
   },
 
-  /**
-   * Logs out a user
-   * @async
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   * @returns {Promise<void>} Responds with logout result or error
-   */
   logout: async (req, res) => {
     try {
       const token = req.headers.authorization?.split(' ')[1];
@@ -104,17 +63,9 @@ export const AuthController = {
     }
   },
 
-  /**
-   * Initiates password reset process
-   * @async
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   * @returns {Promise<void>} Responds with password reset initiation result or error
-   */
   forgotPassword: async (req, res) => {
     try {
-      const { email } = req.body;
-      await AuthService.forgotPassword(email);
+      await AuthService.forgotPassword(req.body.email);
       responseHandler(res, HttpStatus.OK, 'success', 'Password reset email sent');
     } catch (err) {
       logger.error(`Forgot password failed: ${err.message}`);
@@ -123,17 +74,9 @@ export const AuthController = {
     }
   },
 
-  /**
-   * Completes password reset
-   * @async
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   * @returns {Promise<void>} Responds with password reset result or error
-   */
   resetPassword: async (req, res) => {
     try {
-      const { token, newPassword } = req.body;
-      await AuthService.resetPassword({ token, newPassword });
+      await AuthService.resetPassword(req.body);
       responseHandler(res, HttpStatus.OK, 'success', 'Password reset successful');
     } catch (err) {
       logger.error(`Reset password failed: ${err.message}`);

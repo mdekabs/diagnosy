@@ -11,6 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET ?? '';
 const JWT_EXPIRATION = '1d';
 const PASSWORD_RESET_EXPIRATION = 3600000; // 1 hour in ms
 const TOKEN_BYTES = 32;
+
 const ERRORS = {
   MISSING_FIELDS: 'Username, email, and password are required.',
   EMAIL_IN_USE: 'Email is already in use.',
@@ -24,39 +25,17 @@ const ERRORS = {
   LOGOUT_FAILED: (msg) => `Logout failed: ${msg}`,
 };
 
-/**
- * @typedef {Object} UserCredentials
- * @property {string} username - User's username
- * @property {string} email - User's email address
- * @property {string} password - User's password
- */
-
-/**
- * @typedef {Object} LoginCredentials
- * @property {string} username - User's username
- * @property {string} password - User's password
- */
-
-/**
- * @typedef {Object} ResetPasswordData
- * @property {string} token - Password reset token
- * @property {string} newPassword - New password to set
- */
-
-/**
- * AuthService
- * @class
- * @description Manages user authentication operations: registration, login, logout, password recovery, and user details retrieval.
- */
 export const AuthService = {
   /**
-   * Registers a new user with provided credentials
-   * @async
-   * @param {UserCredentials} credentials - User registration data
-   * @returns {Promise<{status: string, message: string}>} Registration result
-   * @throws {Error} If credentials are incomplete or email is in use
+   * Registers a new user
+   * @param {Object} payload
+   * @param {string} payload.username
+   * @param {string} payload.email
+   * @param {string} payload.password
    */
-  createUser: async ({ username, email, password } = {}) => {
+  createUser: async (payload = {}) => {
+    const { username, email, password } = payload;
+
     if (!username || !email || !password) throw new Error(ERRORS.MISSING_FIELDS);
 
     const existingUser = await User.findOne({ email }).exec();
@@ -64,24 +43,28 @@ export const AuthService = {
 
     const user = await new User({ username, email, password }).save();
     logger.info(`User registered: ${user._id}`);
+
     return { status: 'success', message: 'User registered successfully' };
   },
 
   /**
-   * Authenticates a user and generates a JWT token
-   * @async
-   * @param {LoginCredentials} credentials - User login credentials
-   * @returns {Promise<{status: string, message: string, data: {userId: string, token: string}}>} Login result
-   * @throws {Error} If credentials are invalid or account is locked
+   * Logs in a user
+   * @param {Object} payload
+   * @param {string} payload.username
+   * @param {string} payload.password
    */
-  loginUser: async ({ username, password } = {}) => {
+  loginUser: async (payload = {}) => {
+    const { username, password } = payload;
+
     if (!username || !password) throw new Error(ERRORS.MISSING_FIELDS);
 
     const user = await User.findOne({ username }).exec();
     if (!user) throw new Error(ERRORS.INVALID_CREDENTIALS);
 
     if (!user.canLogin()) {
-      throw new Error(ERRORS.ACCOUNT_LOCKED(new Date(user.lockUntil).toLocaleTimeString()));
+      throw new Error(
+        ERRORS.ACCOUNT_LOCKED(new Date(user.lockUntil).toLocaleTimeString())
+      );
     }
 
     if (!(await user.comparePassword(password))) {
@@ -90,13 +73,19 @@ export const AuthService = {
     }
 
     const { currentLoginTime } = await User.recordLoginSuccess(user._id);
+
     const token = jwt.sign(
-      { id: user._id.toString(), isAdmin: user.isAdmin ?? false, iat_session: currentLoginTime },
+      {
+        id: user._id.toString(),
+        isAdmin: user.isAdmin ?? false,
+        iat_session: currentLoginTime,
+      },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRATION }
     );
 
     logger.info(`User login: ${user._id}`);
+
     return {
       status: 'success',
       message: 'Login successful',
@@ -105,13 +94,13 @@ export const AuthService = {
   },
 
   /**
-   * Logs out a user by blacklisting their token
-   * @async
-   * @param {string} token - JWT token to blacklist
-   * @returns {Promise<{status: string, message: string}>} Logout result
-   * @throws {Error} If token is missing or blacklisting fails
+   * Logout user – token blacklist
+   * @param {Object} payload
+   * @param {string} payload.token
    */
-  logoutUser: async (token) => {
+  logoutUser: async (payload = {}) => {
+    const { token } = payload;
+
     if (!token) throw new Error(ERRORS.MISSING_TOKEN);
 
     try {
@@ -125,19 +114,20 @@ export const AuthService = {
   },
 
   /**
-   * Initiates password reset process by sending reset email
-   * @async
-   * @param {string} email - User's email address
-   * @returns {Promise<{status: string, message: string}>} Password reset initiation result
-   * @throws {Error} If email is missing or user not found
+   * Forgot Password
+   * @param {Object} payload
+   * @param {string} payload.email
    */
-  forgotPassword: async (email) => {
+  forgotPassword: async (payload = {}) => {
+    const { email } = payload;
+
     if (!email) throw new Error(ERRORS.MISSING_FIELDS);
 
     const user = await User.findOne({ email }).exec();
     if (!user) throw new Error(ERRORS.USER_NOT_FOUND);
 
     const resetToken = crypto.randomBytes(TOKEN_BYTES).toString('hex');
+
     await User.updateOne(
       { _id: user._id },
       {
@@ -146,19 +136,28 @@ export const AuthService = {
       }
     ).exec();
 
-    await emailQueue.add('sendEmail', generatePasswordResetEmail(user.email, resetToken));
+    await emailQueue.add(
+      'sendEmail',
+      generatePasswordResetEmail(user.email, resetToken)
+    );
+
     logger.info(`Password reset requested: ${user._id}`);
-    return { status: 'success', message: 'Password reset email sent successfully' };
+
+    return {
+      status: 'success',
+      message: 'Password reset email sent successfully',
+    };
   },
 
   /**
-   * Completes password reset with provided token and new password
-   * @async
-   * @param {ResetPasswordData} data - Password reset data
-   * @returns {Promise<{status: string, message: string}>} Password reset result
-   * @throws {Error} If token or new password is missing or invalid
+   * Reset Password
+   * @param {Object} payload
+   * @param {string} payload.token
+   * @param {string} payload.newPassword
    */
-  resetPassword: async ({ token, newPassword } = {}) => {
+  resetPassword: async (payload = {}) => {
+    const { token, newPassword } = payload;
+
     if (!token || !newPassword) throw new Error(ERRORS.MISSING_TOKEN_PASSWORD);
 
     const user = await User.findOne({
@@ -170,31 +169,44 @@ export const AuthService = {
 
     await User.updateOne(
       { _id: user._id },
-      { password: newPassword, resetPasswordToken: undefined, resetPasswordExpires: undefined }
+      {
+        password: newPassword,
+        resetPasswordToken: undefined,
+        resetPasswordExpires: undefined,
+      }
     ).exec();
 
     logger.info(`Password reset: ${user._id}`);
+
     return { status: 'success', message: 'Password reset successful' };
   },
 
   /**
-   * Retrieves authenticated user details
-   * @async
-   * @param {string} userId - ID of the authenticated user
-   * @returns {Promise<{status: string, message: string, data: {userId: string, username: string, email: string}}>} User details
-   * @throws {Error} If userId is invalid or user not found
+   * Get current user
+   * @param {Object} payload
+   * @param {string} payload.userId
    */
-  getMe: async (userId) => {
+  getMe: async (payload = {}) => {
+    const { userId } = payload;
+
     if (!userId) throw new Error(ERRORS.INVALID_USER_TOKEN);
 
-    const user = await User.findById(userId).select('username email').exec();
+    const user = await User.findById(userId)
+      .select('username email')
+      .exec();
+
     if (!user) throw new Error(ERRORS.USER_NOT_FOUND);
 
     logger.info(`Profile retrieved: ${userId}`);
+
     return {
       status: 'success',
       message: 'User details retrieved successfully',
-      data: { userId: user._id.toString(), username: user.username, email: user.email },
+      data: {
+        userId: user._id.toString(),
+        username: user.username,
+        email: user.email,
+      },
     };
   },
 };

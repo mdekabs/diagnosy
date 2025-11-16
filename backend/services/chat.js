@@ -13,7 +13,12 @@ import {
   isCrisis,
   isBlocked,
 } from '../utils/chat_helpers.js';
-import { sanitizePaginationParams, generatePaginationLinks, getPaginatedHistory } from '../utils/pagination.js';
+
+import {
+  sanitizePaginationParams,
+  generatePaginationLinks,
+  getPaginatedHistory,
+} from '../utils/pagination.js';
 
 // --- Constants ---
 const ERRORS = {
@@ -23,40 +28,22 @@ const ERRORS = {
   CHAT_ID_REQUIRED: 'Chat ID is required.',
 };
 
-/**
- * @typedef {Object} PaginationParams
- * @property {number} page - Page number for pagination
- * @property {number} limit - Items per page
- * @property {string} baseUrl - Base URL for HATEOAS links
- */
-
-/**
- * @typedef {Object} FinalizeResponseData
- * @property {string} userID - User ID
- * @property {string} input - User input message
- * @property {string} aiResponse - AI-generated response
- * @property {string} [chatId] - Chat session ID (optional)
- */
-
-/**
- * ChatService
- * @description Manages chat operations for the mental health companion feature, including creation, continuation, finalization, and history retrieval.
- */
 export const ChatService = {
   /**
    * Creates a new chat session and streams an AI response
-   * @async
-   * @param {string} userID - User ID
-   * @param {string} message - User's input message
-   * @returns {Promise<{status: string, stream?: AsyncIterable, metadata?: {userID: string, input: string, isNewSession: boolean, chatId: null}, data?: {advice: string, isCrisis: boolean, isContinued: boolean}}>} Chat creation result
-   * @throws {Error} If input is invalid or message is blocked
+   * @param {Object} payload
+   * @param {string} payload.userID
+   * @param {string} payload.message
    */
-  createChat: async (userID, message) => {
+  createChat: async (payload) => {
+    const { userID, message } = payload;
+
     if (!message?.trim()) throw new Error(ERRORS.NO_INPUT);
     const input = message.trim();
     const userIdObj = toId(userID);
 
     if (isBlocked(input)) throw new Error(ERRORS.REFUSAL);
+
     if (isCrisis(input)) {
       return {
         status: STATUS.SUCCESS,
@@ -66,15 +53,25 @@ export const ChatService = {
 
     try {
       const classificationPrompt = CLASSIFICATION_PROMPT(input);
-      const classification = (await GeminiService.generateResponseNonStream([
-        { role: 'user', content: classificationPrompt },
-      ])).toUpperCase().trim();
+      const classification = (
+        await GeminiService.generateResponseNonStream([
+          { role: 'user', content: classificationPrompt },
+        ])
+      )
+        .toUpperCase()
+        .trim();
 
-      if (classification.includes('OFF_TOPIC')) throw new Error(ERRORS.REFUSAL);
+      if (classification.includes('OFF_TOPIC'))
+        throw new Error(ERRORS.REFUSAL);
+
       if (classification.includes('CRISIS')) {
         return {
           status: STATUS.SUCCESS,
-          data: { advice: CRISIS_RESPONSE, isCrisis: true, isContinued: false },
+          data: {
+            advice: CRISIS_RESPONSE,
+            isCrisis: true,
+            isContinued: false,
+          },
         };
       }
     } catch (err) {
@@ -88,24 +85,31 @@ export const ChatService = {
     return {
       status: STATUS.SUCCESS,
       stream,
-      metadata: { userID: userIdObj, input, isNewSession: true, chatId: null },
+      metadata: {
+        userID: userIdObj,
+        input,
+        isNewSession: true,
+        chatId: null,
+      },
     };
   },
 
   /**
-   * Continues an existing chat session and streams a response
-   * @async
-   * @param {string} userID - User ID
-   * @param {string} message - User's input message
-   * @returns {Promise<{status: string, stream: AsyncIterable, metadata: {userID: string, input: string, chatId: string}}>} Chat continuation result
-   * @throws {Error} If input is invalid, message is blocked, or chat not found
+   * Continues an existing chat
+   * @param {Object} payload
+   * @param {string} payload.userID
+   * @param {string} payload.message
    */
-  continueChat: async (userID, message) => {
+  continueChat: async (payload) => {
+    const { userID, message } = payload;
+
     if (!message?.trim()) throw new Error(ERRORS.NO_INPUT);
+
     const input = message.trim();
     const userIdObj = toId(userID);
 
     if (isBlocked(input)) throw new Error(ERRORS.REFUSAL);
+
     if (isCrisis(input)) {
       return {
         status: STATUS.SUCCESS,
@@ -114,9 +118,11 @@ export const ChatService = {
     }
 
     const chat = await Chat.findOne({ userID: userIdObj }).exec();
-    if (!chat || !chat.history.length) throw new Error(ERRORS.CHAT_NOT_FOUND);
+    if (!chat || !chat.history.length)
+      throw new Error(ERRORS.CHAT_NOT_FOUND);
 
     const context = chat.getDecryptedHistory().slice(-10);
+
     const messages = [
       ...context.map((m) => ({
         role: m.role === 'assistant' ? 'model' : 'user',
@@ -130,18 +136,25 @@ export const ChatService = {
     return {
       status: STATUS.SUCCESS,
       stream,
-      metadata: { userID: userIdObj, input, chatId: chat._id.toString() },
+      metadata: {
+        userID: userIdObj,
+        input,
+        chatId: chat._id.toString(),
+      },
     };
   },
 
   /**
-   * Finalizes a chat response by saving user and AI messages
-   * @async
-   * @param {FinalizeResponseData} data - Chat response data
-   * @returns {Promise<{status: string, message: string, data: {advice: string, isNewSession: boolean, isContinued: boolean, isCrisis: boolean}}>} Finalization result
-   * @throws {Error} If chat not found or DB error occurs
+   * Finalizes chat response
+   * @param {Object} payload
+   * @param {string} payload.userID
+   * @param {string} payload.input
+   * @param {string} payload.aiResponse
+   * @param {string} [payload.chatId]
    */
-  finalizeResponse: async ({ userID, input, aiResponse, chatId }) => {
+  finalizeResponse: async (payload) => {
+    const { userID, input, aiResponse, chatId } = payload;
+
     const userIdObj = toId(userID);
     const chat = chatId
       ? await Chat.findById(chatId).exec()
@@ -149,8 +162,13 @@ export const ChatService = {
 
     if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    const finalResponse = isCrisis(aiResponse) ? CRISIS_RESPONSE : aiResponse;
-    const fullResponse = `${finalResponse}${!chat.disclaimerAdded ? `\n\n_${DISCLAIMER}_` : ''}`;
+    const finalResponse = isCrisis(aiResponse)
+      ? CRISIS_RESPONSE
+      : aiResponse;
+
+    const fullResponse = `${finalResponse}${
+      !chat.disclaimerAdded ? `\n\n_${DISCLAIMER}_` : ''
+    }`;
 
     await chat.addMessage('user', input);
     await chat.addMessage('assistant', fullResponse);
@@ -173,27 +191,30 @@ export const ChatService = {
   },
 
   /**
-   * Retrieves paginated chat history for a user
-   * @async
-   * @param {string} userID - User ID
-   * @param {number} page - Page number
-   * @param {number} limit - Items per page
-   * @param {string} baseUrl - Base URL for HATEOAS links
-   * @returns {Promise<{status: string, message: string, data: {history: Array, startedAt: Date, lastActive: Date}, pagination: {totalItems: number, totalPages: number, currentPage: number, limit: number, links: Object}}>} Paginated chat history
-   * @throws {Error} If chat not found
+   * Returns paginated history
+   * @param {Object} payload
+   * @param {string} payload.userID
+   * @param {number} payload.page
+   * @param {number} payload.limit
+   * @param {string} payload.baseUrl
    */
-  getChatHistory: async (userID, page, limit, baseUrl) => {
-    const { page: sanitizedPage, limit: sanitizedLimit } = sanitizePaginationParams(page, limit);
+  getChatHistory: async (payload) => {
+    const { userID, page, limit, baseUrl } = payload;
+
+    const { page: sanitizedPage, limit: sanitizedLimit } =
+      sanitizePaginationParams(page, limit);
+
     const userIdObj = toId(userID);
 
     const chat = await Chat.findOne({ userID: userIdObj }).exec();
     if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    const { history, totalItems, totalPages } = await getPaginatedHistory(
-      { userID: userIdObj },
-      sanitizedPage,
-      sanitizedLimit
-    );
+    const { history, totalItems, totalPages } =
+      await getPaginatedHistory(
+        { userID: userIdObj },
+        sanitizedPage,
+        sanitizedLimit
+      );
 
     return {
       status: STATUS.SUCCESS,
@@ -208,33 +229,41 @@ export const ChatService = {
         totalPages,
         currentPage: sanitizedPage,
         limit: sanitizedLimit,
-        links: generatePaginationLinks(sanitizedPage, sanitizedLimit, totalItems, baseUrl),
+        links: generatePaginationLinks(
+          sanitizedPage,
+          sanitizedLimit,
+          totalItems,
+          baseUrl
+        ),
       },
     };
   },
 
   /**
-   * Retrieves paginated chat history by chat ID
-   * @async
-   * @param {string} chatId - Chat ID
-   * @param {number} page - Page number
-   * @param {number} limit - Items per page
-   * @param {string} baseUrl - Base URL for HATEOAS links
-   * @returns {Promise<{status: string, message: string, data: {chatId: string, userID: string, history: Array, startedAt: Date, lastActive: Date}, pagination: {totalItems: number, totalPages: number, currentPage: number, limit: number, links: Object}}>} Paginated chat history
-   * @throws {Error} If chat ID is missing or chat not found
+   * Returns history by ID
+   * @param {Object} payload
+   * @param {string} payload.chatId
+   * @param {number} payload.page
+   * @param {number} payload.limit
+   * @param {string} payload.baseUrl
    */
-  getChatById: async (chatId, page, limit, baseUrl) => {
+  getChatById: async (payload) => {
+    const { chatId, page, limit, baseUrl } = payload;
+
     if (!chatId) throw new Error(ERRORS.CHAT_ID_REQUIRED);
 
-    const { page: sanitizedPage, limit: sanitizedLimit } = sanitizePaginationParams(page, limit);
+    const { page: sanitizedPage, limit: sanitizedLimit } =
+      sanitizePaginationParams(page, limit);
+
     const chat = await Chat.findById(chatId).exec();
     if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    const { history, totalItems, totalPages } = await getPaginatedHistory(
-      { _id: toId(chatId) },
-      sanitizedPage,
-      sanitizedLimit
-    );
+    const { history, totalItems, totalPages } =
+      await getPaginatedHistory(
+        { _id: toId(chatId) },
+        sanitizedPage,
+        sanitizedLimit
+      );
 
     return {
       status: STATUS.SUCCESS,
@@ -251,35 +280,49 @@ export const ChatService = {
         totalPages,
         currentPage: sanitizedPage,
         limit: sanitizedLimit,
-        links: generatePaginationLinks(sanitizedPage, sanitizedLimit, totalItems, baseUrl),
+        links: generatePaginationLinks(
+          sanitizedPage,
+          sanitizedLimit,
+          totalItems,
+          baseUrl
+        ),
       },
     };
   },
 
   /**
-   * Clears all messages in a user's chat session
-   * @async
-   * @param {string} userID - User ID
-   * @returns {Promise<{status: string, message: string}>} Clear result
-   * @throws {Error} If chat not found
+   * Clears chat
+   * @param {Object} payload
+   * @param {string} payload.userID
    */
-  clearChat: async (userID) => {
+  clearChat: async (payload) => {
+    const { userID } = payload;
+
     const userIdObj = toId(userID);
     const chat = await Chat.findOne({ userID: userIdObj }).exec();
     if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    await Chat.updateOne({ userID: userIdObj }, { history: [], disclaimerAdded: false }).exec();
+    await Chat.updateOne(
+      { userID: userIdObj },
+      { history: [], disclaimerAdded: false }
+    ).exec();
+
     return { status: STATUS.SUCCESS, message: 'Conversation cleared' };
   },
 
   /**
-   * Deletes a user's chat session
-   * @async
-   * @param {string} userID - User ID
-   * @returns {Promise<{status: string, message: string}>} Deletion result
+   * Ends chat session
+   * @param {Object} payload
+   * @param {string} payload.userID
    */
-  endChat: async (userID) => {
+  endChat: async (payload) => {
+    const { userID } = payload;
+
     await Chat.deleteOne({ userID: toId(userID) }).exec();
-    return { status: STATUS.SUCCESS, message: 'Conversation ended. Take care.' };
+
+    return {
+      status: STATUS.SUCCESS,
+      message: 'Conversation ended. Take care.',
+    };
   },
 };
