@@ -2,7 +2,7 @@ import { ChatService } from '../services/chat.js';
 import { logger } from '../config/index.js';
 
 /**
- * Sends a structured WebSocket message or error back to the client.
+ * Sends a structured WebSocket message to the client.
  * @param {WebSocket} ws - The active WebSocket connection.
  * @param {string} type - The message type (e.g., 'chat_response', 'error').
  * @param {object} payload - The message payload.
@@ -14,29 +14,29 @@ const sendWSMessage = (ws, type, payload) => {
 };
 
 /**
- * Handles incoming chat messages from connected WebSocket clients.
- * Determines if it's a new or continued chat, processes the message stream,
- * and finalizes the conversation for storage.
+ * Processes incoming chat messages over WebSocket, streams AI responses,
+ * and finalizes conversation sessions.
  * @param {WebSocket} ws - The active WebSocket connection.
- * @param {object} enrichedPayload - The enriched message payload.
- * @param {string} enrichedPayload.userID - The authenticated user ID.
- * @param {boolean} enrichedPayload.isContinued - Whether this is an ongoing session.
- * @param {string} enrichedPayload.message - The user’s input message.
+ * @param {object} enrichedPayload - Enriched incoming chat payload.
  */
 export const handleChatMessage = async (ws, enrichedPayload) => {
-  const { userID, isContinued, message } = enrichedPayload;
+  const { userID, message, chatId, isContinued } = enrichedPayload;
   let result;
 
   try {
-    result = isContinued
-      ? await ChatService.continueChat(userID, message)
-      : await ChatService.createChat(userID, message);
+    const payload = { userID, message, chatId };
+    result = await ChatService.handleChat(payload);
+
   } catch (error) {
     logger.error(`Chat service error for user ${userID}: ${error.message}`);
-    return sendWSMessage(ws, 'error', { message: error.message });
+
+    const statusMessage = error.message.includes('Chat not found')
+      ? 'No active conversation found or invalid ID provided.'
+      : error.message;
+
+    return sendWSMessage(ws, 'error', { message: statusMessage });
   }
 
-  // Handle special responses such as crisis or advisory messages
   if (result.data?.advice) {
     return sendWSMessage(ws, 'chat_response', {
       advice: result.data.advice,
@@ -49,8 +49,7 @@ export const handleChatMessage = async (ws, enrichedPayload) => {
   const { stream, metadata } = result;
   let fullResponse = '';
 
-  // Notify client that streaming is starting
-  sendWSMessage(ws, 'chat_response', { isStreaming: true, isContinued });
+  sendWSMessage(ws, 'chat_response', { isStreaming: true, isContinued: metadata.isNewSession });
 
   try {
     for await (const token of stream) {
@@ -60,7 +59,6 @@ export const handleChatMessage = async (ws, enrichedPayload) => {
 
     logger.info(`Stream completed for user ${userID}. Saving conversation...`);
 
-    // Save finalized AI response
     const finalResult = await ChatService.finalizeResponse({
       userID,
       input: message,
@@ -72,15 +70,15 @@ export const handleChatMessage = async (ws, enrichedPayload) => {
       message: 'Conversation session saved.',
       chatId: finalResult.data.chatId,
       isCrisis: finalResult.data.isCrisis,
-      isDisclaimer: finalResult.data.advice?.includes("I'm not a therapist"),
+      isDisclaimer: finalResult.data.advice?.includes("disclaimer") || false,
     });
+
   } catch (streamError) {
     logger.error(
       `Stream processing or finalization error for user ${userID}: ${streamError.message}`
     );
     sendWSMessage(ws, 'error', {
-      message:
-        'A critical error occurred while generating or saving the response.',
+      message: 'A critical error occurred while generating or saving the response.',
     });
   }
 };

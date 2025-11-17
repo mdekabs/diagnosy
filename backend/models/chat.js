@@ -1,22 +1,41 @@
 import mongoose from 'mongoose';
 import { encryptText, decryptText } from '../utils/encryption.js';
+import { logger } from '../config/index.js';
 
 /* -------------------- MESSAGE SCHEMA -------------------- */
+
+// Encrypts content on write
+const encryptSetter = (value) => {
+  if (typeof value === 'string' && value.length > 0) {
+    return encryptText(value.trim());
+  }
+  return value;
+};
+
+// Decrypts content on read
+const decryptGetter = (value) => {
+  if (typeof value === 'string' && value.length > 0) {
+    try {
+      return decryptText(value);
+    } catch (err) {
+      logger.error(`Decryption error: ${err.message}`);
+      return '[Decryption Failed]';
+    }
+  }
+  return value;
+};
 
 const messageSchema = new mongoose.Schema({
   role: {
     type: String,
-    enum: ['user', 'assistant'], // only allow valid roles
-    required: [true, 'Message role is required.'],
+    enum: ['user', 'assistant'],
+    required: true,
   },
   content: {
     type: String,
-    required: [true, 'Message content is required.'],
-    minlength: [1, 'Message cannot be empty.'],
-    maxlength: [2000, 'Message is too long.'],
-    // Encrypt before saving, decrypt when reading
-    set: (value) => (value ? encryptText(value.trim()) : value),
-    get: (value) => (value ? decryptText(value) : value),
+    required: true,
+    set: encryptSetter,
+    get: decryptGetter,
   },
   timestamp: {
     type: Date,
@@ -28,7 +47,6 @@ const messageSchema = new mongoose.Schema({
   },
 });
 
-// Index to optimize sorting by newest messages
 messageSchema.index({ timestamp: -1 });
 
 /* -------------------- CHAT SCHEMA -------------------- */
@@ -38,71 +56,69 @@ const chatSchema = new mongoose.Schema(
     userID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'User ID is required.'],
-      validate: {
-        validator: mongoose.isValidObjectId,
-        message: 'Invalid user ID format.',
-      },
+      required: true,
+      index: true,
     },
+
     history: {
       type: [messageSchema],
       default: [],
       validate: {
-        validator: function (messages) {
-          return messages.length <= 10000;
-        },
+        validator: (messages) => messages.length <= 10000,
         message: 'Message history limit exceeded (max 10,000).',
       },
     },
+
+    disclaimerAdded: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
-    timestamps: true, // adds createdAt & updatedAt
-    toJSON: { getters: true }, // ensures decrypted values show in JSON output
+    timestamps: true,
+    toJSON: { getters: true },
     toObject: { getters: true },
   }
 );
 
-// Each user has one chat record
 chatSchema.index({ userID: 1 }, { unique: true });
 
 /* -------------------- METHODS -------------------- */
 
-// Add a new message to chat
+// Adds a message; encryption is handled by the schema setter
 chatSchema.methods.addMessage = async function (role, content) {
-  // Validate message manually before pushing
-  if (!role || !['user', 'assistant'].includes(role)) {
+  if (!['user', 'assistant'].includes(role)) {
     throw new Error('Invalid role.');
   }
+
   if (!content || content.trim().length === 0) {
     throw new Error('Message content cannot be empty.');
   }
 
-  const encryptedContent = encryptText(content.trim());
-  this.history.push({ role, content: encryptedContent, timestamp: new Date() });
+  this.history.push({
+    role,
+    content: content.trim(),
+    timestamp: new Date(),
+  });
 
   await this.save();
   return this;
 };
 
-// Decrypt all messages for reading
+// Returns all messages with decrypted content via getters
 chatSchema.methods.getDecryptedHistory = function () {
   return this.history.map((msg) => ({
     role: msg.role,
-    content: decryptText(msg.content),
+    content: msg.content,
     timestamp: msg.timestamp,
+    _id: msg._id,
   }));
 };
 
-// Find or create chat record
+// Finds an existing chat or creates a new one
 chatSchema.statics.findOrCreate = async function (userID) {
-  if (!mongoose.isValidObjectId(userID)) {
-    throw new Error('Invalid user ID format.');
-  }
-
   let chat = await this.findOne({ userID });
-  if (!chat) {
-    chat = await this.create({ userID, history: [] });
-  }
+  if (!chat) chat = await this.create({ userID });
   return chat;
 };
 

@@ -6,7 +6,7 @@ info:
     health symptoms and receive advice, with JWT authentication, Redis caching,
     and Bull queue-based email processing.
 servers:
-  - url: http://localhost:3000
+  - url: http://localhost:3000/api
 components:
   securitySchemes:
     bearerAuth:

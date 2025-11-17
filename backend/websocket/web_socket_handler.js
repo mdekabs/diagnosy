@@ -1,104 +1,112 @@
 import { logger } from '../config/index.js';
 import { handleChatMessage } from './chat.js';
 import { parse } from 'url';
-import { verifyTokenCore } from '../middleware/tokenization.js'; 
+import { verifyTokenCore } from '../middleware/tokenization.js';
 
 /**
  * Sends a structured error response to the WebSocket client.
- * @param {WebSocket} ws - The WebSocket connection.
- * @param {string} message - The error message to send.
  */
 const sendError = (ws, message) => {
-    if (ws.readyState === ws.OPEN) {
-        ws.send(JSON.stringify({ type: 'error', payload: { message } }));
-    }
+  if (ws.readyState === ws.OPEN) {
+    ws.send(JSON.stringify({ type: 'error', payload: { message } }));
+  }
 };
 
 /**
- * Handles a new WebSocket connection.
- * Authenticates the client using the verifyTokenCore function (which includes
- * the user existence check), and manages the chat session lifecycle.
- * * @param {WebSocket} ws - The connected WebSocket client.
- * @param {http.IncomingMessage} req - The HTTP request that initiated the WebSocket handshake.
+ * Handles a new WebSocket connection: authenticates the client,
+ * listens for messages, forwards chat requests, and manages session cleanup.
  */
 export const handleWebSocketConnection = (ws, req) => {
-    const { query } = parse(req.url, true);
-    const token = query.token;
+  const { query } = parse(req.url, true);
+  const token = query.token;
 
-    if (!token) {
-        ws.close(1008, 'Authentication token required. Connect with ?token=...');
-        logger.warn('WS connection denied: Missing token.');
-        return;
-    }
+  if (!token) {
+    ws.close(1008, 'Authentication token required. Connect with ?token=...');
+    logger.warn('WS connection denied: Missing token.');
+    return;
+  }
 
-    // 1. Authenticate using the CORE function. This single call now verifies 
-    //    the token and confirms the user's existence in the database.
-    verifyTokenCore(token)
-        .then(decoded => {
-            // If we reach here, the token is valid, not blacklisted, AND the user exists.
-            const userID = decoded.id; 
-            ws.userID = userID;
-            ws.isProcessingChat = false;
-            ws.hasSentFirstMessage = false; // Initialize state
+  verifyTokenCore(token)
+    .then((decoded) => {
+      const userID = decoded.id;
 
-            logger.info(`New WebSocket connection established for user: ${ws.userID}`);
+      ws.userID = userID;
+      ws.isProcessingChat = false;
+      ws.chatId = null;
 
-            /**
-             * Handles incoming messages from the client.
-             */
-            ws.on('message', (message) => {
-                // Failsafe check in case session somehow got cleared
-                if (!ws.userID) {
-                    return sendError(ws, 'Session unauthorized. Please reconnect.');
-                }
+      logger.info(`New WebSocket connection established for user: ${ws.userID}`);
 
-                try {
-                    const data = JSON.parse(message.toString());
+      /**
+       * Handles incoming client messages.
+       */
+      ws.on('message', (message) => {
+        if (!ws.userID) {
+          return sendError(ws, 'Session unauthorized. Please reconnect.');
+        }
 
-                    if (data.message) {
-                        if (ws.isProcessingChat) {
-                            return sendError(ws, 'A chat request is already being processed. Please wait.');
-                        }
+        try {
+          const data = JSON.parse(message.toString());
 
-                        ws.isProcessingChat = true;
+          if (data.command === 'clear_chat') {
+            ws.chatId = null;
+            return sendError(ws, 'Chat cleared successfully.');
+          }
 
-                        const enrichedPayload = {
-                            userID: ws.userID,
-                            isContinued: ws.hasSentFirstMessage,
-                            message: data.message,
-                        };
+          if (data.message) {
+            if (ws.isProcessingChat) {
+              return sendError(ws, 'A chat request is already being processed. Please wait.');
+            }
 
-                        // Delegates to the chat handler
-                        handleChatMessage(ws, enrichedPayload)
-                            .finally(() => {
-                                ws.isProcessingChat = false;
-                                ws.hasSentFirstMessage = true;
-                            });
-                    } else {
-                        sendError(ws, 'Invalid message payload. Expected {"message": "..."}');
-                    }
-                } catch (err) {
-                    logger.error(`Error processing WS message for user ${ws.userID}: ${err.message}`);
-                    sendError(ws, 'Invalid message format (must be valid JSON).');
-                }
+            ws.isProcessingChat = true;
+
+            const enrichedPayload = {
+              userID: ws.userID,
+              isContinued: !!ws.chatId,
+              chatId: ws.chatId,
+              message: data.message,
+            };
+
+            const originalSendWSMessage = ws.send;
+            ws.send = (jsonMessage) => {
+              const parsedMessage = JSON.parse(jsonMessage);
+              if (
+                parsedMessage.type === 'session_complete' &&
+                parsedMessage.payload.chatId
+              ) {
+                ws.chatId = parsedMessage.payload.chatId;
+              }
+              originalSendWSMessage.call(ws, jsonMessage);
+            };
+
+            handleChatMessage(ws, enrichedPayload).finally(() => {
+              ws.isProcessingChat = false;
+              if (ws.send !== originalSendWSMessage) ws.send = originalSendWSMessage;
             });
+          } else {
+            sendError(ws, 'Invalid message payload. Expected {"message": "..."}');
+          }
+        } catch (err) {
+          logger.error(`Error processing WS message for user ${ws.userID}: ${err.message}`);
+          sendError(ws, 'Invalid message format (must be valid JSON).');
+        }
+      });
 
-            /**
-             * Handles client disconnections and errors.
-             */
-            ws.on('close', () => {
-                logger.info(`WebSocket connection closed for user: ${ws.userID}`);
-            });
+      /**
+       * Handles WebSocket connection termination.
+       */
+      ws.on('close', () => {
+        logger.info(`WebSocket connection closed for user: ${ws.userID}`);
+      });
 
-            ws.on('error', (err) => {
-                logger.error(`WebSocket error for user ${ws.userID}: ${err.message}`);
-            });
-
-        }) 
-        .catch(err => {
-            // Catches any authentication/verification error from verifyTokenCore 
-            // (invalid token, blacklisted, or user deleted from MongoDB)
-            ws.close(1008, err.message);
-            logger.error(`WS connection denied: ${err.message}`);
-        });
+      /**
+       * Handles WebSocket-level errors.
+       */
+      ws.on('error', (err) => {
+        logger.error(`WebSocket error for user ${ws.userID}: ${err.message}`);
+      });
+    })
+    .catch((err) => {
+      ws.close(1008, err.message);
+      logger.error(`WS connection denied: ${err.message}`);
+    });
 };

@@ -8,7 +8,6 @@ import {
   CRISIS_RESPONSE,
   CLASSIFICATION_PROMPT,
   CHAT_PROMPT,
-  CONTINUE_PROMPT,
   toId,
   isCrisis,
   isBlocked,
@@ -20,116 +19,99 @@ import {
   getPaginatedHistory,
 } from '../utils/pagination.js';
 
-// --- Constants ---
 const ERRORS = {
   NO_INPUT: M.NO_INPUT,
   REFUSAL: M.REFUSAL,
   CHAT_NOT_FOUND: M.CHAT_NOT_FOUND,
-  CHAT_ID_REQUIRED: 'Chat ID is required.',
+  CHAT_ID_REQUIRED: 'Chat ID is required to continue a conversation.',
+};
+
+/**
+ * Performs fast validation checks before expensive AI operations.
+ * @param {string} input - User message.
+ * @returns {{ input: string, isCrisisResponse: boolean }}
+ */
+const handlePreChatChecks = (input) => {
+  if (!input?.trim()) throw new Error(ERRORS.NO_INPUT);
+  const trimmedInput = input.trim();
+
+  if (isBlocked(trimmedInput)) throw new Error(ERRORS.REFUSAL);
+  if (isCrisis(trimmedInput)) {
+    return { isCrisisResponse: true, input: trimmedInput };
+  }
+
+  return { isCrisisResponse: false, input: trimmedInput };
 };
 
 export const ChatService = {
   /**
-   * Creates a new chat session and streams an AI response
-   * @param {Object} payload
-   * @param {string} payload.userID
-   * @param {string} payload.message
+   * Processes a chat message, starts new sessions, or continues existing ones.
+   * Generates streamed AI output and classification checks when required.
    */
-  createChat: async (payload) => {
-    const { userID, message } = payload;
+  handleChat: async (payload) => {
+    const { userID, message, chatId } = payload;
 
-    if (!message?.trim()) throw new Error(ERRORS.NO_INPUT);
-    const input = message.trim();
+    const preCheck = handlePreChatChecks(message);
     const userIdObj = toId(userID);
+    const isNewSession = !chatId;
 
-    if (isBlocked(input)) throw new Error(ERRORS.REFUSAL);
+    let chat;
+    let messages = [];
 
-    if (isCrisis(input)) {
+    if (preCheck.isCrisisResponse) {
       return {
         status: STATUS.SUCCESS,
-        data: { advice: CRISIS_RESPONSE, isCrisis: true, isContinued: false },
+        data: { advice: CRISIS_RESPONSE, isCrisis: true, isContinued: !isNewSession },
       };
     }
 
-    try {
-      const classificationPrompt = CLASSIFICATION_PROMPT(input);
-      const classification = (
-        await GeminiService.generateResponseNonStream([
-          { role: 'user', content: classificationPrompt },
-        ])
-      )
-        .toUpperCase()
-        .trim();
-
-      if (classification.includes('OFF_TOPIC'))
-        throw new Error(ERRORS.REFUSAL);
-
-      if (classification.includes('CRISIS')) {
-        return {
-          status: STATUS.SUCCESS,
-          data: {
-            advice: CRISIS_RESPONSE,
-            isCrisis: true,
-            isContinued: false,
-          },
-        };
-      }
-    } catch (err) {
-      logger.error(`Classification error: ${err.message}`);
-    }
-
-    const stream = await GeminiService.generateResponseStream([
-      { role: 'user', content: CHAT_PROMPT(input) },
-    ]);
-
-    return {
-      status: STATUS.SUCCESS,
-      stream,
-      metadata: {
+    if (isNewSession) {
+      messages.push({ role: 'user', content: CHAT_PROMPT(preCheck.input) });
+    } else {
+      chat = await Chat.findOne({
+        _id: toId(chatId),
         userID: userIdObj,
-        input,
-        isNewSession: true,
-        chatId: null,
-      },
-    };
-  },
+      }).exec();
 
-  /**
-   * Continues an existing chat
-   * @param {Object} payload
-   * @param {string} payload.userID
-   * @param {string} payload.message
-   */
-  continueChat: async (payload) => {
-    const { userID, message } = payload;
+      if (!chat || !chat.history.length) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    if (!message?.trim()) throw new Error(ERRORS.NO_INPUT);
+      const context = chat.getDecryptedHistory().slice(-20);
 
-    const input = message.trim();
-    const userIdObj = toId(userID);
-
-    if (isBlocked(input)) throw new Error(ERRORS.REFUSAL);
-
-    if (isCrisis(input)) {
-      return {
-        status: STATUS.SUCCESS,
-        data: { advice: CRISIS_RESPONSE, isCrisis: true, isContinued: true },
-      };
+      messages = [
+        ...context.map((m) => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          content: m.content,
+        })),
+        { role: 'user', content: preCheck.input },
+      ];
     }
 
-    const chat = await Chat.findOne({ userID: userIdObj }).exec();
-    if (!chat || !chat.history.length)
-      throw new Error(ERRORS.CHAT_NOT_FOUND);
+    if (isNewSession) {
+      try {
+        const classification = (
+          await GeminiService.generateResponseNonStream([
+            { role: 'user', content: CLASSIFICATION_PROMPT(preCheck.input) },
+          ])
+        )
+          .toUpperCase()
+          .trim();
 
-    const context = chat.getDecryptedHistory().slice(-10);
+        if (classification.includes('OFF_TOPIC')) throw new Error(ERRORS.REFUSAL);
 
-    const messages = [
-      ...context.map((m) => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        content: m.content,
-      })),
-      { role: 'user', content: input },
-    ];
+        if (classification.includes('CRISIS')) {
+          return {
+            status: STATUS.SUCCESS,
+            data: {
+              advice: CRISIS_RESPONSE,
+              isCrisis: true,
+              isContinued: false,
+            },
+          };
+        }
+      } catch (err) {
+        logger.error(`Classification error: ${err.message}`);
+      }
+    }
 
     const stream = await GeminiService.generateResponseStream(messages);
 
@@ -138,19 +120,15 @@ export const ChatService = {
       stream,
       metadata: {
         userID: userIdObj,
-        input,
-        chatId: chat._id.toString(),
+        input: preCheck.input,
+        isNewSession,
+        chatId,
       },
     };
   },
 
   /**
-   * Finalizes chat response
-   * @param {Object} payload
-   * @param {string} payload.userID
-   * @param {string} payload.input
-   * @param {string} payload.aiResponse
-   * @param {string} [payload.chatId]
+   * Saves final user + AI messages into chat history atomically.
    */
   finalizeResponse: async (payload) => {
     const { userID, input, aiResponse, chatId } = payload;
@@ -170,12 +148,20 @@ export const ChatService = {
       !chat.disclaimerAdded ? `\n\n_${DISCLAIMER}_` : ''
     }`;
 
-    await chat.addMessage('user', input);
-    await chat.addMessage('assistant', fullResponse);
+    const historyUpdate = [
+      { role: 'user', content: input },
+      { role: 'assistant', content: fullResponse },
+    ];
 
     await Chat.updateOne(
       { _id: chat._id },
-      { disclaimerAdded: true, lastActive: new Date() }
+      {
+        $push: { history: { $each: historyUpdate } },
+        $set: {
+          disclaimerAdded: true,
+          lastActive: new Date(),
+        },
+      }
     ).exec();
 
     return {
@@ -183,6 +169,7 @@ export const ChatService = {
       message: M.RESPONSE_SUCCESS,
       data: {
         advice: fullResponse,
+        chatId: chat._id.toString(),
         isNewSession: !chatId,
         isContinued: !!chatId,
         isCrisis: finalResponse === CRISIS_RESPONSE,
@@ -191,12 +178,7 @@ export const ChatService = {
   },
 
   /**
-   * Returns paginated history
-   * @param {Object} payload
-   * @param {string} payload.userID
-   * @param {number} payload.page
-   * @param {number} payload.limit
-   * @param {string} payload.baseUrl
+   * Retrieves paginated chat history for the user's primary chat document.
    */
   getChatHistory: async (payload) => {
     const { userID, page, limit, baseUrl } = payload;
@@ -205,16 +187,14 @@ export const ChatService = {
       sanitizePaginationParams(page, limit);
 
     const userIdObj = toId(userID);
-
     const chat = await Chat.findOne({ userID: userIdObj }).exec();
     if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    const { history, totalItems, totalPages } =
-      await getPaginatedHistory(
-        { userID: userIdObj },
-        sanitizedPage,
-        sanitizedLimit
-      );
+    const { history, totalItems, totalPages } = await getPaginatedHistory(
+      { userID: userIdObj },
+      sanitizedPage,
+      sanitizedLimit
+    );
 
     return {
       status: STATUS.SUCCESS,
@@ -240,16 +220,10 @@ export const ChatService = {
   },
 
   /**
-   * Returns history by ID
-   * @param {Object} payload
-   * @param {string} payload.chatId
-   * @param {number} payload.page
-   * @param {number} payload.limit
-   * @param {string} payload.baseUrl
+   * Retrieves paginated chat history for a specific session by ID.
    */
   getChatById: async (payload) => {
     const { chatId, page, limit, baseUrl } = payload;
-
     if (!chatId) throw new Error(ERRORS.CHAT_ID_REQUIRED);
 
     const { page: sanitizedPage, limit: sanitizedLimit } =
@@ -258,12 +232,11 @@ export const ChatService = {
     const chat = await Chat.findById(chatId).exec();
     if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    const { history, totalItems, totalPages } =
-      await getPaginatedHistory(
-        { _id: toId(chatId) },
-        sanitizedPage,
-        sanitizedLimit
-      );
+    const { history, totalItems, totalPages } = await getPaginatedHistory(
+      { _id: toId(chatId) },
+      sanitizedPage,
+      sanitizedLimit
+    );
 
     return {
       status: STATUS.SUCCESS,
@@ -291,9 +264,7 @@ export const ChatService = {
   },
 
   /**
-   * Clears chat
-   * @param {Object} payload
-   * @param {string} payload.userID
+   * Clears all messages from the user's primary chat session.
    */
   clearChat: async (payload) => {
     const { userID } = payload;
@@ -311,9 +282,7 @@ export const ChatService = {
   },
 
   /**
-   * Ends chat session
-   * @param {Object} payload
-   * @param {string} payload.userID
+   * Deletes the user's primary chat document, ending the session.
    */
   endChat: async (payload) => {
     const { userID } = payload;

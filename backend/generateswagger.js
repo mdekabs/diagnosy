@@ -11,7 +11,7 @@ const options = {
       description:
         'A health chat API for authenticated and guest users to submit health symptoms and receive advice, with JWT authentication, Redis caching, and Bull queue-based email processing.',
     },
-    servers: [{ url: 'http://localhost:3000' }],
+    servers: [{ url: 'http://localhost:3000/api' }],
 
     components: {
       securitySchemes: {
@@ -35,5 +35,5 @@ const options = {
 };
 
 const swaggerSpec = swaggerJsdoc(options);
-writeFileSync('./openapi.yaml', stringify(swaggerSpec));
+writeFileSync('./config/openapi.yaml', stringify(swaggerSpec));
 console.log('openapi.yaml generated successfully!');
