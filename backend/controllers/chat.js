@@ -1,68 +1,83 @@
+// controllers/chat.js
 import HttpStatus from 'http-status-codes';
 import { ChatService } from '../services/index.js';
 import { responseHandler } from '../utils/index.js';
 import { logger } from '../config/index.js';
 
-// --- Constants ---
-const ERROR_STATUSES = {
-  'No active conversation found. Start by sharing your feelings.': HttpStatus.NOT_FOUND,
-  'Chat ID is required.': HttpStatus.BAD_REQUEST,
-  'Chat not found': HttpStatus.NOT_FOUND,
-};
-
-/**
- * @typedef {Object} ResponseData
- * @property {string} status - Response status ('success' or 'error')
- * @property {string} message - Response message
- * @property {Object} [data] - Optional response data
- * @property {Object} [pagination] - Optional pagination metadata
- */
-
 /**
  * ChatController
- * @description Handles HTTP requests for chat-related operations, interfacing with ChatService.
+ * Handles HTTP endpoints for the encrypted single-chat-per-user system.
+ * Keeps the controller thin — all business logic and messages live in ChatService.
  */
 export const ChatController = {
+
   /**
-   * Retrieves paginated chat history for the authenticated user
-   * @async
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   * @returns {Promise<void>} Responds with chat history or error
+   * GET /chat/history
+   * Returns paginated, decrypted conversation history for the authenticated user.
    */
   getChatHistory: async (req, res) => {
     try {
       const { page, limit } = req.query;
+
       const baseUrl = `${req.protocol}://${req.get('host')}${req.originalUrl.split('?')[0]}`;
-      const result = await ChatService.getChatHistory(req.userID, page, limit, baseUrl);
-      responseHandler(res, HttpStatus.OK, result.status, result.message, result.data, result.pagination);
+
+      const result = await ChatService.getChatHistory({
+        userID: req.userID,
+        page,
+        limit,
+        baseUrl,
+      });
+
+      responseHandler(
+        res,
+        HttpStatus.OK,
+        result.status,
+        result.message,
+        result.data,
+        result.pagination
+      );
     } catch (err) {
-      logger.error(`getChatHistory failed: ${err.message}`);
-      const status = ERROR_STATUSES[err.message] || HttpStatus.INTERNAL_SERVER_ERROR;
+      logger.error(`getChatHistory error: ${err.message}`);
+
+      // Only one possible error from service: "No active conversation found..."
+      const status = err.message.includes('No active conversation')
+        ? HttpStatus.NOT_FOUND
+        : HttpStatus.INTERNAL_SERVER_ERROR;
+
       responseHandler(res, status, 'error', err.message);
     }
   },
 
   /**
-   * Retrieves paginated chat history by chat ID
-   * @async
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   * @returns {Promise<void>} Responds with chat history or error
+   * DELETE /chat/clear
+   * Removes all messages from the user's chat while preserving the chat document.
    */
-  getChatById: async (req, res) => {
+  clearChat: async (req, res) => {
     try {
-      const { id: chatId } = req.params;
-      const { page, limit } = req.query;
-      const baseUrl = `${req.protocol}://${req.get('host')}${req.originalUrl.split('?')[0]}`;
-      const result = await ChatService.getChatById(chatId, page, limit, baseUrl);
-      responseHandler(res, HttpStatus.OK, result.status, result.message, result.data, result.pagination);
+      const result = await ChatService.clearChat({ userID: req.userID });
+
+      responseHandler(res, HttpStatus.OK, result.status, result.message);
     } catch (err) {
-      logger.error(`getChatById failed: ${err.message}`);
-      const status = ERROR_STATUSES[err.message] || HttpStatus.INTERNAL_SERVER_ERROR;
-      responseHandler(res, status, 'error', err.message);
+      logger.error(`clearChat error: ${err.message}`);
+      responseHandler(res, HttpStatus.INTERNAL_SERVER_ERROR, 'error', err.message);
     }
   },
+
+  /**
+   * DELETE /chat/end
+   * Permanently deletes the user's entire chat document.
+   */
+  endChat: async (req, res) => {
+    try {
+      const result = await ChatService.endChat({ userID: req.userID });
+
+      responseHandler(res, HttpStatus.OK, result.status, result.message);
+    } catch (err) {
+      logger.error(`endChat error: ${err.message}`);
+      responseHandler(res, HttpStatus.INTERNAL_SERVER_ERROR, 'error', err.message);
+    }
+  },
+
 };
 
 export default ChatController;

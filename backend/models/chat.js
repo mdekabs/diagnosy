@@ -1,10 +1,28 @@
+/**
+ * Chat & Message Models (with Field-Level Encryption)
+ * ---------------------------------------------------
+ * This module defines two Mongoose schemas:
+ * 1. Message — Stores individual chat messages (de-normalized collection)
+ * 2. Chat — Stores chat metadata and helper methods
+ *
+ * Includes:
+ * - Transparent encryption on write (setter)
+ * - Transparent decryption on read (getter)
+ * - Pagination-friendly message structure
+ */
+
 import mongoose from 'mongoose';
 import { encryptText, decryptText } from '../utils/encryption.js';
 import { logger } from '../config/index.js';
 
-/* -------------------- MESSAGE SCHEMA -------------------- */
+/* -------------------------------------------------------------------------- */
+/*                          ENCRYPTION HELPERS                                */
+/* -------------------------------------------------------------------------- */
 
-// Encrypts content on write
+/**
+ * Setter: Encrypts message content before storing in the database.
+ * Runs automatically when a message is created or updated.
+ */
 const encryptSetter = (value) => {
   if (typeof value === 'string' && value.length > 0) {
     return encryptText(value.trim());
@@ -12,63 +30,90 @@ const encryptSetter = (value) => {
   return value;
 };
 
-// Decrypts content on read
+/**
+ * Getter: Decrypts message content when retrieved from MongoDB.
+ * Ensures all returned messages include human-readable text.
+ */
 const decryptGetter = (value) => {
   if (typeof value === 'string' && value.length > 0) {
     try {
       return decryptText(value);
     } catch (err) {
-      logger.error(`Decryption error: ${err.message}`);
+      logger.error(`Failed to decrypt message: ${err.message}`);
       return '[Decryption Failed]';
     }
   }
   return value;
 };
 
-const messageSchema = new mongoose.Schema({
-  role: {
-    type: String,
-    enum: ['user', 'assistant'],
-    required: true,
-  },
-  content: {
-    type: String,
-    required: true,
-    set: encryptSetter,
-    get: decryptGetter,
-  },
-  timestamp: {
-    type: Date,
-    default: Date.now,
-    validate: {
-      validator: (value) => !isNaN(value.getTime()),
-      message: 'Invalid timestamp value.',
+/* -------------------------------------------------------------------------- */
+/*                               MESSAGE SCHEMA                               */
+/* -------------------------------------------------------------------------- */
+/**
+ * Each message is an independent document (de-normalized design).
+ * This avoids large nested arrays and improves query performance.
+ */
+
+const messageSchema = new mongoose.Schema(
+  {
+    /** Links message → parent Chat document */
+    chatId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Chat',
+      required: true,
+    },
+
+    /** Role of the entity sending the message */
+    role: {
+      type: String,
+      enum: ['user', 'assistant'],
+      required: true,
+    },
+
+    /** Strong-encrypted chat message content */
+    content: {
+      type: String,
+      required: true,
+      set: encryptSetter,
+      get: decryptGetter,
+    },
+
+    /** Timestamp of when the message was added */
+    timestamp: {
+      type: Date,
+      default: Date.now,
     },
   },
-});
+  {
+    // Ensures getters (decryption) are applied on toJSON and toObject
+    toJSON: { getters: true },
+    toObject: { getters: true },
+  }
+);
 
-messageSchema.index({ timestamp: -1 });
+// Optimized index: speeds up message retrieval per chat in descending order
+messageSchema.index({ chatId: 1, timestamp: -1 });
 
-/* -------------------- CHAT SCHEMA -------------------- */
+const Message = mongoose.model('Message', messageSchema);
+
+/* -------------------------------------------------------------------------- */
+/*                                 CHAT SCHEMA                                */
+/* -------------------------------------------------------------------------- */
+/**
+ * Lightweight Chat schema that stores only metadata.
+ * The actual messages live in the Message collection.
+ */
 
 const chatSchema = new mongoose.Schema(
   {
+    /** Associated user */
     userID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      index: true,
     },
 
-    history: {
-      type: [messageSchema],
-      default: [],
-      validate: {
-        validator: (messages) => messages.length <= 10000,
-        message: 'Message history limit exceeded (max 10,000).',
-      },
-    },
-
+    /** Tracks if any system disclaimer has been injected */
     disclaimerAdded: {
       type: Boolean,
       default: false,
@@ -81,48 +126,76 @@ const chatSchema = new mongoose.Schema(
   }
 );
 
+// Ensure each user has exactly one chat entry
 chatSchema.index({ userID: 1 }, { unique: true });
 
-/* -------------------- METHODS -------------------- */
+/* -------------------------------------------------------------------------- */
+/*                               CHAT METHODS                                 */
+/* -------------------------------------------------------------------------- */
 
-// Adds a message; encryption is handled by the schema setter
+/**
+ * Add a new message to this chat.
+ *
+ * @param {string} role - "user" or "assistant"
+ * @param {string} content - The plaintext message content
+ * @returns {Promise<Document>} The newly created Message doc
+ */
 chatSchema.methods.addMessage = async function (role, content) {
   if (!['user', 'assistant'].includes(role)) {
-    throw new Error('Invalid role.');
+    throw new Error('Invalid message role.');
   }
 
   if (!content || content.trim().length === 0) {
     throw new Error('Message content cannot be empty.');
   }
 
-  this.history.push({
+  return await Message.create({
+    chatId: this._id,
     role,
-    content: content.trim(),
+    content: content.trim(), // Encryption via schema setter
     timestamp: new Date(),
   });
-
-  await this.save();
-  return this;
 };
 
-// Returns all messages with decrypted content via getters
-chatSchema.methods.getDecryptedHistory = function () {
-  return this.history.map((msg) => ({
-    role: msg.role,
-    content: msg.content,
-    timestamp: msg.timestamp,
-    _id: msg._id,
-  }));
+/**
+ * Retrieve paginated chat history.
+ * Automatically returns decrypted message content.
+ *
+ * @param {number} limit - Max number of messages
+ * @param {number} skip - Number of messages to skip (pagination offset)
+ * @returns {Promise<Array<Document>>}
+ */
+chatSchema.methods.getHistory = async function (limit = 50, skip = 0) {
+  return await Message.find({ chatId: this._id })
+    .sort({ timestamp: -1 })
+    .skip(skip)
+    .limit(limit)
+    .lean({ getters: true }); // Ensures decrypted output
 };
 
-// Finds an existing chat or creates a new one
+/* -------------------------------------------------------------------------- */
+/*                               CHAT STATICS                                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Finds an existing chat or creates a new one for the user.
+ *
+ * @param {ObjectId} userID
+ * @returns {Promise<Document>} Chat instance
+ */
 chatSchema.statics.findOrCreate = async function (userID) {
   let chat = await this.findOne({ userID });
-  if (!chat) chat = await this.create({ userID });
+  if (!chat) {
+    chat = await this.create({ userID });
+  }
   return chat;
 };
 
-/* -------------------- EXPORT -------------------- */
+/* -------------------------------------------------------------------------- */
+/*                                  EXPORTS                                   */
+/* -------------------------------------------------------------------------- */
 
 const Chat = mongoose.model('Chat', chatSchema);
-export { Chat };
+
+export { Chat, Message };
+

@@ -5,7 +5,7 @@ import { authenticationVerifier, cacheMiddleware } from '../middleware/index.js'
 /**
  * ------------------------------------------------------------------
  * Mental-Health Chat API Routes
- * Includes chat history retrieval and fetching chat by ID.
+ * One encrypted chat per authenticated user. No multi-session support.
  * ------------------------------------------------------------------
  */
 export default function chatRoutes(router) {
@@ -13,7 +13,7 @@ export default function chatRoutes(router) {
    * @swagger
    * tags:
    *   - name: Chat
-   *     description: Endpoints for chat history and message retrieval
+   *     description: Encrypted conversation management (one chat per user)
    */
 
   /**
@@ -21,7 +21,7 @@ export default function chatRoutes(router) {
    * /chat/history:
    *   get:
    *     summary: Get paginated chat history
-   *     description: Returns a paginated list of conversation messages (user + assistant) for the authenticated user.
+   *     description: Returns the full decrypted conversation history (newest first) for the authenticated user.
    *     tags: [Chat]
    *     security:
    *       - bearerAuth: []
@@ -30,211 +30,73 @@ export default function chatRoutes(router) {
    *         name: page
    *         schema:
    *           type: integer
+   *           minimum: 1
    *           default: 1
-   *         description: Page number for pagination
    *       - in: query
    *         name: limit
    *         schema:
    *           type: integer
-   *           default: 10
+   *           minimum: 1
    *           maximum: 100
-   *         description: Number of messages per page
+   *           default: 20
    *     responses:
    *       200:
    *         description: Chat history retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 status:
-   *                   type: string
-   *                   example: success
-   *                 message:
-   *                   type: string
-   *                   example: Response retrieved successfully
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     history:
-   *                       type: array
-   *                       items:
-   *                         type: object
-   *                         properties:
-   *                           role:
-   *                             type: string
-   *                             enum: [user, assistant]
-   *                             example: user
-   *                           content:
-   *                             type: string
-   *                             example: Hello, how are you feeling today?
-   *                           timestamp:
-   *                             type: string
-   *                             format: date-time
-   *                             example: 2025-11-01T12:05:00Z
-   *                     startedAt:
-   *                       type: string
-   *                       format: date-time
-   *                       example: 2025-11-01T12:00:00Z
-   *                     lastActive:
-   *                       type: string
-   *                       format: date-time
-   *                       example: 2025-11-07T12:00:00Z
-   *                 pagination:
-   *                   type: object
-   *                   properties:
-   *                     totalItems:
-   *                       type: integer
-   *                       example: 20
-   *                     totalPages:
-   *                       type: integer
-   *                       example: 4
-   *                     currentPage:
-   *                       type: integer
-   *                       example: 2
-   *                     limit:
-   *                       type: integer
-   *                       example: 5
-   *                     links:
-   *                       type: array
-   *                       items:
-   *                         type: object
-   *                         properties:
-   *                           rel:
-   *                             type: string
-   *                             example: self
-   *                           href:
-   *                             type: string
-   *                             example: http://example.com/api/chat/history?page=2&limit=5
    *       404:
-   *         description: No chat history found
+   *         description: No conversation started yet
    *       401:
    *         description: Unauthorized
-   *       500:
-   *         description: Internal server error
    */
   router.get(
     '/chat/history',
     authenticationVerifier,
-    cacheMiddleware,
+    cacheMiddleware, // Optional: cache for 30s if you want to reduce DB reads
     ChatController.getChatHistory
   );
 
   /**
    * @swagger
-   * /chat/{id}:
-   *   get:
-   *     summary: Get paginated chat by ID
-   *     description: Retrieves a paginated list of conversation messages for a specific chat ID.
+   * /chat/clear:
+   *   delete:
+   *     summary: Clear conversation history
+   *     description: Removes all messages but keeps the chat document (disclaimer resets).
    *     tags: [Chat]
    *     security:
    *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *         description: The unique ID of the chat
-   *       - in: query
-   *         name: page
-   *         schema:
-   *           type: integer
-   *           default: 1
-   *         description: Page number for pagination
-   *       - in: query
-   *         name: limit
-   *         schema:
-   *           type: integer
-   *           default: 10
-   *           maximum: 100
-   *         description: Number of messages per page
    *     responses:
    *       200:
-   *         description: Chat retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 status:
-   *                   type: string
-   *                   example: success
-   *                 message:
-   *                   type: string
-   *                   example: Response retrieved successfully
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     chatId:
-   *                       type: string
-   *                       example: 653fa31eb38b8c4d9011a219
-   *                     userID:
-   *                       type: string
-   *                       example: 653fa31eb38b8c4d9011a218
-   *                     history:
-   *                       type: array
-   *                       items:
-   *                         type: object
-   *                         properties:
-   *                           role:
-   *                             type: string
-   *                             enum: [user, assistant]
-   *                             example: user
-   *                           content:
-   *                             type: string
-   *                             example: I’m feeling better today.
-   *                           timestamp:
-   *                             type: string
-   *                             format: date-time
-   *                             example: 2025-11-01T12:05:00Z
-   *                     startedAt:
-   *                       type: string
-   *                       format: date-time
-   *                       example: 2025-11-01T12:00:00Z
-   *                     lastActive:
-   *                       type: string
-   *                       format: date-time
-   *                       example: 2025-11-07T12:00:00Z
-   *                 pagination:
-   *                   type: object
-   *                   properties:
-   *                     totalItems:
-   *                       type: integer
-   *                       example: 20
-   *                     totalPages:
-   *                       type: integer
-   *                       example: 4
-   *                     currentPage:
-   *                       type: integer
-   *                       example: 2
-   *                     limit:
-   *                       type: integer
-   *                       example: 5
-   *                     links:
-   *                       type: array
-   *                       items:
-   *                         type: object
-   *                         properties:
-   *                           rel:
-   *                             type: string
-   *                             example: self
-   *                           href:
-   *                             type: string
-   *                             example: http://example.com/api/chat/653fa31eb38b8c4d9011a219?page=2&limit=5
-   *       404:
-   *         description: Chat not found
-   *       400:
-   *         description: Invalid chat ID
+   *         description: Conversation cleared successfully
    *       401:
    *         description: Unauthorized
-   *       500:
-   *         description: Internal server error
    */
-  router.get(
-    '/chat/:id',
+  router.delete(
+    '/chat/clear',
     authenticationVerifier,
-    cacheMiddleware, // Added for consistency, remove if not needed
-    ChatController.getChatById
+    ChatController.clearChat
   );
+
+  /**
+   * @swagger
+   * /chat/end:
+   *   delete:
+   *     summary: Permanently end and delete the conversation
+   *     description: Deletes the entire chat document. User will start fresh on next message.
+   *     tags: [Chat]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Conversation ended and deleted
+   *       401:
+   *         description: Unauthorized
+   */
+  router.delete(
+    '/chat/end',
+    authenticationVerifier,
+    ChatController.endChat
+  );
+
+  // REMOVED: /chat/:id route
+  // → No longer exists. There is only ONE chat per user.
+  // → Clients should never need to know or pass a chatId.
 }
