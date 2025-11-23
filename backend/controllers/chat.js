@@ -47,37 +47,4 @@ export const ChatController = {
       responseHandler(res, status, 'error', err.message);
     }
   },
-
-  /**
-   * DELETE /chat/clear
-   * Removes all messages from the user's chat while preserving the chat document.
-   */
-  clearChat: async (req, res) => {
-    try {
-      const result = await ChatService.clearChat({ userID: req.userID });
-
-      responseHandler(res, HttpStatus.OK, result.status, result.message);
-    } catch (err) {
-      logger.error(`clearChat error: ${err.message}`);
-      responseHandler(res, HttpStatus.INTERNAL_SERVER_ERROR, 'error', err.message);
-    }
-  },
-
-  /**
-   * DELETE /chat/end
-   * Permanently deletes the user's entire chat document.
-   */
-  endChat: async (req, res) => {
-    try {
-      const result = await ChatService.endChat({ userID: req.userID });
-
-      responseHandler(res, HttpStatus.OK, result.status, result.message);
-    } catch (err) {
-      logger.error(`endChat error: ${err.message}`);
-      responseHandler(res, HttpStatus.INTERNAL_SERVER_ERROR, 'error', err.message);
-    }
-  },
-
-};
-
-export default ChatController;
+}
