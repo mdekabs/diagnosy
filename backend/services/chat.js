@@ -1,6 +1,18 @@
-import { Chat, Message } from '../models/chat.js'; // Updated to ensure Message is imported
+/**
+ * ChatService Module
+ * -------------------
+ * Handles:
+ *  - Chat message processing with Gemini AI
+ *  - Crisis/off-topic classification
+ *  - De-normalized message storage
+ *  - Pagination of messages
+ *  - Session management (start, clear, end)
+ */
+
+import { Chat, Message } from '../models/chat.js';
 import { GeminiService } from './gemini.js';
 import { logger } from '../config/index.js';
+
 import {
   STATUS,
   M,
@@ -16,7 +28,6 @@ import {
 import {
   sanitizePaginationParams,
   generatePaginationLinks,
-  // Removed getPaginatedHistory as it is no longer suitable for the de-normalized model
 } from '../utils/pagination.js';
 
 const ERRORS = {
@@ -27,80 +38,71 @@ const ERRORS = {
 };
 
 /**
- * Performs fast validation checks before expensive AI operations.
- * @param {string} input - User message.
- * @returns {{ input: string, isCrisisResponse: boolean }}
+ * Pre-validates input before AI operations.
+ * - Ensures message exists
+ * - Ensures it is not blocked
+ * - Detects crisis queries early
  */
 const handlePreChatChecks = (input) => {
   if (!input?.trim()) throw new Error(ERRORS.NO_INPUT);
-  const trimmedInput = input.trim();
 
-  if (isBlocked(trimmedInput)) throw new Error(ERRORS.REFUSAL);
-  if (isCrisis(trimmedInput)) {
-    return { isCrisisResponse: true, input: trimmedInput };
-  }
+  const trimmed = input.trim();
 
-  return { isCrisisResponse: false, input: trimmedInput };
+  if (isBlocked(trimmed)) throw new Error(ERRORS.REFUSAL);
+
+  return { input: trimmed, isCrisisResponse: isCrisis(trimmed) };
 };
 
 export const ChatService = {
   /**
-   * Processes a chat message, starts new sessions, or continues existing ones.
-   * Generates streamed AI output and classification checks when required.
+   * handleChat()
+   * -------------------
+   * Main entry point for processing user messages.
+   * Responsibilities:
+   *  - Pre-check input
+   *  - Start new chat session OR continue existing one
+   *  - Prepare model context
+   *  - Run classification on first message
+   *  - Stream Gemini response
+   *
+   * @param {Object} payload
+   * @returns {Object}
    */
-  handleChat: async (payload) => {
-    const { userID, message, chatId } = payload;
-
+  handleChat: async ({ userID, message, chatId }) => {
     const preCheck = handlePreChatChecks(message);
-    const userIdObj = toId(userID);
-    const isNewSession = !chatId;
-
-    let chat;
-    let messages = [];
 
     if (preCheck.isCrisisResponse) {
       return {
         status: STATUS.SUCCESS,
-        data: { advice: CRISIS_RESPONSE, isCrisis: true, isContinued: !isNewSession },
+        data: { advice: CRISIS_RESPONSE, isCrisis: true, isContinued: !!chatId },
       };
     }
 
+    const userIdObj = toId(userID);
+    const isNewSession = !chatId;
+    let messages = [];
+    let chat;
+
+    // Build AI prompt context
     if (isNewSession) {
-      // For a new session, the first message sets the prompt/context
       messages.push({ role: 'user', content: CHAT_PROMPT(preCheck.input) });
     } else {
-      chat = await Chat.findOne({
-        _id: toId(chatId),
-        userID: userIdObj,
-      }).exec();
-
+      chat = await Chat.findOne({ _id: toId(chatId), userID: userIdObj }).exec();
       if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-      // --- DE-NORMALIZATION FIX: Fetch last 20 messages for context from Message collection ---
-      // chat.getHistory(20) returns the 20 most recent messages (DESCENDING order).
-      const recentMessages = await chat.getHistory(20);
+      const last20 = await chat.getHistory(20); // Most recent messages DESC
+      const context = last20.reverse(); // Convert to ASC chronological order
 
-      if (!recentMessages.length) {
-        // If chat exists but has no messages, start fresh with the new prompt
-        messages.push({ role: 'user', content: CHAT_PROMPT(preCheck.input) });
-      } else {
-        // Reverse the array to put messages in chronological order for the AI model
-        const context = recentMessages.reverse();
-
-        messages = [
-          ...context.map((m) => ({
-            // Mongoose getter has already decrypted m.content
-            // Assuming 'model' role is required for 'assistant' history messages in the Gemini API format
-            role: m.role === 'assistant' ? 'model' : 'user', 
-            content: m.content,
-          })),
-          { role: 'user', content: preCheck.input },
-        ];
-      }
-      // --- END DE-NORMALIZATION FIX ---
+      messages = [
+        ...context.map((msg) => ({
+          role: msg.role === 'assistant' ? 'model' : 'user',
+          content: msg.content,
+        })),
+        { role: 'user', content: preCheck.input },
+      ];
     }
 
-    // Classification logic for new sessions (remains the same)
+    // Classify only first message
     if (isNewSession) {
       try {
         const classification = (
@@ -112,15 +114,10 @@ export const ChatService = {
           .trim();
 
         if (classification.includes('OFF_TOPIC')) throw new Error(ERRORS.REFUSAL);
-
         if (classification.includes('CRISIS')) {
           return {
             status: STATUS.SUCCESS,
-            data: {
-              advice: CRISIS_RESPONSE,
-              isCrisis: true,
-              isContinued: false,
-            },
+            data: { advice: CRISIS_RESPONSE, isCrisis: true, isContinued: false },
           };
         }
       } catch (err) {
@@ -128,6 +125,7 @@ export const ChatService = {
       }
     }
 
+    // Get streamed AI response
     const stream = await GeminiService.generateResponseStream(messages);
 
     return {
@@ -143,51 +141,44 @@ export const ChatService = {
   },
 
   /**
-   * Saves final user + AI messages by creating new Message documents.
+   * finalizeResponse()
+   * -------------------
+   * Saves the final AI + user messages after streaming completes.
+   * Responsibilities:
+   *  - Locate or create chat session
+   *  - Append user and AI messages
+   *  - Update disclaimer status
+   *
+   * @param {Object} payload
+   * @returns {Object}
    */
-  finalizeResponse: async (payload) => {
-    const { userID, input, aiResponse, chatId } = payload;
-
+  finalizeResponse: async ({ userID, input, aiResponse, chatId }) => {
     const userIdObj = toId(userID);
-    // Find chat by ID if provided, otherwise find or create a new one
+
     const chat = chatId
       ? await Chat.findById(chatId).exec()
       : await Chat.findOrCreate(userIdObj);
 
     if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    const finalResponse = isCrisis(aiResponse)
-      ? CRISIS_RESPONSE
-      : aiResponse;
-
-    const fullResponse = `${finalResponse}${
+    const finalResponse = isCrisis(aiResponse) ? CRISIS_RESPONSE : aiResponse;
+    const responseWithDisclaimer = `${finalResponse}${
       !chat.disclaimerAdded ? `\n\n_${DISCLAIMER}_` : ''
     }`;
 
-    // --- DE-NORMALIZATION FIX: Save messages via chat.addMessage() ---
-    // 1. Save User Message
     await chat.addMessage('user', input);
+    await chat.addMessage('assistant', responseWithDisclaimer);
 
-    // 2. Save AI Message
-    await chat.addMessage('assistant', fullResponse);
-
-    // 3. Update Chat metadata (Disclaimer status)
     await Chat.updateOne(
       { _id: chat._id },
-      {
-        $set: {
-          disclaimerAdded: true,
-          // Mongoose {timestamps: true} handles 'updatedAt' update automatically
-        },
-      }
-    ).exec();
-    // --- END DE-NORMALIZATION FIX ---
+      { $set: { disclaimerAdded: true } }
+    );
 
     return {
       status: STATUS.SUCCESS,
       message: M.RESPONSE_SUCCESS,
       data: {
-        advice: fullResponse,
+        advice: responseWithDisclaimer,
         chatId: chat._id.toString(),
         isNewSession: !chatId,
         isContinued: !!chatId,
@@ -197,94 +188,76 @@ export const ChatService = {
   },
 
   /**
-   * Retrieves paginated chat history for the user's primary chat document by querying the Message collection.
+   * getChatHistory()
+   * -------------------
+   * Retrieves paginated message history from the user's primary session.
+   * Responsibilities:
+   *  - Fetch chat
+   *  - Fetch paginated messages
+   *  - Auto-run decryption getters
+   *  - Build pagination metadata
+   *
+   * @returns {Object}
    */
-  getChatHistory: async (payload) => {
-    const { userID, page, limit, baseUrl } = payload;
-
-    const { page: sanitizedPage, limit: sanitizedLimit } =
-      sanitizePaginationParams(page, limit);
-
+  getChatHistory: async ({ userID, page, limit, baseUrl }) => {
+    const { page: p, limit: l } = sanitizePaginationParams(page, limit);
     const userIdObj = toId(userID);
+
     const chat = await Chat.findOne({ userID: userIdObj }).exec();
     if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    // --- FIX: Removed .lean({ getters: true }) to ensure decryption getters run on fetch ---
-    const chatId = chat._id;
-    const skip = (sanitizedPage - 1) * sanitizedLimit;
+    const skip = (p - 1) * l;
 
-    // Use Message model directly for counting and fetching
-    const [history, totalItems] = await Promise.all([
-      Message.find({ chatId })
-        .sort({ timestamp: -1 }) // Latest messages first (DESC)
+    const [history, total] = await Promise.all([
+      Message.find({ chatId: chat._id })
+        .sort({ timestamp: -1 })
         .skip(skip)
-        .limit(sanitizedLimit)
-        .exec(), // Removed .lean({ getters: true })
-      Message.countDocuments({ chatId }),
+        .limit(l)
+        .exec(),
+      Message.countDocuments({ chatId: chat._id }),
     ]);
-
-    // Convert Mongoose documents to plain objects after decryption has run
-    const decryptedHistory = history.map(doc => doc.toObject({ getters: true }));
-    
-    const totalPages = Math.ceil(totalItems / sanitizedLimit);
-    // --- END FIX ---
 
     return {
       status: STATUS.SUCCESS,
       message: M.RESPONSE_SUCCESS,
       data: {
-        history: decryptedHistory,
+        history: history.map((d) => d.toObject({ getters: true })),
         startedAt: chat.createdAt,
         lastActive: chat.updatedAt,
-        // --- FIX: Nest pagination inside the 'data' object ---
         pagination: {
-          totalItems,
-          totalPages,
-          currentPage: sanitizedPage,
-          limit: sanitizedLimit,
-          links: generatePaginationLinks(
-            sanitizedPage,
-            sanitizedLimit,
-            totalItems,
-            baseUrl
-          ),
+          totalItems: total,
+          totalPages: Math.ceil(total / l),
+          currentPage: p,
+          limit: l,
+          links: generatePaginationLinks(p, l, total, baseUrl),
         },
-        // --- END FIX ---
       },
     };
   },
 
   /**
-   * Retrieves paginated chat history for a specific session by ID by querying the Message collection.
+   * getChatById()
+   * -------------------
+   * Retrieves paginated history for a specific chat session.
    */
-  getChatById: async (payload) => {
-    const { chatId, page, limit, baseUrl } = payload;
+  getChatById: async ({ chatId, page, limit, baseUrl }) => {
     if (!chatId) throw new Error(ERRORS.CHAT_ID_REQUIRED);
 
-    const { page: sanitizedPage, limit: sanitizedLimit } =
-      sanitizePaginationParams(page, limit);
+    const { page: p, limit: l } = sanitizePaginationParams(page, limit);
 
     const chat = await Chat.findById(chatId).exec();
     if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    // --- FIX: Removed .lean({ getters: true }) to ensure decryption getters run on fetch ---
-    const skip = (sanitizedPage - 1) * sanitizedLimit;
+    const skip = (p - 1) * l;
 
-    // Use Message model directly for counting and fetching
-    const [history, totalItems] = await Promise.all([
-      Message.find({ chatId: chat._id })
-        .sort({ timestamp: -1 }) // Latest messages first (DESC)
+    const [history, total] = await Promise.all([
+      Message.find({ chatId })
+        .sort({ timestamp: -1 })
         .skip(skip)
-        .limit(sanitizedLimit)
-        .exec(), // Removed .lean({ getters: true })
-      Message.countDocuments({ chatId: chat._id }),
+        .limit(l)
+        .exec(),
+      Message.countDocuments({ chatId }),
     ]);
-
-    // Convert Mongoose documents to plain objects after decryption has run
-    const decryptedHistory = history.map(doc => doc.toObject({ getters: true }));
-
-    const totalPages = Math.ceil(totalItems / sanitizedLimit);
-    // --- END FIX ---
 
     return {
       status: STATUS.SUCCESS,
@@ -292,64 +265,46 @@ export const ChatService = {
       data: {
         chatId: chat._id.toString(),
         userID: chat.userID,
-        history: decryptedHistory,
+        history: history.map((d) => d.toObject({ getters: true })),
         startedAt: chat.createdAt,
         lastActive: chat.updatedAt,
-        // --- FIX: Nest pagination inside the 'data' object ---
         pagination: {
-          totalItems,
-          totalPages,
-          currentPage: sanitizedPage,
-          limit: sanitizedLimit,
-          links: generatePaginationLinks(
-            sanitizedPage,
-            sanitizedLimit,
-            totalItems,
-            baseUrl
-          ),
+          totalItems: total,
+          totalPages: Math.ceil(total / l),
+          currentPage: p,
+          limit: l,
+          links: generatePaginationLinks(p, l, total, baseUrl),
         },
-        // --- END FIX ---
       },
     };
   },
 
   /**
-   * Clears all messages from the user's primary chat session.
+   * clearChat()
+   * -------------------
+   * Deletes all messages in the user's primary chat session.
    */
-  clearChat: async (payload) => {
-    const { userID } = payload;
-
-    const userIdObj = toId(userID);
-    const chat = await Chat.findOne({ userID: userIdObj }).exec();
+  clearChat: async ({ userID }) => {
+    const chat = await Chat.findOne({ userID: toId(userID) }).exec();
     if (!chat) throw new Error(ERRORS.CHAT_NOT_FOUND);
 
-    // --- DE-NORMALIZATION FIX: Delete all associated Message documents ---
-    await Message.deleteMany({ chatId: chat._id }).exec();
-    
-    // Reset disclaimerAdded status on the Chat document
-    await Chat.updateOne(
-        { _id: chat._id },
-        { $set: { disclaimerAdded: false } }
-    ).exec();
-    // --- END DE-NORMALIZATION FIX ---
+    await Message.deleteMany({ chatId: chat._id });
+    await Chat.updateOne({ _id: chat._id }, { $set: { disclaimerAdded: false } });
 
     return { status: STATUS.SUCCESS, message: 'Conversation cleared' };
   },
 
   /**
-   * Deletes the user's primary chat document and all associated messages, ending the session.
+   * endChat()
+   * -------------------
+   * Permanently deletes the user's primary chat session and messages.
    */
-  endChat: async (payload) => {
-    const { userID } = payload;
-
+  endChat: async ({ userID }) => {
     const chat = await Chat.findOne({ userID: toId(userID) }).exec();
+
     if (chat) {
-        // --- DE-NORMALIZATION FIX ---
-        // 1. Delete all associated messages
-        await Message.deleteMany({ chatId: chat._id }).exec();
-        // 2. Delete the Chat document itself
-        await Chat.deleteOne({ _id: chat._id }).exec();
-        // --- END DE-NORMALIZATION FIX ---
+      await Message.deleteMany({ chatId: chat._id });
+      await Chat.deleteOne({ _id: chat._id });
     }
 
     return {

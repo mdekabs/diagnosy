@@ -54,34 +54,3 @@ export const generatePaginationLinks = (page, limit, totalItems, baseUrl) => {
 
   return links;
 };
-
-/**
- * Retrieves paginated chat history
- * @async
- * @param {Object} match - MongoDB match criteria
- * @param {number} page - Page number
- * @param {number} limit - Items per page
- * @returns {Promise<{history: Array, totalItems: number, totalPages: number}>} Paginated history data
- */
-export const getPaginatedHistory = async (match, page, limit) => {
-  const chat = await Chat.findOne(match).exec();
-  const totalItems = chat?.history.length ?? 0;
-
-  const pipeline = [
-    { $match: match },
-    { $unwind: '$history' },
-    { $sort: { 'history.timestamp': -1 } },
-    { $skip: (page - 1) * limit },
-    { $limit: limit },
-    { $project: { role: '$history.role', content: '$history.content', timestamp: '$history.timestamp' } },
-  ];
-
-  const paginatedHistory = await Chat.aggregate(pipeline).option({ getters: true });
-  const history = paginatedHistory.map((msg) => ({
-    role: msg.role,
-    content: msg.content,
-    timestamp: msg.timestamp,
-  }));
-
-  return { history, totalItems, totalPages: Math.max(1, Math.ceil(totalItems / limit)) };
-};
