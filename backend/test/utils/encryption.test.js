@@ -2,124 +2,170 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import crypto from 'crypto';
 import { logger } from '../../config/index.js';
-import { encryptText, decryptText } from '../../utils/encryption.js';
 
-describe('Encrypt Utilities', () => {
-  let cryptoStub, loggerStub;
+describe('Encryption Utilities — AES-256-GCM with versioning', () => {
+  let sandbox;
+  let encryptText;
+  let decryptText;
+  let DERIVED_KEYS;
 
-  beforeEach(() => {
-    // Mock crypto methods
-    cryptoStub = {
-      randomBytes: sinon.stub(crypto, 'randomBytes'),
-      createCipheriv: sinon.stub(crypto, 'createCipheriv'),
-      createDecipheriv: sinon.stub(crypto, 'createDecipheriv'),
-      pbkdf2Sync: sinon.stub(crypto, 'pbkdf2Sync'),
-    };
+  // Fake 32-byte keys for v1 and v2
+  const mockKeyV1 = Buffer.alloc(32, 'a');
+  const mockKeyV2 = Buffer.alloc(32, 'b');
 
-    // Mock logger.error
-    loggerStub = sinon.stub(logger, 'error');
+  const loadModule = async () => {
+    // Force fresh import by cache-busting the URL
+    const mod = await import(`../../utils/encryption.js?t=${Date.now()}`);
+    encryptText = mod.encryptText;
+    decryptText = mod.decryptText;
+    DERIVED_KEYS = mod.DERIVED_KEYS;
+  };
 
-    // Setup default mocks
-    cryptoStub.pbkdf2Sync.returns(Buffer.alloc(32, 'key')); // Mock 32-byte key
+  beforeEach(async () => {
+    sandbox = sinon.createSandbox();
+
+    // Reset environment variables for key derivation
+    process.env.ENCRYPTION_KEY_V1 = 'fake-key-v1-32bytes!!!!!!!!!!!';
+    process.env.ENCRYPTION_SALT_V1 = 'fake-salt-v1';
+    process.env.ENCRYPTION_KEY_V2 = 'fake-key-v2-32bytes!!!!!!!!!!!';
+    process.env.ENCRYPTION_SALT_V2 = 'fake-salt-v2';
+
+    // Stub pbkdf2Sync so key derivation is deterministic
+    sandbox.stub(crypto, 'pbkdf2Sync')
+      .onCall(0).returns(mockKeyV1) // v1
+      .onCall(1).returns(mockKeyV2); // v2
+
+    await loadModule();
+
+    // Stub logger to avoid console noise
+    sandbox.stub(logger, 'error');
   });
 
   afterEach(() => {
-    // Restore mocks
-    sinon.restore();
+    sandbox.restore();
   });
 
+  // ───────────────────────────────────────────────
   describe('encryptText', () => {
-    it('should return empty string for non-string input', () => {
-      expect(encryptText(null)).to.equal('');
-      expect(encryptText(undefined)).to.equal('');
-      expect(encryptText(123)).to.equal('');
-      expect(encryptText({})).to.equal('');
-      expect(loggerStub.called).to.be.false;
-    });
-
-    it('should return empty string for empty string input', () => {
+    it('returns empty string on invalid input', () => {
       expect(encryptText('')).to.equal('');
-      expect(loggerStub.called).to.be.false;
+      expect(encryptText(null)).to.equal('');
+      expect(encryptText(42)).to.equal('');
+      expect(logger.error.called).to.be.false;
     });
 
-    it('should encrypt a valid string and return base64', () => {
-      const iv = Buffer.alloc(16, 'iv');
-      const cipherMock = {
-        update: sinon.stub().returns('encrypted'),
-        final: sinon.stub().returns('final'),
+    it('encrypts using CURRENT_VERSION (v1)', () => {
+      const iv = Buffer.alloc(12, 0x11);
+      const tag = Buffer.alloc(16, 0x99);
+
+      sandbox.stub(crypto, 'randomBytes').returns(iv);
+
+      const cipher = {
+        update: sinon.stub().returns(Buffer.from('cipher-body')),
+        final: sinon.stub().returns(Buffer.alloc(0)),
+        getAuthTag: sinon.stub().returns(tag),
       };
-      cryptoStub.randomBytes.returns(iv);
-      cryptoStub.createCipheriv.returns(cipherMock);
 
-      const input = 'Hello, world!';
-      const result = encryptText(input);
+      sandbox.stub(crypto, 'createCipheriv').returns(cipher);
 
-      expect(cryptoStub.randomBytes.calledOnceWith(16)).to.be.true;
-      expect(cryptoStub.createCipheriv.calledOnceWith('aes-256-cbc', sinon.match.any, iv)).to.be.true;
-      expect(cipherMock.update.calledOnceWith(input, 'utf8', 'base64')).to.be.true;
-      expect(cipherMock.final.calledOnceWith('base64')).to.be.true;
-      expect(result).to.equal(Buffer.concat([iv, Buffer.from('encryptedfinal', 'base64')]).toString('base64'));
-      expect(loggerStub.called).to.be.false;
+      const out = encryptText('Hello AES-GCM!');
+
+      const expected = [
+        'v1',
+        iv.toString('base64'),
+        tag.toString('base64'),
+        Buffer.from('cipher-body').toString('base64')
+      ].join(':');
+
+      expect(out).to.equal(expected);
+      expect(crypto.createCipheriv.calledOnceWith(
+        'aes-256-gcm',
+        mockKeyV1,
+        iv
+      )).to.be.true;
     });
   });
 
+  // ───────────────────────────────────────────────
   describe('decryptText', () => {
-    it('should return empty string for non-string input', () => {
-      expect(decryptText(null)).to.equal('');
-      expect(decryptText(undefined)).to.equal('');
-      expect(decryptText(123)).to.equal('');
-      expect(decryptText({})).to.equal('');
-      expect(loggerStub.called).to.be.false;
-    });
+    const buildPayload = (
+      version = 'v1',
+      iv = Buffer.alloc(12),
+      tag = Buffer.alloc(16),
+      data = Buffer.from('hello')
+    ) => `${version}:${iv.toString('base64')}:${tag.toString('base64')}:${data.toString('base64')}`;
 
-    it('should return empty string for empty string input', () => {
+    it('returns empty string and logs error on malformed input', () => {
       expect(decryptText('')).to.equal('');
-      expect(loggerStub.called).to.be.false;
+      expect(decryptText('bad:format')).to.equal('');
+      expect(decryptText('v1:only:three')).to.equal('');
+
+      expect(logger.error.called).to.be.true;
     });
 
-    it('should return empty string and log error for invalid encrypted data (too short)', () => {
-      const context = { test: 'context' };
-      const result = decryptText('short', context);
+    it('decrypts valid v1 payload', () => {
+      const iv = Buffer.alloc(12, 0x22);
+      const tag = Buffer.alloc(16, 0x44);
+      const data = Buffer.from('my secret');
 
-      expect(result).to.equal('');
-      expect(loggerStub.calledOnceWith('Decryption failed', { error: 'Invalid encrypted data', context })).to.be.true;
-    });
+      const payload = buildPayload('v1', iv, tag, data);
 
-    it('should decrypt a valid encrypted string', () => {
-      const originalText = 'Hello, world!';
-      const iv = Buffer.alloc(16, 'iv');
-      const encrypted = Buffer.from('encrypted', 'utf8').toString('base64');
-      const encryptedBuffer = Buffer.concat([iv, Buffer.from(encrypted, 'base64')]);
-      const encryptedText = encryptedBuffer.toString('base64');
-
-      const decipherMock = {
-        update: sinon.stub().returns('decrypted'),
-        final: sinon.stub().returns('final'),
+      const decipher = {
+        setAuthTag: sinon.stub(),
+        update: sinon.stub().returns(Buffer.from('my ')),
+        final: sinon.stub().returns(Buffer.from('secret')),
       };
-      cryptoStub.createDecipheriv.returns(decipherMock);
 
-      const result = decryptText(encryptedText);
+      sandbox.stub(crypto, 'createDecipheriv').returns(decipher);
 
-      expect(cryptoStub.createDecipheriv.calledOnceWith('aes-256-cbc', sinon.match.any, iv)).to.be.true;
-      expect(decipherMock.update.calledOnceWith(encrypted, 'base64', 'utf8')).to.be.true;
-      expect(decipherMock.final.calledOnceWith('utf8')).to.be.true;
-      expect(result).to.equal('decryptedfinal');
-      expect(loggerStub.called).to.be.false;
+      const out = decryptText(payload);
+
+      expect(out).to.equal('my secret');
+      expect(decipher.setAuthTag.calledWith(tag)).to.be.true;
+      expect(crypto.createDecipheriv.calledWith(
+        'aes-256-gcm',
+        mockKeyV1,
+        iv
+      )).to.be.true;
     });
 
-    it('should return empty string and log error for decryption failure', () => {
-      const iv = Buffer.alloc(16, 'iv');
-      const encrypted = Buffer.from('encrypted', 'utf8').toString('base64');
-      const encryptedBuffer = Buffer.concat([iv, Buffer.from(encrypted, 'base64')]);
-      const encryptedText = encryptedBuffer.toString('base64');
-      const context = { test: 'context' };
+    it('decrypts v1 data even when CURRENT_VERSION is v1 (no rotation yet)', () => {
+      const payload = buildPayload('v1');
 
-      cryptoStub.createDecipheriv.throws(new Error('Decryption error'));
+      sandbox.stub(crypto, 'createDecipheriv').returns({
+        setAuthTag: () => {},
+        update: d => d,
+        final: () => Buffer.alloc(0),
+      });
 
-      const result = decryptText(encryptedText, context);
-
-      expect(result).to.equal('');
-      expect(loggerStub.calledOnceWith('Decryption failed', { error: 'Decryption error', context })).to.be.true;
+      const out = decryptText(payload);
+      expect(out).to.equal('hello');
     });
+  });
+
+  // ───────────────────────────────────────────────
+  it('round-trip encrypt → decrypt works', () => {
+    const iv = Buffer.alloc(12, 0xaa);
+    const tag = Buffer.alloc(16, 0xbb);
+
+    sandbox.stub(crypto, 'randomBytes').returns(iv);
+
+    sandbox.stub(crypto, 'createCipheriv').returns({
+      update: buf => Buffer.from(buf),
+      final: () => Buffer.alloc(0),
+      getAuthTag: () => tag,
+    });
+
+    const msg = 'Works perfectly!';
+    const encrypted = encryptText(msg);
+
+    sandbox.stub(crypto, 'createDecipheriv').returns({
+      setAuthTag: () => {},
+      update: d => d,
+      final: () => Buffer.alloc(0),
+    });
+
+    const decrypted = decryptText(encrypted);
+    expect(decrypted).to.equal(msg);
   });
 });

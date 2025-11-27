@@ -1,5 +1,3 @@
-import { Chat } from '../models/chat.js';
-
 /**
  * @constant {Object} PAGINATION_CONSTANTS
  * @property {string} PAGE_PARAM - Query parameter for page number
