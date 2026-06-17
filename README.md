@@ -88,15 +88,15 @@ Title: UI/UX Designer/Team Lead
 [Portfolio](https://mikerock.tech)
 
 
-**Modinat**
+**Mark James**
 
 Title: Frontend Engineer
 
-[GitHub Profile](https://github.com/Modinat1)
+[GitHub Profile](https://github.com/Naijad)
 
-[LinkedIn Profile](https://www.linkedin.com/in/michael-adebayo-637507251/)
+[LinkedIn Profile]Currently Unavailable)
 
-[Portfolio](https://mikerock.tech)
+[Portfolio](https://macdevfolio.netlify.app)
 
 
 **Michael Adebayo**
